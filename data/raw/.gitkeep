@@ -1,0 +1,3 @@
+# This file ensures that the data/raw directory is tracked by git
+# despite being listed in .gitignore
+# Add raw egg images here for training

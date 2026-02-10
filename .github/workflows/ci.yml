@@ -1,0 +1,130 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  PYTHON_VERSION: "3.10"
+  CUDA_VERSION: "12.0"
+
+jobs:
+  linting:
+    name: Linting & Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install linting tools
+        run: |
+          pip install ruff black mypy
+
+      - name: Run Ruff linting
+        run: ruff check src/ tests/ web/
+
+      - name: Run Black formatting check
+        run: black --check src/ tests/ web/
+
+      - name: Run MyPy type checking
+        run: mypy src/ tests/
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: linting
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-mock
+
+      - name: Run ML unit tests
+        run: pytest tests/test_ML/ -v --cov=src/ --cov-report=xml
+
+      - name: Run Web unit tests
+        run: pytest tests/test_web/ -v
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+
+  web-tests:
+    name: Web API Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-web.txt
+          pip install pytest pytest-cov requests
+
+      - name: Run API tests
+        run: pytest tests/test_web/ -v --cov=web/
+
+  build-docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [linting, unit-tests, web-tests]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: deployment/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/duck-egg-fertility-detection:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: [linting, unit-tests, web-tests, build-docker]
+    if: always()
+    steps:
+      - name: Send notification on failure
+        if: failure()
+        run: |
+          echo "CI/CD Pipeline failed. Check GitHub Actions for details."

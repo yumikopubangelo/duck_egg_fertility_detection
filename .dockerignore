@@ -1,88 +1,16 @@
 # ===========================================
-# Environment & Configuration
+# Docker Ignore File
+# Exclude files from Docker context
 # ===========================================
-.env
-.env.local
-.env.*.local
-*.key
-*.pem
-*.crt
-credentials.json
-service-account.json
 
 # ===========================================
-# Python
+# Git & Version Control
 # ===========================================
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-.pytest_cache/
-.coverage
-htmlcov/
-*.cover
-.mypy_cache/
-.ruff_cache/
-.tox/
-.nox/
-
-# Virtual Environments
-venv/
-ENV/
-env/
-.venv/
-.env/
-
-# ===========================================
-# Data & Models (Large Files)
-# ===========================================
-data/raw/*
-!data/raw/.gitkeep
-data/preprocessed/*
-!data/preprocessed/.gitkeep
-data/uploads/*
-!data/uploads/.gitkeep
-data/features/*.npy
-!data/features/.gitkeep
-models/**/*.h5
-models/**/*.pth
-models/**/*.pkl
-models/**/*.npy
-!models/__init__.py
-!models/**/__init__.py
-models/versions/*
-results/figures/*
-results/logs/*
-results/tables/*
-*.h5
-*.pth
-*.pkl
-*.npy
-*.pt
-*.onnx
-*.model
-
-# ===========================================
-# Jupyter Notebooks
-# ===========================================
-.ipynb_checkpoints/
-*.ipynb_checkpoints
+.git
+.gitignore
+*.md
+LICENSE
+.env*
 
 # ===========================================
 # IDE & OS
@@ -98,27 +26,53 @@ ehthumbs.db
 Desktop.ini
 
 # ===========================================
-# Logs & Temporary
+# Python
 # ===========================================
-*.log
-*.tmp
-*.bak
-*~
-*.orig
-*.rej
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.ruff_cache/
+.mypy_cache/
 
 # ===========================================
-# Docker
+# Virtual Environments
 # ===========================================
-.docker/
+venv/
+ENV/
+env/
+.venv/
+
+# ===========================================
+# Data & Models (Large Files)
+# ===========================================
+data/raw/*
+data/preprocessed/*
+data/uploads/*
+data/features/*.npy
+models/**/*.h5
+models/**/*.pth
+models/**/*.pkl
+models/**/*.npy
+results/*
+!results/.gitkeep
 
 # ===========================================
 # Testing
 # ===========================================
-.pytest_cache/
-.hypothesis/
+tests/
 .coverage
-coverage.xml
+htmlcov/
 
 # ===========================================
 # Database
@@ -126,9 +80,28 @@ coverage.xml
 *.db
 *.sqlite
 *.sqlite3
-database/*.db
+database/users.db
 
 # ===========================================
-# Keep Important Template Files
+# Logs & Temp
 # ===========================================
-!.env.example
+*.log
+*.tmp
+*.bak
+tmp/
+
+# ===========================================
+# Notebooks
+# ===========================================
+*.ipynb_checkpoints
+.ipynb
+
+# ===========================================
+# Credentials
+# ===========================================
+.env
+.env.local
+*.key
+*.pem
+*.crt
+credentials.json

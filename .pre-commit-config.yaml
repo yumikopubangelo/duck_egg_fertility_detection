@@ -1,0 +1,107 @@
+# Pre-commit hooks configuration
+# Install with: pre-commit install
+
+repos:
+  # ===========================================
+  # Format and Lint
+  # ===========================================
+  
+  # Ruff - Fast Python linter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.6
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # Black - Code formatter
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        language_version: python3.10
+
+  # isort - Import sorter
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+
+  # ===========================================
+  # Type Checking
+  # ===========================================
+
+  # MyPy - Static type checker
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - numpy
+          - torch
+          - tensorflow
+        args: [--ignore-missing-imports]
+
+  # ===========================================
+  # Security
+  # ===========================================
+
+  # Bandit - Security linter
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.6
+    hooks:
+      - id: bandit
+        args: [-r, src/, tests/]
+
+  # ===========================================
+  # Git Hooks
+  # ===========================================
+
+  # Check for large files
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: detect-private-key
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+
+  # ===========================================
+  # Docker
+  # ===========================================
+
+  # Hadolint - Dockerfile linter
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint
+        args: ['--ignore', 'DL3008']  # Allow pinning except for base image
+
+  # ===========================================
+  # YAML/JSON Validation
+  # ===========================================
+
+  # Check YAML/JSON syntax
+  - repo: https://github.com/sirosen/check-jsonschema
+    rev: v0.28.3
+    hooks:
+      - id: check-github-workflows
+      - id: check-prettier
+
+# ===========================================
+# Settings
+# ===========================================
+
+default_language_version:
+  python: python3.10
+
+default_stages: [pre-commit]
+
+fail_fast: false
+
+ci:
+  autoupdate_commit_msg: "chore: update pre-commit hooks"
