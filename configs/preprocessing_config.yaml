@@ -1,0 +1,739 @@
+# Preprocessing Configuration
+# Configuration for data preprocessing pipeline
+
+# Image Preprocessing
+image_preprocessing:
+  # Enable image preprocessing
+  enabled: true
+  
+  # Resize images
+  resize:
+    enabled: true
+    width: 256
+    height: 256
+    
+  # Crop images
+  crop:
+    enabled: false
+    method: "center"  # Options: "center", "random", "corner"
+    size: [224, 224]
+    
+  # Pad images
+  pad:
+    enabled: false
+    method: "constant"  # Options: "constant", "reflect", "replicate"
+    value: 0
+    
+  # Rotate images
+  rotate:
+    enabled: false
+    angles: [-30, -15, 0, 15, 30]
+    
+  # Flip images
+  flip:
+    enabled: true
+    horizontal: true
+    vertical: false
+    
+  # Brightness adjustment
+  brightness:
+    enabled: false
+    min_factor: 0.8
+    max_factor: 1.2
+    
+  # Contrast adjustment
+  contrast:
+    enabled: false
+    min_factor: 0.8
+    max_factor: 1.2
+    
+  # Saturation adjustment
+  saturation:
+    enabled: false
+    min_factor: 0.8
+    max_factor: 1.2
+    
+  # Hue adjustment
+  hue:
+    enabled: false
+    degrees: 10
+    
+  # Color jitter
+  color_jitter:
+    enabled: false
+    brightness: 0.2
+    contrast: 0.2
+    saturation: 0.2
+    hue: 0.1
+    
+  # Normalize images
+  normalize:
+    enabled: true
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+    
+  # Standardization
+  standardize:
+    enabled: true
+    
+  # Min-max scaling
+  min_max_scaling:
+    enabled: false
+    feature_range: [0, 1]
+    
+  # Z-score normalization
+  z_score_normalization:
+    enabled: true
+    
+  # Image enhancement
+  enhancement:
+    # Histogram equalization
+    histogram_equalization:
+      enabled: false
+      method: "clahe"  # Options: "equalize", "clahe"
+      
+    # Contrast Limited Adaptive Histogram Equalization (CLAHE)
+    clahe:
+      enabled: false
+      clip_limit: 2.0
+      tile_grid_size: [8, 8]
+      
+    # Gamma correction
+    gamma_correction:
+      enabled: false
+      gamma: 1.0
+      
+    # Sharpening
+    sharpening:
+      enabled: false
+      amount: 1.0
+      
+    # Denoising
+    denoising:
+      enabled: false
+      method: "bilateral"  # Options: "bilateral", "median", "gaussian"
+      
+    # Bilateral filtering
+    bilateral_filter:
+      enabled: false
+      diameter: 5
+      sigma_color: 75
+      sigma_space: 75
+      
+    # Median filtering
+    median_filter:
+      enabled: false
+      kernel_size: 3
+      
+    # Gaussian filtering
+    gaussian_filter:
+      enabled: false
+      kernel_size: 3
+      sigma: 1.0
+      
+    # Morphological operations
+    morphological:
+      enabled: false
+      
+    # Erosion
+    erosion:
+      enabled: false
+      kernel_size: 3
+      iterations: 1
+      
+    # Dilation
+    dilation:
+      enabled: false
+      kernel_size: 3
+      iterations: 1
+      
+    # Opening
+    opening:
+      enabled: false
+      kernel_size: 3
+      iterations: 1
+      
+    # Closing
+    closing:
+      enabled: false
+      kernel_size: 3
+      iterations: 1
+
+# Data Augmentation
+data_augmentation:
+  # Enable data augmentation
+  enabled: true
+  
+  # Augmentation probability
+  probability: 0.5
+  
+  # Random crop
+  random_crop:
+    enabled: true
+    size: [224, 224]
+    
+  # Random rotation
+  random_rotation:
+    enabled: true
+    degrees: 30
+    
+  # Random horizontal flip
+  random_horizontal_flip:
+    enabled: true
+    p: 0.5
+    
+  # Random vertical flip
+  random_vertical_flip:
+    enabled: false
+    p: 0.5
+    
+  # Random brightness
+  random_brightness:
+    enabled: true
+    max_delta: 0.2
+    
+  # Random contrast
+  random_contrast:
+    enabled: true
+    lower: 0.8
+    upper: 1.2
+    
+  # Random saturation
+  random_saturation:
+    enabled: true
+    lower: 0.8
+    upper: 1.2
+    
+  # Random hue
+  random_hue:
+    enabled: true
+    max_delta: 0.1
+    
+  # Random affine transformation
+  random_affine:
+    enabled: false
+    degrees: 10
+    translate: [0.1, 0.1]
+    scale: [0.9, 1.1]
+    shear: 10
+    
+  # Random perspective transformation
+  random_perspective:
+    enabled: false
+    distortion_scale: 0.1
+    p: 0.5
+    
+  # Random erasing
+  random_erasing:
+    enabled: false
+    p: 0.5
+    scale: [0.02, 0.33]
+    ratio: [0.3, 3.3]
+    value: 0
+    
+  # Mixup
+  mixup:
+    enabled: false
+    alpha: 0.2
+    
+  # Cutmix
+  cutmix:
+    enabled: false
+    alpha: 1.0
+    
+  # Mosaic
+  mosaic:
+    enabled: false
+    
+  # Gridmask
+  gridmask:
+    enabled: false
+    d1: 10
+    d2: 10
+    rotate: 1
+    ratio: 0.5
+    mode: 0
+    p: 0.5
+
+# Feature Extraction
+feature_extraction:
+  # Enable feature extraction
+  enabled: true
+  
+  # Feature types
+  features:
+    # Color features
+    color:
+      enabled: true
+      
+    # Color histogram
+    color_histogram:
+      enabled: true
+      bins: 32
+      
+    # Color moments
+    color_moments:
+      enabled: true
+      
+    # Color coherence vector
+    color_coherence_vector:
+      enabled: false
+      
+    # Texture features
+    texture:
+      enabled: true
+      
+    # Gray-level co-occurrence matrix (GLCM)
+    glcm:
+      enabled: true
+      distances: [1, 2, 3]
+      angles: [0, np.pi/4, np.pi/2, 3*np.pi/4]
+      levels: 256
+      properties: ["contrast", "dissimilarity", "homogeneity", "energy", "correlation", "ASM"]
+      
+    # Local binary patterns (LBP)
+    lbp:
+      enabled: true
+      radius: 1
+      n_points: 8
+      method: "uniform"
+      
+    # Gabor filters
+    gabor:
+      enabled: false
+      frequencies: [0.1, 0.5, 1.0]
+      orientations: [0, np.pi/4, np.pi/2, 3*np.pi/4]
+      
+    # Shape features
+    shape:
+      enabled: true
+      
+    # Area
+    area:
+      enabled: true
+      
+    # Perimeter
+    perimeter:
+      enabled: true
+      
+    # Circularity
+    circularity:
+      enabled: true
+      
+    # Aspect ratio
+    aspect_ratio:
+      enabled: true
+      
+    # Convex hull
+    convex_hull:
+      enabled: true
+      
+    # Solidity
+    solidity:
+      enabled: true
+      
+    # Extent
+    extent:
+      enabled: true
+      
+    # Orientation
+    orientation:
+      enabled: true
+      
+    # Hu moments
+    hu_moments:
+      enabled: true
+      
+    # Zernike moments
+    zernike_moments:
+      enabled: false
+      max_order: 8
+      
+    # Deep learning features
+    deep:
+      enabled: true
+      
+    # CNN features
+    cnn_features:
+      enabled: true
+      model: "resnet50"  # Options: "resnet50", "vgg16", "inception_v3", "efficientnet_b0"
+      layer: "avgpool"  # Options: "conv1", "layer1", "layer2", "layer3", "layer4", "avgpool", "fc"
+      
+    # Autoencoder features
+    autoencoder:
+      enabled: false
+      
+    # PCA features
+    pca:
+      enabled: false
+      n_components: 50
+      
+    # t-SNE features
+    tsne:
+      enabled: false
+      n_components: 2
+      perplexity: 30
+      
+    # UMAP features
+    umap:
+      enabled: false
+      n_components: 2
+      n_neighbors: 15
+      min_dist: 0.1
+
+# Data Cleaning
+data_cleaning:
+  # Enable data cleaning
+  enabled: true
+  
+  # Remove duplicates
+  remove_duplicates:
+    enabled: true
+    
+  # Handle missing values
+  handle_missing:
+    enabled: true
+    strategy: "mean"  # Options: "mean", "median", "mode", "drop"
+    
+  # Remove outliers
+  remove_outliers:
+    enabled: true
+    method: "zscore"  # Options: "zscore", "iqr", "isolation_forest"
+    threshold: 3.0
+    
+  # Remove low variance features
+  remove_low_variance:
+    enabled: true
+    threshold: 0.01
+    
+  # Remove high correlation features
+  remove_high_correlation:
+    enabled: true
+    threshold: 0.9
+    
+  # Handle class imbalance
+  handle_class_imbalance:
+    enabled: true
+    method: "oversampling"  # Options: "oversampling", "undersampling", "smote"
+    
+  # Oversampling
+  oversampling:
+    enabled: true
+    method: "random"  # Options: "random", "smote", "adasyn"
+    
+  # SMOTE
+  smote:
+    enabled: false
+    k_neighbors: 5
+    
+  # ADASYN
+  adasyn:
+    enabled: false
+    n_neighbors: 5
+    
+  # Undersampling
+  undersampling:
+    enabled: false
+    method: "random"  # Options: "random", "tomek_links", "edited_nearest_neighbors"
+    
+  # Tomek links
+  tomek_links:
+    enabled: false
+    
+  # Edited nearest neighbors
+  edited_nearest_neighbors:
+    enabled: false
+    n_neighbors: 3
+
+# Data Splitting
+data_splitting:
+  # Enable data splitting
+  enabled: true
+  
+  # Train size
+  train_size: 0.7
+  
+  # Validation size
+  val_size: 0.15
+  
+  # Test size
+  test_size: 0.15
+  
+  # Stratify
+  stratify: true
+  
+  # Random state
+  random_state: 42
+  
+  # Shuffle
+  shuffle: true
+  
+  # Split method
+  method: "train_test_split"  # Options: "train_test_split", "k_fold", "stratified_k_fold"
+  
+  # K-fold cross-validation
+  k_fold:
+    enabled: false
+    n_splits: 5
+    
+  # Stratified k-fold cross-validation
+  stratified_k_fold:
+    enabled: false
+    n_splits: 5
+
+# Data Normalization
+data_normalization:
+  # Enable data normalization
+  enabled: true
+  
+  # Normalization method
+  method: "standardization"  # Options: "standardization", "min_max", "max_abs", "robust"
+  
+  # Standardization
+  standardization:
+    enabled: true
+    
+  # Min-max scaling
+  min_max_scaling:
+    enabled: false
+    feature_range: [0, 1]
+    
+  # Max absolute scaling
+  max_abs_scaling:
+    enabled: false
+    
+  # Robust scaling
+  robust_scaling:
+    enabled: false
+    quantile_range: [25, 75]
+
+# Data Transformation
+data_transformation:
+  # Enable data transformation
+  enabled: true
+  
+  # Transformation methods
+  methods:
+    # Log transformation
+    log:
+      enabled: false
+      
+    # Square root transformation
+    sqrt:
+      enabled: false
+      
+    # Box-Cox transformation
+    box_cox:
+      enabled: false
+      
+    # Yeo-Johnson transformation
+    yeo_johnson:
+      enabled: false
+      
+    # Power transformation
+    power:
+      enabled: false
+      method: "box-cox"  # Options: "box-cox", "yeo-johnson"
+      standardize: true
+
+# Data Quality Assurance
+data_quality:
+  # Enable data quality checks
+  enabled: true
+  
+  # Data quality metrics
+  metrics:
+    # Missing values
+    missing_values:
+      enabled: true
+      
+    # Duplicate rows
+    duplicate_rows:
+      enabled: true
+      
+    # Duplicate columns
+    duplicate_columns:
+      enabled: true
+      
+    # Data types
+    data_types:
+      enabled: true
+      
+    # Range checking
+    range_checking:
+      enabled: true
+      
+    # Consistency checks
+    consistency_checks:
+      enabled: true
+      
+    # Distribution checks
+    distribution_checks:
+      enabled: true
+      
+    # Correlation checks
+    correlation_checks:
+      enabled: true
+
+# Performance Optimization
+performance:
+  # Enable performance optimization
+  enabled: true
+  
+  # Parallel processing
+  parallel:
+    enabled: true
+    n_jobs: -1
+    
+  # Memory efficient
+  memory_efficient:
+    enabled: true
+    
+  # Batch processing
+  batch_processing:
+    enabled: true
+    batch_size: 1000
+    
+  # Caching
+  caching:
+    enabled: true
+    cache_size: 1000
+    
+  # Progress tracking
+  progress_tracking:
+    enabled: true
+    
+  # Time tracking
+  time_tracking:
+    enabled: true
+
+# Error Handling
+error_handling:
+  # Enable error handling
+  enabled: true
+  
+  # Error tolerance
+  error_tolerance: 0.01
+  
+  # Error logging
+  error_logging:
+    enabled: true
+    log_file: "./logs/preprocessing_errors.log"
+    
+  # Error recovery
+  error_recovery:
+    enabled: true
+    max_retries: 3
+    retry_delay: 1
+    
+  # Error notifications
+  error_notifications:
+    enabled: true
+    channels:
+      - email
+      - slack
+      - pagerduty
+
+# Logging Configuration
+logging:
+  # Enable logging
+  enabled: true
+  
+  # Log level
+  level: "INFO"
+  
+  # Log format
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # Log file
+  file: "./logs/preprocessing.log"
+  
+  # Log rotation
+  rotation:
+    max_size: "10MB"
+    backup_count: 5
+  
+  # Log handlers
+  handlers:
+    - console
+    - file
+    - elasticsearch
+
+# Monitoring Configuration
+monitoring:
+  # Enable monitoring
+  enabled: true
+  
+  # Monitoring interval
+  interval: 60
+  
+  # Metrics to collect
+  metrics:
+    - processing_time
+    - memory_usage
+    - disk_usage
+    - cpu_usage
+    - data_size
+    - feature_count
+    - transformation_count
+  
+  # Monitoring service
+  service: "prometheus"
+  
+  # Monitoring endpoint
+  endpoint: "/metrics"
+  
+  # Alerting
+  alerting:
+    enabled: true
+    channels:
+      - email
+      - slack
+      - pagerduty
+    
+    # Alert thresholds
+    thresholds:
+      processing_time: 300
+      memory_usage: 80
+      disk_usage: 90
+      cpu_usage: 80
+
+# Development Configuration
+development:
+  # Development mode
+  enabled: false
+  
+  # Debug mode
+  debug: false
+  
+  # Test mode
+  test: false
+  
+  # Sample size for testing
+  sample_size: 100
+  
+  # Dry run
+  dry_run: false
+
+# Production Configuration
+production:
+  # Production mode
+  enabled: true
+  
+  # Batch size
+  batch_size: 1000
+  
+  # Parallel processing
+  parallel: true
+  
+  # Memory efficient
+  memory_efficient: true
+  
+  # Error handling
+  error_handling: true
+  
+  # Logging
+  logging: true
+  
+  # Monitoring
+  monitoring: true

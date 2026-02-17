@@ -1,0 +1,184 @@
+# AWC (Adaptive Weighted Clustering) Configuration
+# Configuration for training and evaluation of AWC algorithm
+
+# Data Configuration
+data:
+  # Number of clusters
+  n_clusters: 3
+  
+  # Training data paths
+  train_data: ./data/features/awc_features.npy
+  train_labels: ./data/features/awc_labels.npy
+  
+  # Test data paths
+  test_data: ./data/features/awc_test_features.npy
+  test_labels: ./data/features/awc_test_labels.npy
+  
+  # Feature names (if available)
+  feature_names: ["feature1", "feature2", "feature3", "feature4", "feature5"]
+  
+  # Data normalization
+  normalize: true
+  
+  # Standardize features
+  standardize: true
+
+# Algorithm Configuration
+algorithm:
+  # Maximum number of iterations
+  max_iter: 100
+  
+  # Convergence tolerance
+  tol: 0.0001
+  
+  # Initial weights (optional)
+  initial_weights: null
+  
+  # Feature importance (optional)
+  feature_importance: null
+  
+  # Random state for reproducibility
+  random_state: 42
+  
+  # Use weighted centroids
+  weighted_centroids: true
+  
+  # Update weights every N iterations
+  weight_update_interval: 5
+
+# Model Configuration
+model:
+  # Use adaptive weights
+  adaptive_weights: true
+  
+  # Use feature importance
+  use_feature_importance: true
+  
+  # Enable logging
+  logging: true
+  
+  # Verbose output
+  verbose: true
+
+# Training Configuration
+training:
+  # Output directory for model checkpoints
+  output_dir: ./results/awc_training
+  
+  # Log directory
+  log_dir: ./results/awc_logs
+  
+  # Save model checkpoint
+  save_checkpoint: true
+  checkpoint_path: ./models/awc/awc_model.pkl
+  
+  # Load existing model
+  load_model: false
+  load_path: ""
+  
+  # Number of runs for averaging
+  n_runs: 5
+  
+  # Cross-validation
+  cross_validation: false
+  cv_folds: 5
+
+# Evaluation Configuration
+evaluation:
+  # Output directory for evaluation results
+  output_dir: ./results/awc_evaluation
+  
+  # Log directory
+  log_dir: ./results/awc_evaluation_logs
+  
+  # Generate visualizations
+  generate_visualizations: true
+  
+  # Visualization settings
+  n_visualization_samples: 100
+  
+  # Save evaluation metrics
+  save_metrics: true
+  metrics_path: ./results/awc_evaluation/metrics.json
+  
+  # Generate confusion matrix
+  generate_confusion_matrix: true
+  
+  # Generate classification report
+  generate_classification_report: true
+
+# Advanced Configuration
+advanced:
+  # Use parallel processing
+  parallel: false
+  
+  # Number of parallel jobs
+  n_jobs: -1
+  
+  # Memory efficient mode
+  memory_efficient: false
+  
+  # Early stopping
+  early_stopping: true
+  early_stopping_patience: 10
+  
+  # Performance metrics
+  calculate_metrics: true
+  metrics: ["silhouette", "davies_bouldin", "calinski_harabasz"]
+  
+  # Feature selection
+  feature_selection: false
+  selection_method: "variance"
+  variance_threshold: 0.1
+
+# Egg Fertility Specific Configuration
+eg_fertility:
+  # Fertility classes
+  classes: ["infertile", "fertile", "uncertain"]
+  
+  # Class weights (for imbalanced data)
+  class_weights: [1.0, 1.0, 1.0]
+  
+  # Minimum cluster size
+  min_cluster_size: 10
+  
+  # Maximum cluster size
+  max_cluster_size: 1000
+  
+  # Cluster purity threshold
+  purity_threshold: 0.7
+  
+  # Feature importance threshold
+  importance_threshold: 0.1
+
+# Output Configuration
+output:
+  # Save model summary
+  save_summary: true
+  summary_path: ./results/awc_evaluation/model_summary.txt
+  
+  # Save cluster information
+  save_cluster_info: true
+  cluster_info_path: ./results/awc_evaluation/cluster_info.json
+  
+  # Save feature importance
+  save_feature_importance: true
+  feature_importance_path: ./results/awc_evaluation/feature_importance.json
+  
+  # Save training history
+  save_training_history: true
+  history_path: ./results/awc_training/history.json
+
+# Debug Configuration
+debug:
+  # Debug mode
+  debug: false
+  
+  # Debug sample size
+  debug_sample_size: 100
+  
+  # Save intermediate results
+  save_intermediate: false
+  
+  # Print debug information
+  print_debug: false

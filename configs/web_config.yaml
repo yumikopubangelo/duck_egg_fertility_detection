@@ -1,0 +1,1002 @@
+# Web Configuration
+# Configuration for the web application and API
+
+# Web Application Configuration
+web:
+  # Application name
+  name: "Duck Egg Fertility Detection"
+  
+  # Application version
+  version: "1.0.0"
+  
+  # Application description
+  description: "A web application for detecting fertility of duck eggs using image analysis"
+  
+  # Application URL
+  url: "http://localhost:5000"
+  
+  # Application email
+  email: "support@duckeggfertility.com"
+  
+  # Application timezone
+  timezone: "Asia/Jakarta"
+  
+  # Application language
+  language: "en"
+  
+  # Application locale
+  locale: "en_US"
+
+# Flask Configuration
+flask:
+  # Flask environment
+  environment: "production"
+  
+  # Flask debug mode
+  debug: false
+  
+  # Flask testing mode
+  testing: false
+  
+  # Flask secret key
+  secret_key: "${SECRET_KEY}"
+  
+  # Flask session type
+  session_type: "redis"
+  
+  # Flask session lifetime (in seconds)
+  session_lifetime: 3600
+  
+  # Flask permanent session lifetime (in seconds)
+  permanent_session_lifetime: 86400
+  
+  # Flask session cookie name
+  session_cookie_name: "duck_egg_session"
+  
+  # Flask session cookie secure
+  session_cookie_secure: true
+  
+  # Flask session cookie httponly
+  session_cookie_httponly: true
+  
+  # Flask session cookie samesite
+  session_cookie_samesite: "Lax"
+  
+  # Flask max content length
+  max_content_length: 16777216  # 16MB
+  
+  # Flask JSON sort keys
+  json_sort_keys: false
+  
+  # Flask JSON pretty print
+  json_pretty_print: true
+  
+  # Flask JSON as ASCII
+  json_as_ascii: false
+
+# API Configuration
+api:
+  # API prefix
+  prefix: "/api"
+  
+  # API version
+  version: "v1"
+  
+  # API documentation
+  documentation: true
+  
+  # API documentation URL
+  documentation_url: "/api/docs"
+  
+  # API rate limiting
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 60
+    requests_per_hour: 1000
+    requests_per_day: 10000
+    
+  # API authentication
+  authentication:
+    enabled: true
+    jwt_required: true
+    
+  # API endpoints
+  endpoints:
+    # Health check endpoint
+    - path: "/health"
+      method: "GET"
+      description: "Health check endpoint"
+      
+    # Prediction endpoint
+    - path: "/predict"
+      method: "POST"
+      description: "Predict egg fertility"
+      
+    # Upload endpoint
+    - path: "/upload"
+      method: "POST"
+      description: "Upload egg image"
+      
+    # History endpoint
+    - path: "/history"
+      method: "GET"
+      description: "Get prediction history"
+      
+    # Retrain endpoint
+    - path: "/retrain"
+      method: "POST"
+      description: "Retrain model"
+      
+    # Authentication endpoints
+    - path: "/auth/login"
+      method: "POST"
+      description: "User login"
+      
+    - path: "/auth/register"
+      method: "POST"
+      description: "User registration"
+      
+    - path: "/auth/logout"
+      method: "POST"
+      description: "User logout"
+      
+    - path: "/auth/refresh"
+      method: "POST"
+      description: "Refresh JWT token"
+
+# Database Configuration
+database:
+  # Database type
+  type: "postgresql"
+  
+  # Database URL
+  url: "${DATABASE_URL}"
+  
+  # Database name
+  name: "duckdb"
+  
+  # Database user
+  user: "duck"
+  
+  # Database password
+  password: "${DB_PASSWORD}"
+  
+  # Database host
+  host: "db"
+  
+  # Database port
+  port: 5432
+  
+  # Connection pool size
+  pool_size: 10
+  
+  # Maximum overflow connections
+  max_overflow: 20
+  
+  # Connection timeout
+  timeout: 30
+  
+  # Echo SQL queries
+  echo: false
+  
+  # Track modifications
+  track_modifications: false
+  
+  # Database migrations
+  migrations:
+    enabled: true
+    directory: "./database/migrations"
+    
+  # Database seed data
+  seed_data:
+    enabled: true
+    directory: "./database/seed_data"
+
+# Redis Configuration
+redis:
+  # Redis URL
+  url: "${REDIS_URL}"
+  
+  # Redis host
+  host: "redis"
+  
+  # Redis port
+  port: 6379
+  
+  # Redis database
+  db: 0
+  
+  # Redis password
+  password: ""
+  
+  # Redis timeout
+  timeout: 30
+  
+  # Redis connection pool size
+  pool_size: 10
+  
+  # Redis max connections
+  max_connections: 50
+  
+  # Redis cache timeout
+  cache_timeout: 3600
+  
+  # Redis session timeout
+  session_timeout: 86400
+
+# File Upload Configuration
+file_upload:
+  # Maximum file size (in bytes)
+  max_content_length: 16777216  # 16MB
+  
+  # Upload folder
+  upload_folder: "./data/uploads"
+  
+  # Allowed file extensions
+  allowed_extensions:
+    - "jpg"
+    - "jpeg"
+    - "png"
+    - "bmp"
+    - "tiff"
+    
+  # File naming convention
+  file_naming: "uuid"
+  
+  # File retention period (in days)
+  retention_period: 30
+  
+  # Image processing
+  image_processing:
+    # Resize images
+    resize: true
+    
+    # Maximum image dimensions
+    max_width: 1024
+    max_height: 1024
+    
+    # Image quality (for JPEG)
+    quality: 90
+    
+    # Convert to RGB
+    convert_to_rgb: true
+    
+  # File validation
+  file_validation:
+    enabled: true
+    
+  # File virus scanning
+  virus_scanning:
+    enabled: false
+    
+  # File metadata extraction
+  metadata_extraction:
+    enabled: true
+    
+  # File thumbnail generation
+  thumbnail_generation:
+    enabled: true
+    size: [128, 128]
+
+# Model Configuration
+model:
+  # Model directory
+  model_dir: "./models"
+  
+  # UNet model path
+  unet_model_path: "./models/unet/model.pth"
+  
+  # AWC model path
+  awc_model_path: "./models/awc/model.pkl"
+  
+  # Model loading
+  load_models_on_startup: true
+  
+  # Model cache
+  cache_models: true
+  
+  # Model cache timeout (in seconds)
+  cache_timeout: 3600
+  
+  # Model prediction timeout (in seconds)
+  prediction_timeout: 30
+  
+  # Model batch size
+  batch_size: 8
+  
+  # Model confidence threshold
+  confidence_threshold: 0.7
+  
+  # Model fallback
+  fallback_model: false
+  fallback_model_path: ""
+  
+  # Model versioning
+  versioning:
+    enabled: true
+    directory: "./models/versions"
+    
+  # Model monitoring
+  monitoring:
+    enabled: true
+    
+  # Model logging
+  logging:
+    enabled: true
+    
+  # Model validation
+  validation:
+    enabled: true
+
+# Authentication Configuration
+auth:
+  # Enable authentication
+  enabled: true
+  
+  # JWT secret key
+  jwt_secret_key: "${JWT_SECRET_KEY}"
+  
+  # JWT algorithm
+  jwt_algorithm: "HS256"
+  
+  # JWT expiration (in minutes)
+  jwt_expiration: 60
+  
+  # JWT refresh expiration (in minutes)
+  jwt_refresh_expiration: 1440
+  
+  # JWT token prefix
+  jwt_token_prefix: "Bearer"
+  
+  # JWT cookie name
+  jwt_cookie_name: "access_token"
+  
+  # JWT refresh cookie name
+  jwt_refresh_cookie_name: "refresh_token"
+  
+  # JWT cookie secure
+  jwt_cookie_secure: true
+  
+  # JWT cookie httponly
+  jwt_cookie_httponly: true
+  
+  # JWT cookie samesite
+  jwt_cookie_samesite: "Lax"
+  
+  # User roles
+  roles:
+    - "admin"
+    - "user"
+    - "guest"
+  
+  # Default role
+  default_role: "guest"
+  
+  # Password requirements
+  password_requirements:
+    min_length: 8
+    max_length: 128
+    require_uppercase: true
+    require_lowercase: true
+    require_numbers: true
+    require_special_chars: true
+
+# CORS Configuration
+cors:
+  # Enable CORS
+  enabled: true
+  
+  # CORS origins
+  origins:
+    - "http://localhost:3000"
+    - "http://localhost:8501"
+    - "http://localhost:5000"
+    - "http://127.0.0.1:3000"
+    - "http://127.0.0.1:8501"
+    - "http://127.0.0.1:5000"
+  
+  # CORS methods
+  methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+    - "OPTIONS"
+  
+  # CORS headers
+  headers:
+    - "Content-Type"
+    - "Authorization"
+    - "X-Requested-With"
+    - "Accept"
+    - "Origin"
+    - "Access-Control-Allow-Origin"
+    - "Access-Control-Allow-Headers"
+    - "Access-Control-Allow-Methods"
+  
+  # CORS credentials
+  credentials: true
+  
+  # CORS max age
+  max_age: 86400
+
+# Rate Limiting Configuration
+rate_limiting:
+  # Enable rate limiting
+  enabled: true
+  
+  # Rate limiting strategy
+  strategy: "fixed_window"  # Options: "fixed_window", "sliding_window", "token_bucket"
+  
+  # Fixed window rate limiting
+  fixed_window:
+    requests_per_minute: 60
+    requests_per_hour: 1000
+    requests_per_day: 10000
+    
+  # Sliding window rate limiting
+  sliding_window:
+    window_size: 60  # in seconds
+    max_requests: 60
+    
+  # Token bucket rate limiting
+  token_bucket:
+    bucket_size: 100
+    refill_rate: 1  # tokens per second
+    
+  # Rate limiting storage
+  storage: "redis"
+  
+  # Rate limiting key prefix
+  key_prefix: "rate_limit:"
+  
+  # Rate limiting headers
+  headers:
+    enabled: true
+    limit_header: "X-RateLimit-Limit"
+    remaining_header: "X-RateLimit-Remaining"
+    reset_header: "X-RateLimit-Reset"
+
+# Logging Configuration
+logging:
+  # Log level
+  level: "INFO"
+  
+  # Log format
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # Log file
+  file: "./logs/app.log"
+  
+  # Log rotation
+  rotation:
+    max_size: "10MB"
+    backup_count: 5
+  
+  # Log handlers
+  handlers:
+    - console
+    - file
+    - sentry
+  
+  # Log to Sentry
+  sentry:
+    enabled: false
+    dsn: ""
+  
+  # Log to Elasticsearch
+  elasticsearch:
+    enabled: false
+    hosts: ["http://localhost:9200"]
+    index: "web_logs"
+
+# Monitoring Configuration
+monitoring:
+  # Enable monitoring
+  enabled: true
+  
+  # Monitoring interval (in seconds)
+  interval: 60
+  
+  # Metrics to collect
+  metrics:
+    - request_count
+    - response_time
+    - error_count
+    - memory_usage
+    - cpu_usage
+    - disk_usage
+    - network_usage
+    - active_connections
+    - database_connections
+    - redis_connections
+  
+  # Monitoring service
+  service: "prometheus"
+  
+  # Monitoring endpoint
+  endpoint: "/metrics"
+  
+  # Alerting
+  alerting:
+    enabled: true
+    channels:
+      - email
+      - slack
+      - pagerduty
+    
+    # Alert thresholds
+    thresholds:
+      response_time: 2000
+      error_rate: 0.01
+      memory_usage: 80
+      cpu_usage: 80
+      disk_usage: 90
+
+# Caching Configuration
+caching:
+  # Enable caching
+  enabled: true
+  
+  # Cache type
+  type: "redis"
+  
+  # Cache timeout (in seconds)
+  timeout: 3600
+  
+  # Cache size
+  max_size: 1000
+  
+  # Cache compression
+  compression: true
+  
+  # Cache serialization
+  serialization: "json"
+  
+  # Cache regions
+  regions:
+    - name: "default"
+      timeout: 3600
+      max_size: 1000
+    - name: "short_term"
+      timeout: 300
+      max_size: 100
+    - name: "long_term"
+      timeout: 86400
+      max_size: 10000
+
+# Background Tasks Configuration
+background_tasks:
+  # Enable background tasks
+  enabled: true
+  
+  # Task queue
+  queue: "celery"
+  
+  # Task broker
+  broker: "redis://localhost:6379/0"
+  
+  # Task result backend
+  result_backend: "redis://localhost:6379/0"
+  
+  # Task concurrency
+  concurrency: 4
+  
+  # Task timeout
+  timeout: 300
+  
+  # Task retry
+  retry: true
+  retry_count: 3
+  retry_delay: 60
+  
+  # Task priority
+  priority: true
+  
+  # Task routing
+  routing:
+    default_queue: "default"
+    queues:
+      - name: "high_priority"
+        routing_key: "high_priority"
+      - name: "low_priority"
+        routing_key: "low_priority"
+
+# Email Configuration
+email:
+  # Enable email notifications
+  enabled: false
+  
+  # SMTP server
+  smtp_server: "smtp.gmail.com"
+  
+  # SMTP port
+  smtp_port: 587
+  
+  # SMTP username
+  username: ""
+  
+  # SMTP password
+  password: ""
+  
+  # Use TLS
+  use_tls: true
+  
+  # Use SSL
+  use_ssl: false
+  
+  # From email
+  from_email: "noreply@duckeggfertility.com"
+  
+  # From name
+  from_name: "Duck Egg Fertility Detection"
+  
+  # Email templates directory
+  templates_dir: "./templates/email"
+  
+  # Email recipients
+  recipients:
+    - "admin@duckeggfertility.com"
+    - "support@duckeggfertility.com"
+
+# External Services Configuration
+external_services:
+  # External API URLs
+  api_urls:
+    - name: "weather"
+      url: "https://api.weather.com"
+    - name: "geolocation"
+      url: "https://api.geolocation.com"
+  
+  # API keys
+  api_keys:
+    weather: "${WEATHER_API_KEY}"
+    geolocation: "${GEOLOCATION_API_KEY}"
+  
+  # Service timeouts
+  timeouts:
+    weather: 10
+    geolocation: 5
+  
+  # Service retries
+  retries:
+    weather: 3
+    geolocation: 2
+  
+  # Service fallback
+  fallback:
+    enabled: true
+    
+  # Service caching
+  caching:
+    enabled: true
+    timeout: 3600
+
+# Development Configuration
+development:
+  # Development mode
+  enabled: false
+  
+  # Debug mode
+  debug: true
+  
+  # Hot reload
+  hot_reload: true
+  
+  # Development server
+  server: "flask"
+  
+  # Development port
+  port: 5000
+  
+  # Development host
+  host: "0.0.0.0"
+  
+  # Development database
+  database:
+    url: "postgresql://duck:duckpassword@localhost:5432/duckdb_dev"
+    echo: true
+    track_modifications: true
+  
+  # Development cache
+  cache:
+    enabled: false
+    
+  # Development logging
+  logging:
+    level: "DEBUG"
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s [in %(pathname)s:%(lineno)d]"
+
+# Production Configuration
+production:
+  # Production mode
+  enabled: true
+  
+  # Production server
+  server: "gunicorn"
+  
+  # Production port
+  port: 5000
+  
+  # Production host
+  host: "0.0.0.0"
+  
+  # Workers
+  workers: 4
+  
+  # Threads per worker
+  threads_per_worker: 2
+  
+  # Timeout
+  timeout: 30
+  
+  # Keep alive
+  keep_alive: 2
+  
+  # Worker class
+  worker_class: "sync"
+  
+  # Worker connections
+  worker_connections: 1000
+  
+  # Backlog
+  backlog: 2048
+  
+  # Daemon mode
+  daemon: false
+  
+  # PID file
+  pidfile: "/tmp/gunicorn.pid"
+  
+  # User
+  user: "appuser"
+  
+  # Group
+  group: "appuser"
+
+# Testing Configuration
+testing:
+  # Test mode
+  enabled: false
+  
+  # Test database
+  database:
+    url: "sqlite:///:memory:"
+    echo: false
+    track_modifications: false
+  
+  # Test data directory
+  test_data_dir: "./tests/data"
+  
+  # Test coverage
+  coverage: true
+  
+  # Test parallel
+  parallel: true
+  
+  # Test workers
+  workers: 4
+  
+  # Test timeout
+  timeout: 30
+  
+  # Test logging
+  logging:
+    level: "INFO"
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Feature Flags
+feature_flags:
+  # Enable new features
+  enable_new_features: false
+  
+  # Beta features
+  beta_features:
+    - name: "advanced_clustering"
+      enabled: false
+    - name: "real_time_processing"
+      enabled: false
+    - name: "multi_model_support"
+      enabled: false
+    - name: "video_processing"
+      enabled: false
+    - name: "batch_processing"
+      enabled: false
+
+# Performance Configuration
+performance:
+  # Enable performance monitoring
+  monitoring: true
+  
+  # Performance metrics
+  metrics:
+    - response_time
+    - throughput
+    - error_rate
+    - memory_usage
+    - cpu_usage
+    - disk_usage
+    - network_usage
+    - active_connections
+    - database_connections
+    - redis_connections
+  
+  # Performance thresholds
+  thresholds:
+    response_time: 2000
+    error_rate: 0.01
+    memory_usage: 80
+    cpu_usage: 80
+    disk_usage: 90
+  
+  # Performance optimization
+  optimization:
+    enabled: true
+    
+  # Caching optimization
+  caching:
+    enabled: true
+    
+  # Database optimization
+  database:
+    enabled: true
+    
+  # Query optimization
+  query:
+    enabled: true
+    
+  # Index optimization
+  index:
+    enabled: true
+
+# Maintenance Configuration
+maintenance:
+  # Maintenance mode
+  enabled: false
+  
+  # Maintenance message
+  message: "The application is currently under maintenance. Please try again later."
+  
+  # Maintenance start time
+  start_time: ""
+  
+  # Maintenance end time
+  end_time: ""
+  
+  # Maintenance allowed users
+  allowed_users: []
+  
+  # Maintenance whitelist
+  whitelist:
+    - "127.0.0.1"
+    - "::1"
+    - "localhost"
+
+# Error Handling
+error_handling:
+  # Enable error handling
+  enabled: true
+  
+  # Error thresholds
+  thresholds:
+    critical: 5
+    warning: 10
+    info: 20
+  
+  # Error notifications
+  notifications:
+    enabled: true
+    channels:
+      - email
+      - slack
+      - pagerduty
+  
+  # Error recovery
+  recovery:
+    enabled: true
+    max_retries: 3
+    retry_delay: 30
+  
+  # Error logging
+  logging:
+    enabled: true
+    log_file: "./logs/error.log"
+    
+  # Error reporting
+  reporting:
+    enabled: true
+    service: "sentry"
+    dsn: ""
+
+# Security Configuration
+security:
+  # Security headers
+  headers:
+    enabled: true
+    
+  # Content Security Policy
+  csp:
+    enabled: true
+    policy: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'"
+    
+  # HTTP Strict Transport Security
+  hsts:
+    enabled: true
+    max_age: 31536000
+    include_subdomains: true
+    preload: false
+    
+  # X-Content-Type-Options
+  x_content_type_options:
+    enabled: true
+    
+  # X-Frame-Options
+  x_frame_options:
+    enabled: true
+    option: "DENY"  # Options: "DENY", "SAMEORIGIN", "ALLOW-FROM"
+    
+  # X-XSS-Protection
+  x_xss_protection:
+    enabled: true
+    option: "1; mode=block"
+    
+  # Referrer Policy
+  referrer_policy:
+    enabled: true
+    policy: "no-referrer-when-downgrade"  # Options: "no-referrer", "no-referrer-when-downgrade", "same-origin", "origin", "strict-origin", "origin-when-cross-origin", "strict-origin-when-cross-origin", "unsafe-url"
+    
+  # Permissions Policy
+  permissions_policy:
+    enabled: true
+    features:
+      - "geolocation=()"
+      - "microphone=()"
+      - "camera=()"
+      - "payment=()"
+      - "usb=()"
+      - "magnetometer=()"
+      - "gyroscope=()"
+      - "accelerometer=()"
+      - "ambient-light-sensor=()"
+      - "autoplay=()"
+      - "encrypted-media=()"
+      - "fullscreen=()"
+      - "picture-in-picture=()"
+
+# Compliance Configuration
+compliance:
+  # GDPR compliance
+  gdpr:
+    enabled: true
+    
+  # CCPA compliance
+  ccpa:
+    enabled: true
+    
+  # Privacy policy
+  privacy_policy:
+    enabled: true
+    url: "/privacy"
+    
+  # Terms of service
+  terms_of_service:
+    enabled: true
+    url: "/terms"
+    
+  # Cookie policy
+  cookie_policy:
+    enabled: true
+    url: "/cookies"
+    
+  # Data retention policy
+  data_retention:
+    enabled: true
+    retention_period: 365  # days
+    
+  # Data deletion
+  data_deletion:
+    enabled: true
+    
+  # Data portability
+  data_portability:
+    enabled: true

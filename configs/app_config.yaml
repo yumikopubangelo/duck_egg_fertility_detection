@@ -1,0 +1,509 @@
+# Application Configuration
+# Configuration for the duck egg fertility detection application
+
+# Application Settings
+app:
+  # Application name
+  name: "Duck Egg Fertility Detection"
+  
+  # Application version
+  version: "1.0.0"
+  
+  # Application description
+  description: "A machine learning application for detecting fertility of duck eggs using image analysis"
+  
+  # Application author
+  author: "Duck Egg Fertility Detection Team"
+  
+  # Application URL
+  url: "http://localhost:5000"
+  
+  # Application email
+  email: "support@duckeggfertility.com"
+  
+  # Application timezone
+  timezone: "Asia/Jakarta"
+
+# Security Configuration
+security:
+  # Secret key for session management
+  secret_key: "${SECRET_KEY}"
+  
+  # JWT secret key for authentication
+  jwt_secret_key: "${JWT_SECRET_KEY}"
+  
+  # Password hashing algorithm
+  password_hash_algorithm: "bcrypt"
+  
+  # Password hashing rounds
+  password_hash_rounds: 12
+  
+  # Session timeout (in minutes)
+  session_timeout: 30
+  
+  # JWT token expiration (in minutes)
+  jwt_expiration: 60
+  
+  # CORS origins
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://localhost:8501"
+    - "http://localhost:5000"
+  
+  # Rate limiting
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 60
+    requests_per_hour: 1000
+    requests_per_day: 10000
+
+# Database Configuration
+database:
+  # Database type
+  type: "postgresql"
+  
+  # Database URL
+  url: "${DATABASE_URL}"
+  
+  # Database name
+  name: "duckdb"
+  
+  # Database user
+  user: "duck"
+  
+  # Database password
+  password: "${DB_PASSWORD}"
+  
+  # Database host
+  host: "db"
+  
+  # Database port
+  port: 5432
+  
+  # Connection pool size
+  pool_size: 10
+  
+  # Maximum overflow connections
+  max_overflow: 20
+  
+  # Connection timeout
+  timeout: 30
+  
+  # Echo SQL queries
+  echo: false
+  
+  # Track modifications
+  track_modifications: false
+
+# Redis Configuration
+redis:
+  # Redis URL
+  url: "${REDIS_URL}"
+  
+  # Redis host
+  host: "redis"
+  
+  # Redis port
+  port: 6379
+  
+  # Redis database
+  db: 0
+  
+  # Redis password
+  password: ""
+  
+  # Redis timeout
+  timeout: 30
+  
+  # Redis connection pool size
+  pool_size: 10
+  
+  # Redis max connections
+  max_connections: 50
+
+# File Upload Configuration
+file_upload:
+  # Maximum file size (in bytes)
+  max_content_length: 16777216  # 16MB
+  
+  # Upload folder
+  upload_folder: "./data/uploads"
+  
+  # Allowed file extensions
+  allowed_extensions:
+    - "jpg"
+    - "jpeg"
+    - "png"
+    - "bmp"
+    - "tiff"
+  
+  # File naming convention
+  file_naming: "uuid"
+  
+  # File retention period (in days)
+  retention_period: 30
+  
+  # Image processing
+  image_processing:
+    # Resize images
+    resize: true
+    
+    # Maximum image dimensions
+    max_width: 1024
+    max_height: 1024
+    
+    # Image quality (for JPEG)
+    quality: 90
+    
+    # Convert to RGB
+    convert_to_rgb: true
+
+# Model Configuration
+model:
+  # Model directory
+  model_dir: "./models"
+  
+  # UNet model path
+  unet_model_path: "./models/unet/model.pth"
+  
+  # AWC model path
+  awc_model_path: "./models/awc/model.pkl"
+  
+  # Model loading
+  load_models_on_startup: true
+  
+  # Model cache
+  cache_models: true
+  
+  # Model cache timeout (in seconds)
+  cache_timeout: 3600
+  
+  # Model prediction timeout (in seconds)
+  prediction_timeout: 30
+  
+  # Model batch size
+  batch_size: 8
+  
+  # Model confidence threshold
+  confidence_threshold: 0.7
+  
+  # Model fallback
+  fallback_model: false
+  fallback_model_path: ""
+
+# API Configuration
+api:
+  # API prefix
+  prefix: "/api"
+  
+  # API version
+  version: "v1"
+  
+  # API documentation
+  documentation: true
+  
+  # API rate limiting
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 60
+    requests_per_hour: 1000
+    requests_per_day: 10000
+  
+  # API authentication
+  authentication:
+    enabled: true
+    jwt_required: true
+    
+  # API endpoints
+  endpoints:
+    - path: "/health"
+      method: "GET"
+      description: "Health check endpoint"
+    - path: "/predict"
+      method: "POST"
+      description: "Predict egg fertility"
+    - path: "/upload"
+      method: "POST"
+      description: "Upload egg image"
+    - path: "/history"
+      method: "GET"
+      description: "Get prediction history"
+    - path: "/retrain"
+      method: "POST"
+      description: "Retrain model"
+
+# Logging Configuration
+logging:
+  # Log level
+  level: "INFO"
+  
+  # Log format
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # Log file
+  file: "./logs/app.log"
+  
+  # Log rotation
+  rotation:
+    max_size: "10MB"
+    backup_count: 5
+  
+  # Log handlers
+  handlers:
+    - console
+    - file
+    - sentry
+  
+  # Log to Sentry
+  sentry:
+    enabled: false
+    dsn: ""
+
+# Monitoring Configuration
+monitoring:
+  # Enable monitoring
+  enabled: true
+  
+  # Monitoring interval (in seconds)
+  interval: 60
+  
+  # Metrics to collect
+  metrics:
+    - cpu_usage
+    - memory_usage
+    - disk_usage
+    - network_usage
+    - request_count
+    - error_count
+    - response_time
+  
+  # Monitoring service
+  service: "prometheus"
+  
+  # Monitoring endpoint
+  endpoint: "/metrics"
+  
+  # Alerting
+  alerting:
+    enabled: true
+    channels:
+      - email
+      - slack
+      - pagerduty
+    
+    # Alert thresholds
+    thresholds:
+      cpu: 80
+      memory: 80
+      disk: 90
+      response_time: 2000
+
+# Caching Configuration
+caching:
+  # Enable caching
+  enabled: true
+  
+  # Cache type
+  type: "redis"
+  
+  # Cache timeout (in seconds)
+  timeout: 3600
+  
+  # Cache size
+  max_size: 1000
+  
+  # Cache compression
+  compression: true
+  
+  # Cache serialization
+  serialization: "json"
+
+# Background Tasks Configuration
+background_tasks:
+  # Enable background tasks
+  enabled: true
+  
+  # Task queue
+  queue: "celery"
+  
+  # Task broker
+  broker: "redis://localhost:6379/0"
+  
+  # Task result backend
+  result_backend: "redis://localhost:6379/0"
+  
+  # Task concurrency
+  concurrency: 4
+  
+  # Task timeout
+  timeout: 300
+  
+  # Task retry
+  retry: true
+  retry_count: 3
+  retry_delay: 60
+
+# Email Configuration
+email:
+  # Enable email notifications
+  enabled: false
+  
+  # SMTP server
+  smtp_server: "smtp.gmail.com"
+  
+  # SMTP port
+  smtp_port: 587
+  
+  # SMTP username
+  username: ""
+  
+  # SMTP password
+  password: ""
+  
+  # Use TLS
+  use_tls: true
+  
+  # Use SSL
+  use_ssl: false
+  
+  # From email
+  from_email: "noreply@duckeggfertility.com"
+  
+  # From name
+  from_name: "Duck Egg Fertility Detection"
+  
+  # Email templates directory
+  templates_dir: "./templates/email"
+
+# External Services Configuration
+external_services:
+  # External API URLs
+  api_urls:
+    - name: "weather"
+      url: "https://api.weather.com"
+    - name: "geolocation"
+      url: "https://api.geolocation.com"
+  
+  # API keys
+  api_keys:
+    weather: "${WEATHER_API_KEY}"
+    geolocation: "${GEOLOCATION_API_KEY}"
+  
+  # Service timeouts
+  timeouts:
+    weather: 10
+    geolocation: 5
+
+# Development Configuration
+development:
+  # Development mode
+  enabled: false
+  
+  # Debug mode
+  debug: false
+  
+  # Hot reload
+  hot_reload: false
+  
+  # Development server
+  server: "flask"
+  
+  # Development port
+  port: 5000
+  
+  # Development host
+  host: "0.0.0.0"
+
+# Production Configuration
+production:
+  # Production mode
+  enabled: true
+  
+  # Production server
+  server: "gunicorn"
+  
+  # Production port
+  port: 5000
+  
+  # Production host
+  host: "0.0.0.0"
+  
+  # Workers
+  workers: 4
+  
+  # Threads per worker
+  threads_per_worker: 2
+  
+  # Timeout
+  timeout: 30
+
+# Testing Configuration
+testing:
+  # Test mode
+  enabled: false
+  
+  # Test database
+  test_database: "./database/test_duckdb.db"
+  
+  # Test data directory
+  test_data_dir: "./tests/data"
+  
+  # Test coverage
+  coverage: true
+  
+  # Test parallel
+  parallel: true
+  
+  # Test workers
+  workers: 4
+
+# Feature Flags
+feature_flags:
+  # Enable new features
+  enable_new_features: false
+  
+  # Beta features
+  beta_features:
+    - name: "advanced_clustering"
+      enabled: false
+    - name: "real_time_processing"
+      enabled: false
+    - name: "multi_model_support"
+      enabled: false
+
+# Performance Configuration
+performance:
+  # Enable performance monitoring
+  monitoring: true
+  
+  # Performance metrics
+  metrics:
+    - response_time
+    - throughput
+    - error_rate
+    - memory_usage
+    - cpu_usage
+  
+  # Performance thresholds
+  thresholds:
+    response_time: 2000
+    error_rate: 0.01
+    memory_usage: 80
+    cpu_usage: 80
+
+# Maintenance Configuration
+maintenance:
+  # Maintenance mode
+  enabled: false
+  
+  # Maintenance message
+  message: "The application is currently under maintenance. Please try again later."
+  
+  # Maintenance start time
+  start_time: ""
+  
+  # Maintenance end time
+  end_time: ""
+  
+  # Maintenance allowed users
+  allowed_users: []

@@ -1,0 +1,358 @@
+# Deployment Configuration
+# Configuration for deploying the duck egg fertility detection application
+
+# Docker Configuration
+docker:
+  # Docker compose file
+  compose_file: ./deployment/docker-compose.yml
+  
+  # Dockerfile
+  dockerfile: ./deployment/Dockerfile
+  
+  # Nginx configuration
+  nginx_config: ./deployment/nginx.conf
+  
+  # Build context
+  build_context: .
+  
+  # Docker image name
+  image_name: duck-egg-fertility
+  
+  # Docker image tag
+  image_tag: latest
+  
+  # Container name
+  container_name: duck-egg-fertility-web
+  
+  # Network name
+  network_name: duck-egg-network
+  
+  # Volume mappings
+  volumes:
+    - ./data:/app/data
+    - ./models:/app/models
+    - ./logs:/app/logs
+    - ./results:/app/results
+
+# Environment Configuration
+environment:
+  # Environment variables file
+  env_file: ./.env
+  
+  # Environment variables
+  variables:
+    - FLASK_ENV=production
+    - DATABASE_URL=postgresql://duck:duckpassword@db:5432/duckdb
+    - REDIS_URL=redis://redis:6379/0
+    - SECRET_KEY=${SECRET_KEY}
+    - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    - MAX_CONTENT_LENGTH=16777216
+    - UPLOAD_FOLDER=./data/uploads
+    - ALLOWED_EXTENSIONS=jpg,jpeg,png,bmp,tiff
+
+# Service Configuration
+services:
+  # Web service
+  web:
+    # Service name
+    name: web
+    
+    # Image
+    image: ${image_name}:${image_tag}
+    
+    # Container name
+    container_name: ${container_name}
+    
+    # Ports
+    ports:
+      - "5000:5000"
+    
+    # Environment variables
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://duck:duckpassword@db:5432/duckdb
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    
+    # Volumes
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
+      - ./results:/app/results
+    
+    # Dependencies
+    depends_on:
+      - db
+      - redis
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  
+  # Database service
+  db:
+    # Service name
+    name: db
+    
+    # Image
+    image: postgres:15-alpine
+    
+    # Container name
+    container_name: duck-egg-db
+    
+    # Environment variables
+    environment:
+      - POSTGRES_DB=duckdb
+      - POSTGRES_USER=duck
+      - POSTGRES_PASSWORD=duckpassword
+    
+    # Volumes
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    
+    # Ports
+    ports:
+      - "5432:5432"
+    
+    # Restart policy
+    restart: unless-stopped
+  
+  # Redis service
+  redis:
+    # Service name
+    name: redis
+    
+    # Image
+    image: redis:7-alpine
+    
+    # Container name
+    container_name: duck-egg-redis
+    
+    # Ports
+    ports:
+      - "6379:6379"
+    
+    # Restart policy
+    restart: unless-stopped
+  
+  # Nginx service
+  nginx:
+    # Service name
+    name: nginx
+    
+    # Image
+    image: nginx:alpine
+    
+    # Container name
+    container_name: duck-egg-nginx
+    
+    # Ports
+    ports:
+      - "80:80"
+      - "443:443"
+    
+    # Volumes
+    volumes:
+      - ./deployment/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./web/frontend/static:/var/www/static
+    
+    # Dependencies
+    depends_on:
+      - web
+    
+    # Restart policy
+    restart: unless-stopped
+
+# Volume Configuration
+volumes:
+  # PostgreSQL data volume
+  postgres_data:
+    driver: local
+    
+  # Redis data volume
+  redis_data:
+    driver: local
+    
+  # Application data volume
+  app_data:
+    driver: local
+    
+  # Model data volume
+  model_data:
+    driver: local
+
+# Network Configuration
+networks:
+  # Application network
+  duck_network:
+    driver: bridge
+    
+  # Database network
+  db_network:
+    driver: bridge
+    
+  # Redis network
+  redis_network:
+    driver: bridge
+
+# Security Configuration
+security:
+  # Non-root user
+  user: appuser
+  
+  # User ID
+  uid: 1000
+  
+  # Group ID
+  gid: 1000
+  
+  # File permissions
+  file_permissions:
+    - path: ./data
+      permissions: 0755
+    - path: ./models
+      permissions: 0755
+    - path: ./logs
+      permissions: 0755
+    - path: ./results
+      permissions: 0755
+
+# Performance Configuration
+performance:
+  # Number of workers
+  workers: 4
+  
+  # Threads per worker
+  threads_per_worker: 2
+  
+  # Maximum requests per worker
+  max_requests: 1000
+  
+  # Timeout settings
+  timeout:
+    connect: 30
+    read: 60
+    write: 60
+
+# Monitoring Configuration
+monitoring:
+  # Health check endpoint
+  health_check:
+    path: /health
+    interval: 30s
+    timeout: 10s
+    retries: 3
+  
+  # Metrics endpoint
+  metrics:
+    path: /metrics
+    interval: 60s
+  
+  # Log level
+  log_level: INFO
+  
+  # Log format
+  log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Backup Configuration
+backup:
+  # Backup schedule
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  
+  # Backup retention
+  retention_days: 30
+  
+  # Backup directories
+  directories:
+    - ./data
+    - ./models
+    - ./logs
+    - ./results
+  
+  # Backup destination
+  destination: ./backups
+  
+  # Backup compression
+  compression: true
+  
+  # Backup encryption
+  encryption: false
+  
+  # Backup verification
+  verification: true
+
+# Scaling Configuration
+scaling:
+  # Web service replicas
+  web_replicas: 1
+  
+  # Database replicas
+  db_replicas: 1
+  
+  # Redis replicas
+  redis_replicas: 1
+  
+  # Nginx replicas
+  nginx_replicas: 1
+  
+  # Auto-scaling
+  auto_scaling:
+    enabled: false
+    min_replicas: 1
+    max_replicas: 5
+    cpu_threshold: 70
+    memory_threshold: 80
+
+# Logging Configuration
+logging:
+  # Log level
+  level: INFO
+  
+  # Log format
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # Log file
+  file: ./logs/deployment.log
+  
+  # Log rotation
+  rotation:
+    max_size: 10MB
+    backup_count: 5
+  
+  # Log destinations
+  destinations:
+    - console
+    - file
+    - elasticsearch
+
+# Error Handling
+error_handling:
+  # Error thresholds
+  thresholds:
+    critical: 5
+    warning: 10
+    info: 20
+  
+  # Error notifications
+  notifications:
+    enabled: true
+    channels:
+      - email
+      - slack
+      - pagerduty
+  
+  # Error recovery
+  recovery:
+    enabled: true
+    max_retries: 3
+    retry_delay: 30s

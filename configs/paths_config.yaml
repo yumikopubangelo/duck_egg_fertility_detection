@@ -1,0 +1,301 @@
+# Paths Configuration
+# Configuration for file paths and directories used in the application
+
+# Base Directories
+base:
+  # Project root directory
+  project_root: ./
+  
+  # Data directory
+  data_dir: ./data
+  
+  # Models directory
+  models_dir: ./models
+  
+  # Results directory
+  results_dir: ./results
+  
+  # Logs directory
+  logs_dir: ./logs
+  
+  # Configuration directory
+  configs_dir: ./configs
+  
+  # Scripts directory
+  scripts_dir: ./scripts
+  
+  # Documentation directory
+  docs_dir: ./docs
+  
+  # Source code directory
+  src_dir: ./src
+  
+  # Web application directory
+  web_dir: ./web
+  
+  # Deployment directory
+  deployment_dir: ./deployment
+
+# Data Paths
+data:
+  # Raw data directory
+  raw_dir: ./data/raw
+  
+  # Preprocessed data directory
+  preprocessed_dir: ./data/preprocessed
+  
+  # Features directory
+  features_dir: ./data/features
+  
+  # Annotations directory
+  annotations_dir: ./data/annotations
+  
+  # Splits directory (for train/val/test)
+  splits_dir: ./data/splits
+  
+  # Uploads directory
+  uploads_dir: ./data/uploads
+  
+  # Temporary directory
+  temp_dir: ./data/temp
+  
+  # Cache directory
+  cache_dir: ./data/cache
+
+# Model Paths
+models:
+  # UNet model directory
+  unet_dir: ./models/unet
+  
+  # AWC model directory
+  awc_dir: ./models/awc
+  
+  # Baseline models directory
+  baselines_dir: ./models/baselines
+  
+  # Model versions directory
+  versions_dir: ./models/versions
+  
+  # Trained model files
+  unet_model_file: ./models/unet/model.pth
+  awc_model_file: ./models/awc/model.pkl
+  
+  # Model configuration files
+  unet_config_file: ./configs/unet_config.yaml
+  awc_config_file: ./configs/awc_config.yaml
+
+# Results Paths
+results:
+  # Main results directory
+  main_dir: ./results
+  
+  # Figures directory
+  figures_dir: ./results/figures
+  
+  # Tables directory
+  tables_dir: ./results/tables
+  
+  # Logs directory
+  logs_dir: ./results/logs
+  
+  # Training results directory
+  training_dir: ./results/training
+  
+  # Evaluation results directory
+  evaluation_dir: ./results/evaluation
+  
+  # Prediction results directory
+  predictions_dir: ./results/predictions
+  
+  # Reports directory
+  reports_dir: ./results/reports
+
+# Web Application Paths
+web:
+  # Frontend static files
+  static_dir: ./web/frontend/static
+  
+  # CSS directory
+  css_dir: ./web/frontend/static/css
+  
+  # JavaScript directory
+  js_dir: ./web/frontend/static/js
+  
+  # Templates directory
+  templates_dir: ./web/frontend/templates
+  
+  # API directory
+  api_dir: ./web/api
+  
+  # Streamlit app directory
+  streamlit_dir: ./web/streamlit_app
+
+# Database Paths
+database:
+  # Database directory
+  db_dir: ./database
+  
+  # Database file
+  db_file: ./database/duck_egg_fertility.db
+  
+  # Migration directory
+  migrations_dir: ./database/migrations
+  
+  # Seed data directory
+  seed_data_dir: ./database/seed_data
+
+# Documentation Paths
+docs:
+  # API documentation
+  api_docs_dir: ./docs/api
+  
+  # User manual
+  user_manual_dir: ./docs/user_manual
+  
+  # Deployment guide
+  deployment_guide_dir: ./docs/deployment
+  
+  # Methodology documentation
+  methodology_dir: ./docs/methodology
+  
+  # Algorithm documentation
+  algorithm_dir: ./docs/algorithms
+
+# Scripts Paths
+scripts:
+  # Data preprocessing scripts
+  preprocessing_dir: ./scripts/preprocessing
+  
+  # Model training scripts
+  training_dir: ./scripts/training
+  
+  # Evaluation scripts
+  evaluation_dir: ./scripts/evaluation
+  
+  # Inference scripts
+  inference_dir: ./scripts/inference
+  
+  # Utility scripts
+  utils_dir: ./scripts/utils
+
+# Configuration Files
+config_files:
+  # Main application config
+  app_config: ./configs/app_config.yaml
+  
+  # Deployment config
+  deployment_config: ./configs/deployment_config.yaml
+  
+  # Paths config
+  paths_config: ./configs/paths_config.yaml
+  
+  # Web config
+  web_config: ./configs/web_config.yaml
+  
+  # Preprocessing config
+  preprocessing_config: ./configs/preprocessing_config.yaml
+  
+  # AWC config
+  awc_config: ./configs/awc_config.yaml
+  
+  # UNet config
+  unet_config: ./configs/unet_config.yaml
+
+# Environment Variables
+env:
+  # Environment file
+  env_file: ./.env
+  
+  # Development environment
+  dev_env: development
+  
+  # Production environment
+  prod_env: production
+  
+  # Test environment
+  test_env: test
+
+# Temporary Files
+temp:
+  # Temporary directory
+  temp_dir: ./data/temp
+  
+  # Cache directory
+  cache_dir: ./data/cache
+  
+  # Log files
+  log_files:
+    - ./logs/app.log
+    - ./logs/training.log
+    - ./logs/evaluation.log
+    - ./logs/deployment.log
+
+# External Dependencies
+external:
+  # Python packages
+  requirements_file: ./requirements.txt
+  
+  # Web requirements
+  web_requirements_file: ./requirements-web.txt
+  
+  # Deployment requirements
+  deploy_requirements_file: ./deployment/requirements-deploy.txt
+  
+  # Environment example
+  env_example: ./.env.example
+
+# Version Control
+git:
+  # Git ignore file
+  gitignore: ./.gitignore
+  
+  # Git attributes
+  gitattributes: ./.gitattributes
+  
+  # Git hooks directory
+  hooks_dir: ./.git/hooks
+
+# Testing Paths
+testing:
+  # Test directory
+  test_dir: ./tests
+  
+  # Unit tests
+  unit_tests_dir: ./tests/unit
+  
+  # Integration tests
+  integration_tests_dir: ./tests/integration
+  
+  # Test data directory
+  test_data_dir: ./tests/data
+  
+  # Test configuration
+  test_config: ./configs/test_config.yaml
+
+# Development Tools
+development:
+  # Development requirements
+  dev_requirements: ./requirements-dev.txt
+  
+  # Pre-commit configuration
+  pre_commit_config: ./.pre-commit-config.yaml
+  
+  # Docker compose file
+  docker_compose: ./deployment/docker-compose.yml
+  
+  # Docker file
+  dockerfile: ./deployment/Dockerfile
+
+# Production Paths
+production:
+  # Production configuration
+  prod_config: ./configs/production_config.yaml
+  
+  # Production logs
+  prod_logs_dir: ./logs/production
+  
+  # Production data
+  prod_data_dir: ./data/production
+  
+  # Production models
+  prod_models_dir: ./models/production
