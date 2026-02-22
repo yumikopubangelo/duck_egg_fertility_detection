@@ -15,22 +15,31 @@ class EggDataset(Dataset):
     
     def __init__(
         self,
-        image_dir: str,
-        mask_dir: str,
+        fertile_dir: str,
+        infertile_dir: str,
         image_size: Tuple[int, int] = (256, 256),
         transform: Optional[transforms.Compose] = None
     ):
-        self.image_dir = Path(image_dir)
-        self.mask_dir = Path(mask_dir)
+        self.fertile_dir = Path(fertile_dir)
+        self.infertile_dir = Path(infertile_dir)
         self.image_size = image_size
         self.transform = transform
         
-        # Get list of image files
-        self.image_files = sorted(self.image_dir.glob('*.jpg')) + sorted(self.image_dir.glob('*.png'))
-        self.mask_files = sorted(self.mask_dir.glob('*.png'))
+        # Get list of image files from both classes
+        fertile_files = sorted(self.fertile_dir.glob('*.jpg')) + sorted(self.fertile_dir.glob('*.png'))
+        infertile_files = sorted(self.infertile_dir.glob('*.jpg')) + sorted(self.infertile_dir.glob('*.png'))
         
-        if len(self.image_files) != len(self.mask_files):
-            raise ValueError("Number of images and masks must be equal")
+        # Create dataset with labels: 0 for infertile, 1 for fertile
+        self.image_files = []
+        self.labels = []
+        
+        for file in fertile_files:
+            self.image_files.append(file)
+            self.labels.append(1)  # Fertile
+        
+        for file in infertile_files:
+            self.image_files.append(file)
+            self.labels.append(0)  # Infertile
     
     def __len__(self) -> int:
         return len(self.image_files)
@@ -40,20 +49,15 @@ class EggDataset(Dataset):
         image_path = self.image_files[idx]
         image = Image.open(image_path).convert('RGB')
         
-        # Load mask
-        mask_path = self.mask_files[idx]
-        mask = Image.open(mask_path).convert('L')  # Grayscale
-        
         # Apply transformations
         if self.transform:
-            image = self.transform(image)
-            mask = self.transform(mask)
+            image_tensor = self.transform(image)
+        else:
+            # Default transform if none provided
+            image_tensor = transforms.ToTensor()(image)
         
-        # Convert to tensors
-        image_tensor = transforms.ToTensor()(image)
-        mask_tensor = transforms.ToTensor()(mask)
+        # Get label
+        label = self.labels[idx]
+        label_tensor = torch.tensor(label, dtype=torch.float32)
         
-        # For binary segmentation, convert mask to binary
-        mask_tensor = (mask_tensor > 0.5).float()
-        
-        return image_tensor, mask_tensor
+        return image_tensor, label_tensor

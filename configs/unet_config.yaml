@@ -7,16 +7,16 @@ data:
   image_size: [256, 256]
   
   # Training data paths
-  train_image_dir: ./data/train/images
-  train_mask_dir: ./data/train/masks
+  train_fertile_dir: ./data/train/fertile
+  train_infertile_dir: ./data/train/infertile
   
   # Validation data paths
-  val_image_dir: ./data/val/images
-  val_mask_dir: ./data/val/masks
+  val_fertile_dir: ./data/val/fertile
+  val_infertile_dir: ./data/val/infertile
   
   # Test data paths
-  test_image_dir: ./data/test/images
-  test_mask_dir: ./data/test/masks
+  test_fertile_dir: ./data/test/fertile
+  test_infertile_dir: ./data/test/infertile
   
   # Number of workers for data loading
   num_workers: 4

@@ -60,6 +60,15 @@ data/uploads/*
 !data/uploads/.gitkeep
 data/features/*.npy
 !data/features/.gitkeep
+data/train/**/*.jpg
+data/train/**/*.jpeg
+data/train/**/*.png
+data/test/**/*.jpg
+data/test/**/*.jpeg
+data/test/**/*.png
+data/val/**/*.jpg
+data/val/**/*.jpeg
+data/val/**/*.png
 models/**/*.h5
 models/**/*.pth
 models/**/*.pkl

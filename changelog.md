@@ -13,16 +13,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Nginx reverse proxy configuration
 - Environment configuration template
 - Comprehensive documentation
+- Enhanced preprocessing module with advanced features
+- Complete utility module (config, file utils, logger, plotting)
+- Training script for UNet model with validation
+- Segmentation module with UNet and lightweight UNet
+- Comprehensive test coverage for preprocessing and segmentation
 
 ### Changed
 - Updated base image to python:3.11-slim-bookworm for security
 - Optimized Dockerfile for production deployment
 - Improved nginx configuration for static file serving
+- Enhanced preprocessing pipeline with retinex, illumination correction, and contrast stretching
+- Updated training script with metrics tracking and validation
+- Improved segmentation models with better performance
 
 ### Fixed
 - Security vulnerabilities in base image
 - File permission issues in Docker container
 - Environment variable handling
+- Import errors in training script
+- Configuration module errors
+- Plotting utilities for data visualization
 
 ## [1.0.0] - 2026-02-17
 

@@ -353,8 +353,8 @@ def main():
     ])
     
     test_dataset = EggDataset(
-        config['data']['test_image_dir'],
-        config['data']['test_mask_dir'],
+        config['data']['test_fertile_dir'],
+        config['data']['test_infertile_dir'],
         config['data']['image_size'],
         test_transform
     )

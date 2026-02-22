@@ -240,15 +240,15 @@ def main():
     
     # Load datasets
     train_dataset = EggDataset(
-        config['data']['train_image_dir'],
-        config['data']['train_mask_dir'],
+        config['data']['train_fertile_dir'],
+        config['data']['train_infertile_dir'],
         config['data']['image_size'],
         train_transform
     )
     
     val_dataset = EggDataset(
-        config['data']['val_image_dir'],
-        config['data']['val_mask_dir'],
+        config['data']['val_fertile_dir'],
+        config['data']['val_infertile_dir'],
         config['data']['image_size'],
         val_transform
     )
