@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Duck Egg Fertility Detection{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12">
+    <h4 class="fw-bold mb-0"><i class="bi bi-house-door me-2 text-primary"></i>Dashboard</h4>
+    <p class="text-muted small">Ringkasan sistem deteksi kesuburan telur bebek</p>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-3 p-3">
+          <i class="bi bi-activity fs-3"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Total Prediksi</div>
+          <div class="fs-4 fw-bold" id="stat-total">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="icon-box bg-success bg-opacity-10 text-success rounded-3 p-3">
+          <i class="bi bi-check-circle fs-3"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Telur Fertile</div>
+          <div class="fs-4 fw-bold text-success" id="stat-fertile">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="icon-box bg-danger bg-opacity-10 text-danger rounded-3 p-3">
+          <i class="bi bi-x-circle fs-3"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Telur Infertile</div>
+          <div class="fs-4 fw-bold text-danger" id="stat-infertile">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="icon-box bg-warning bg-opacity-10 text-warning rounded-3 p-3">
+          <i class="bi bi-graph-up fs-3"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Avg Confidence</div>
+          <div class="fs-4 fw-bold text-warning" id="stat-confidence">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-transparent border-0 fw-semibold">
+        <i class="bi bi-lightning me-2 text-primary"></i>Aksi Cepat
+      </div>
+      <div class="card-body d-flex flex-column gap-2">
+        <a href="/upload" class="btn btn-primary">
+          <i class="bi bi-cloud-upload me-2"></i>Upload & Prediksi Telur
+        </a>
+        <a href="/history" class="btn btn-outline-secondary">
+          <i class="bi bi-clock-history me-2"></i>Lihat Riwayat Prediksi
+        </a>
+        <a href="/dataset" class="btn btn-outline-secondary">
+          <i class="bi bi-database me-2"></i>Kelola Dataset
+        </a>
+        <a href="/retrain" class="btn btn-outline-warning">
+          <i class="bi bi-arrow-repeat me-2"></i>Retrain Model
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Model Info -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-transparent border-0 fw-semibold">
+        <i class="bi bi-cpu me-2 text-primary"></i>Informasi Model
+      </div>
+      <div class="card-body" id="model-info-card">
+        <div class="text-center py-3 text-muted">
+          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+          Memuat informasi model...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Load stats
+  fetch('/api/history/stats')
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('stat-total').textContent = d.total_predictions ?? 0;
+      document.getElementById('stat-fertile').textContent = d.fertile_count ?? 0;
+      document.getElementById('stat-infertile').textContent = d.infertile_count ?? 0;
+      const conf = d.average_confidence ? (d.average_confidence * 100).toFixed(1) + '%' : '0%';
+      document.getElementById('stat-confidence').textContent = conf;
+    })
+    .catch(() => {
+      ['stat-total','stat-fertile','stat-infertile','stat-confidence'].forEach(id => {
+        document.getElementById(id).textContent = '0';
+      });
+    });
+
+  // Load model info
+  fetch('/api/model/info')
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('model-info-card').innerHTML = `
+        <table class="table table-sm table-borderless mb-0">
+          <tbody>
+            <tr><th class="text-muted fw-normal" style="width:45%">Nama Model</th><td class="fw-semibold">${d.model_name}</td></tr>
+            <tr><th class="text-muted fw-normal">Versi</th><td>${d.model_version}</td></tr>
+            <tr><th class="text-muted fw-normal">Akurasi</th><td><span class="badge bg-success">${(d.accuracy*100).toFixed(1)}%</span></td></tr>
+            <tr><th class="text-muted fw-normal">Dilatih</th><td>${new Date(d.last_trained).toLocaleString('id-ID')}</td></tr>
+          </tbody>
+        </table>`;
+    })
+    .catch(() => {
+      document.getElementById('model-info-card').innerHTML =
+        '<p class="text-danger small mb-0"><i class="bi bi-exclamation-circle me-1"></i>Gagal memuat informasi model.</p>';
+    });
+</script>
+{% endblock %}

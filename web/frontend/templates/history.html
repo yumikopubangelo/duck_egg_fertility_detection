@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}Riwayat - Duck Egg Fertility Detection{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <div>
+      <h4 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Riwayat Prediksi</h4>
+      <p class="text-muted small mb-0">Daftar semua prediksi yang telah dilakukan</p>
+    </div>
+    <button class="btn btn-outline-danger btn-sm" id="btn-clear" onclick="clearHistory()">
+      <i class="bi bi-trash me-1"></i>Hapus Semua
+    </button>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body py-2">
+        <div class="row g-2 align-items-center">
+          <div class="col-sm-4">
+            <label class="form-label small mb-1">Dari Tanggal</label>
+            <input type="date" id="filter-start" class="form-control form-control-sm" />
+          </div>
+          <div class="col-sm-4">
+            <label class="form-label small mb-1">Sampai Tanggal</label>
+            <input type="date" id="filter-end" class="form-control form-control-sm" />
+          </div>
+          <div class="col-sm-4 d-flex align-items-end gap-2">
+            <button class="btn btn-primary btn-sm w-100" onclick="loadHistory()">
+              <i class="bi bi-search me-1"></i>Filter
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="resetFilter()">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-3">#</th>
+                <th>Nama File</th>
+                <th>Prediksi</th>
+                <th>Confidence</th>
+                <th>Waktu</th>
+                <th class="text-end pe-3">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="history-tbody">
+              <tr><td colspan="6" class="text-center py-4 text-muted">
+                <div class="spinner-border spinner-border-sm me-2"></div>Memuat data...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="col-12 d-flex justify-content-center" id="pagination-area"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  let currentPage = 1;
+
+  function loadHistory(page = 1) {
+    currentPage = page;
+    const start = document.getElementById('filter-start').value;
+    const end = document.getElementById('filter-end').value;
+    let url = `/api/history?page=${page}&per_page=15`;
+    if (start) url += `&start_date=${start}`;
+    if (end) url += `&end_date=${end}`;
+
+    const tbody = document.getElementById('history-tbody');
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Memuat...</td></tr>';
+
+    fetch(url)
+      .then(r => r.json())
+      .then(d => {
+        if (!d.history || d.history.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted"><i class="bi bi-inbox fs-4 d-block mb-1"></i>Belum ada riwayat prediksi</td></tr>';
+          document.getElementById('pagination-area').innerHTML = '';
+          return;
+        }
+        tbody.innerHTML = d.history.map((h, i) => `
+          <tr>
+            <td class="ps-3 text-muted">${(page-1)*15 + i + 1}</td>
+            <td>${h.original_filename || h.filename || '-'}</td>
+            <td>
+              <span class="badge ${h.prediction === 'fertile' ? 'bg-success' : 'bg-danger'}">
+                ${h.prediction === 'fertile' ? 'Fertile' : 'Infertile'}
+              </span>
+            </td>
+            <td>
+              <div class="progress" style="height:6px;width:80px">
+                <div class="progress-bar ${h.prediction === 'fertile' ? 'bg-success' : 'bg-danger'}"
+                     style="width:${((h.confidence||0)*100).toFixed(0)}%"></div>
+              </div>
+              <small class="text-muted">${((h.confidence||0)*100).toFixed(1)}%</small>
+            </td>
+            <td class="text-muted small">${new Date(h.timestamp).toLocaleString('id-ID')}</td>
+            <td class="text-end pe-3">
+              <button class="btn btn-outline-danger btn-sm" onclick="deletePrediction('${h.id}')">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>`).join('');
+
+        // Pagination
+        renderPagination(d.pages, d.page);
+      })
+      .catch(() => {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-danger">Gagal memuat data</td></tr>';
+      });
+  }
+
+  function renderPagination(totalPages, current) {
+    if (totalPages <= 1) { document.getElementById('pagination-area').innerHTML = ''; return; }
+    let html = '<nav><ul class="pagination pagination-sm mb-0">';
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<li class="page-item ${i === current ? 'active' : ''}">
+        <button class="page-link" onclick="loadHistory(${i})">${i}</button></li>`;
+    }
+    html += '</ul></nav>';
+    document.getElementById('pagination-area').innerHTML = html;
+  }
+
+  function deletePrediction(id) {
+    if (!confirm('Hapus prediksi ini?')) return;
+    fetch(`/api/history/${id}`, { method: 'DELETE' })
+      .then(() => loadHistory(currentPage));
+  }
+
+  function clearHistory() {
+    if (!confirm('Hapus semua riwayat prediksi?')) return;
+    // Delete one by one (simple implementation)
+    fetch('/api/history?per_page=1000')
+      .then(r => r.json())
+      .then(d => Promise.all(d.history.map(h => fetch(`/api/history/${h.id}`, { method: 'DELETE' }))))
+      .then(() => loadHistory(1));
+  }
+
+  function resetFilter() {
+    document.getElementById('filter-start').value = '';
+    document.getElementById('filter-end').value = '';
+    loadHistory(1);
+  }
+
+  loadHistory();
+</script>
+{% endblock %}

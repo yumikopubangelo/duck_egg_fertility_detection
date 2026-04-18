@@ -1,0 +1,30 @@
+body {
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.navbar {
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+
+.card {
+  border-radius: 12px;
+}
+
+.icon-box {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.table th {
+  font-weight: 600;
+  font-size: .85rem;
+}
+
+.badge {
+  font-weight: 500;
+}
