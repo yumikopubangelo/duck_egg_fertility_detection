@@ -1,0 +1,100 @@
+{
+    "unet_metrics": {
+        "iou": [
+            1.0,
+            0.6666666666666666,
+            0.0
+        ],
+        "dice": [
+            1.0,
+            0.8,
+            0.0
+        ],
+        "accuracy": [
+            1.0,
+            0.75,
+            0.5
+        ],
+        "precision": [
+            1.0,
+            0.6666666666666666,
+            0.0
+        ],
+        "recall": [
+            1.0,
+            1.0,
+            0.0
+        ]
+    },
+    "awc_metrics": {
+        "silhouette": [
+            0.2454480528831482
+        ],
+        "davies_bouldin": [
+            1.113316540343401
+        ],
+        "calinski_harabasz": [
+            16.279033852625073
+        ]
+    },
+    "overall_metrics": {
+        "confusion_matrix": [
+            [
+                7,
+                5,
+                0
+            ],
+            [
+                0,
+                4,
+                8
+            ],
+            [
+                0,
+                0,
+                0
+            ]
+        ],
+        "classification_report": "{\n    \"Cluster 0\": {\n        \"precision\": 1.0,\n        \"recall\": 0.5833333333333334,\n        \"f1-score\": 0.7368421052631579,\n        \"support\": 12.0\n    },\n    \"Cluster 1\": {\n        \"precision\": 0.4444444444444444,\n        \"recall\": 0.3333333333333333,\n        \"f1-score\": 0.38095238095238093,\n        \"support\": 12.0\n    },\n    \"Cluster 2\": {\n        \"precision\": 0.0,\n        \"recall\": 0.0,\n        \"f1-score\": 0.0,\n        \"support\": 0.0\n    },\n    \"accuracy\": 0.4583333333333333,\n    \"macro avg\": {\n        \"precision\": 0.48148148148148145,\n        \"recall\": 0.3055555555555556,\n        \"f1-score\": 0.3725981620718463,\n        \"support\": 24.0\n    },\n    \"weighted avg\": {\n        \"precision\": 0.7222222222222222,\n        \"recall\": 0.4583333333333333,\n        \"f1-score\": 0.5588972431077693,\n        \"support\": 24.0\n    }\n}"
+    },
+    "averages": {
+        "unet": {
+            "iou": 0.5555555555555555,
+            "dice": 0.6,
+            "accuracy": 0.75,
+            "precision": 0.5555555555555555,
+            "recall": 0.6666666666666666
+        },
+        "awc": {
+            "silhouette": 0.2454480528831482,
+            "davies_bouldin": 1.113316540343401,
+            "calinski_harabasz": 16.279033852625073
+        }
+    },
+    "config": {
+        "data": {
+            "awc_test_data": "./data/features/awc_test_features.npy",
+            "awc_test_labels": "./data/features/awc_test_labels.npy",
+            "image_size": [
+                64,
+                64
+            ],
+            "test_fertile_dir": "./data/preprocessed/test/fertile",
+            "test_infertile_dir": "./data/preprocessed/test/infertile"
+        },
+        "evaluation": {
+            "batch_size": 8,
+            "log_dir": "./results/evaluation/logs",
+            "num_workers": 2,
+            "output_dir": "./results/evaluation"
+        },
+        "model": {
+            "awc_checkpoint": "./models/awc/awc_model.pkl",
+            "bilinear": true,
+            "dropout_rate": 0.3,
+            "lightweight": true,
+            "n_clusters": 3,
+            "unet_checkpoint": "./results/unet_training/checkpoints/final_epoch_1_20260417_133215.pth"
+        }
+    }
+}

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tahapan Penelitian - Deteksi Fertilitas Telur Bebek</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    background: #fff;
+    color: #222;
+    padding: 30px 40px;
+  }
+
+  h2.section-title {
+    font-size: 16pt;
+    font-weight: bold;
+    margin-bottom: 24px;
+  }
+
+  /* ─── FLOWCHART ─── */
+  .flowchart {
+    display: grid;
+    grid-template-columns: 180px 220px 180px 160px;
+    grid-template-rows: auto auto auto auto auto auto;
+    gap: 0;
+    position: relative;
+    margin-bottom: 40px;
+    width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .node {
+    border: 1.5px solid #1a3a6e;
+    border-radius: 2px;
+    overflow: hidden;
+    width: 160px;
+    text-align: center;
+    position: absolute;
+  }
+
+  .node-header {
+    background-color: #1a5276;
+    color: white;
+    font-weight: bold;
+    font-size: 9.5pt;
+    padding: 6px 8px;
+  }
+
+  .node-body {
+    background: #fff;
+    font-size: 8.5pt;
+    padding: 5px 8px;
+    line-height: 1.5;
+  }
+
+  /* ─── SVG CANVAS for arrows ─── */
+  .diagram-wrapper {
+    position: relative;
+    width: 780px;
+    height: 680px;
+    margin: 0 auto 20px auto;
+  }
+
+  .diagram-wrapper svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .fig-caption {
+    text-align: center;
+    font-weight: bold;
+    font-size: 10.5pt;
+    margin-bottom: 48px;
+  }
+
+  /* ─── FORMULA SECTION ─── */
+  .formula-section {
+    width: 760px;
+    margin: 0 auto;
+  }
+
+  .formula-section h3 {
+    font-size: 13pt;
+    font-weight: bold;
+    margin: 24px 0 10px 0;
+    border-bottom: 1px solid #aaa;
+    padding-bottom: 4px;
+  }
+
+  .formula-section h4 {
+    font-size: 11pt;
+    font-weight: bold;
+    margin: 16px 0 6px 0;
+  }
+
+  .formula-block {
+    background: #f7f9fc;
+    border-left: 4px solid #1a5276;
+    padding: 12px 18px;
+    margin: 10px 0 16px 0;
+    border-radius: 2px;
+  }
+
+  .formula-block p {
+    font-size: 10pt;
+    line-height: 1.8;
+    margin-bottom: 6px;
+  }
+
+  .formula-label {
+    font-size: 9pt;
+    color: #555;
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  .param-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+    margin: 8px 0 16px 0;
+  }
+  .param-table th {
+    background: #1a5276;
+    color: white;
+    padding: 5px 10px;
+    text-align: left;
+  }
+  .param-table td {
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    vertical-align: top;
+  }
+  .param-table tr:nth-child(even) td { background: #eef2f7; }
+
+  @media print {
+    body { padding: 10px 20px; }
+    .formula-block { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<h2 class="section-title">3.2 &nbsp;&nbsp; Tahapan Penelitian</h2>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  DIAGRAM                                               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="diagram-wrapper">
+
+  <!-- SVG arrows (drawn first, nodes on top) -->
+  <svg xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#333"/>
+      </marker>
+    </defs>
+
+    <!-- Studi Literatur → Praproses Data (down) -->
+    <line x1="310" y1="72"  x2="310" y2="118" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- Akuisisi Data → Praproses Data (left) -->
+    <line x1="570" y1="170" x2="450" y2="170" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- Praproses Data → Segmentasi (left-down) -->
+    <line x1="240" y1="230" x2="130" y2="290" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- Segmentasi → Ekstraksi Fitur Klasik (down) -->
+    <line x1="90"  y1="365" x2="90"  y2="410" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- Praproses Data → Ekstraksi Deep Embedding (right-down via center) -->
+    <line x1="380" y1="230" x2="430" y2="410" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- Ekstraksi Fitur Klasik → Fusi Fitur (right) -->
+    <line x1="180" y1="450" x2="250" y2="450" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- Ekstraksi Deep Embedding → Fusi Fitur (left) -->
+    <line x1="420" y1="450" x2="420" y2="450" stroke="none"/>
+    <line x1="420" y1="450" x2="418" y2="450" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- Fusi Fitur → Klasifikasi AWC (down) -->
+    <line x1="335" y1="490" x2="335" y2="540" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- Klasifikasi AWC → Evaluasi (right) -->
+    <line x1="445" y1="575" x2="530" y2="575" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- Evaluasi → Pengujian (down) -->
+    <line x1="610" y1="615" x2="610" y2="650" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- Pengujian → (end) -->
+    <line x1="610" y1="650" x2="335" y2="650" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  </svg>
+
+  <!-- ── NODE 1: Studi Literatur ── -->
+  <div class="node" style="left:230px; top:10px; width:160px;">
+    <div class="node-header">Studi Literatur</div>
+    <div class="node-body">
+      Eksplorasi penelitian terkait<br>
+      Membangun state of the art
+    </div>
+  </div>
+
+  <!-- ── NODE 2: Akuisisi Data ── -->
+  <div class="node" style="left:570px; top:130px; width:180px;">
+    <div class="node-header">Akuisisi Data</div>
+    <div class="node-body">
+      Telur Bebek Peternakan Cihateup<br>
+      Dataset candling usia 5–7 hari<br>
+      inkubasi (fertil &amp; infertil)
+    </div>
+  </div>
+
+  <!-- ── NODE 3: Praproses Data ── -->
+  <div class="node" style="left:230px; top:118px; width:195px;">
+    <div class="node-header">Praproses Data</div>
+    <div class="node-body">
+      Labelling Data (fertil / infertil)<br>
+      Resize &amp; Normalisasi citra<br>
+      CLAHE (peningkatan kontras)<br>
+      Homomorphic Filtering<br>
+      Bilateral Denoising<br>
+      Split Validasi (Train/Val/Test)<br>
+      Augmentasi Data
+    </div>
+  </div>
+
+  <!-- ── NODE 4: Segmentasi ── -->
+  <div class="node" style="left:10px; top:290px; width:160px;">
+    <div class="node-header">Segmentasi</div>
+    <div class="node-body">
+      U-Net Lightweight<br>
+      (Encoder–Decoder +<br>
+      Skip Connections)
+    </div>
+  </div>
+
+  <!-- ── NODE 4b: Deep Embedding (from U-Net bottleneck) ── -->
+  <div class="node" style="left:420px; top:290px; width:185px;">
+    <div class="node-header">Ekstraksi Deep Embedding</div>
+    <div class="node-body">
+      Bottleneck Layer U-Net<br>
+      Global Average Pooling (GAP)<br>
+      Vektor fitur berdimensi tinggi
+    </div>
+  </div>
+
+  <!-- ── NODE 5: Ekstraksi Fitur Klasik ── -->
+  <div class="node" style="left:10px; top:410px; width:170px;">
+    <div class="node-header">Ekstraksi Fitur Klasik</div>
+    <div class="node-body">
+      GLCM (tekstur)<br>
+      LBP (pola mikro)<br>
+      Morfologi vaskular<br>
+      Histogram intensitas
+    </div>
+  </div>
+
+  <!-- ── NODE 6: Fusi Fitur ── -->
+  <div class="node" style="left:250px; top:415px; width:165px;">
+    <div class="node-header">Fusi Fitur Hybrid</div>
+    <div class="node-body">
+      Fitur Klasik + Deep Embedding<br>
+      Concatenation multi-level<br>
+      Representasi vektor hibrida
+    </div>
+  </div>
+
+  <!-- ── NODE 7: Klasifikasi AWC ── -->
+  <div class="node" style="left:225px; top:540px; width:220px;">
+    <div class="node-header">Klasifikasi – Adaptive Weight Clustering (AWC)</div>
+    <div class="node-body">
+      Pembobotan adaptif antar fitur<br>
+      Softmax normalization<br>
+      Deteksi homogenitas (likelihood ratio)<br>
+      Pembanding: K-Means, Fuzzy C-Means
+    </div>
+  </div>
+
+  <!-- ── NODE 8: Evaluasi ── -->
+  <div class="node" style="left:530px; top:540px; width:160px;">
+    <div class="node-header">Evaluasi</div>
+    <div class="node-body">
+      Accuracy, Precision, Recall<br>
+      F1-Score, ROC-AUC<br>
+      Confusion Matrix<br>
+      Brier Score
+    </div>
+  </div>
+
+  <!-- ── NODE 9: Pengujian ── -->
+  <div class="node" style="left:250px; top:640px; width:170px;">
+    <div class="node-header">Pengujian</div>
+    <div class="node-body">
+      Pengujian sistem terintegrasi<br>
+      Perbandingan model baseline<br>
+      Validasi pada data real
+    </div>
+  </div>
+
+</div>
+
+<p class="fig-caption">Gambar 3.2 Tahapan Penelitian</p>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  FORMULA MATEMATIKA                                    -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="formula-section">
+
+<h3>3.3 &nbsp; Formula Matematika yang Digunakan</h3>
+
+<!-- ─── 1. CLAHE ─── -->
+<h4>1. Contrast Limited Adaptive Histogram Equalization (CLAHE)</h4>
+<div class="formula-block">
+  <p>CLAHE membagi citra menjadi blok-blok lokal (<em>tiles</em>), kemudian melakukan ekualisasi histogram dengan pembatasan kontras untuk menghindari amplifikasi noise berlebihan.</p>
+  <p>
+    Fungsi transfer ekualisasi histogram:
+    \[
+      s_k = T(r_k) = \sum_{j=0}^{k} \frac{n_j}{N}
+    \]
+  </p>
+  <p>
+    Pembatasan kemiringan (<em>clip limit</em>) pada setiap nilai intensitas:
+    \[
+      h_{\text{clip}}(r) = \min\!\left(h(r),\; \beta_{\text{clip}}\right),
+      \qquad
+      \beta_{\text{clip}} = \frac{N_{\text{pixels}}}{L} + \frac{\text{excess}}{L}
+    \]
+  </p>
+  <table class="param-table">
+    <tr><th>Simbol</th><th>Keterangan</th></tr>
+    <tr><td>\(s_k\)</td><td>Nilai intensitas output pada level \(k\)</td></tr>
+    <tr><td>\(r_k\)</td><td>Nilai intensitas input pada level \(k\)</td></tr>
+    <tr><td>\(n_j\)</td><td>Jumlah piksel pada level intensitas \(j\)</td></tr>
+    <tr><td>\(N\)</td><td>Total jumlah piksel dalam tile</td></tr>
+    <tr><td>\(\beta_{\text{clip}}\)</td><td>Batas maksimum kemiringan histogram</td></tr>
+    <tr><td>\(L\)</td><td>Jumlah level intensitas (misal 256)</td></tr>
+  </table>
+</div>
+
+<!-- ─── 2. Homomorphic Filtering ─── -->
+<h4>2. Homomorphic Filtering</h4>
+<div class="formula-block">
+  <p>Citra \(f(x,y)\) dimodelkan sebagai perkalian komponen iluminasi \(i(x,y)\) dan reflektansi \(r(x,y)\):</p>
+  <p>
+    \[
+      f(x,y) = i(x,y) \cdot r(x,y)
+    \]
+  </p>
+  <p>
+    Dengan transformasi logaritmik dan filter frekuensi tinggi \(H(u,v)\):
+    \[
+      \hat{z}(x,y) = \mathcal{F}^{-1}\!\left\{H(u,v) \cdot \mathcal{F}\!\left\{\ln f(x,y)\right\}\right\}
+    \]
+  </p>
+  <p>
+    Filter Butterworth orde-\(n\) untuk homomorphic:
+    \[
+      H(u,v) = \left(\gamma_H - \gamma_L\right)\left[1 - \frac{1}{1 + \left(\frac{D(u,v)}{D_0}\right)^{2n}}\right] + \gamma_L
+    \]
+  </p>
+  <table class="param-table">
+    <tr><th>Simbol</th><th>Keterangan</th></tr>
+    <tr><td>\(\gamma_H, \gamma_L\)</td><td>Gain tinggi dan rendah (pengontrol kontras)</td></tr>
+    <tr><td>\(D(u,v)\)</td><td>Jarak titik \((u,v)\) dari pusat spektrum</td></tr>
+    <tr><td>\(D_0\)</td><td>Frekuensi cutoff</td></tr>
+    <tr><td>\(n\)</td><td>Orde filter</td></tr>
+  </table>
+</div>
+
+<!-- ─── 3. U-Net Loss Function ─── -->
+<h4>3. Fungsi Loss U-Net (Binary Cross-Entropy + Dice Loss)</h4>
+<div class="formula-block">
+  <p>
+    Binary Cross-Entropy Loss:
+    \[
+      \mathcal{L}_{\text{BCE}} = -\frac{1}{N}\sum_{i=1}^{N}\left[y_i \log \hat{y}_i + (1-y_i)\log(1-\hat{y}_i)\right]
+    \]
+  </p>
+  <p>
+    Dice Loss (berdasarkan koefisien Sørensen–Dice):
+    \[
+      \mathcal{L}_{\text{Dice}} = 1 - \frac{2\,\sum_{i} y_i \hat{y}_i + \epsilon}{\sum_{i} y_i + \sum_{i} \hat{y}_i + \epsilon}
+    \]
+  </p>
+  <p>
+    Total loss (kombinasi):
+    \[
+      \mathcal{L}_{\text{total}} = \mathcal{L}_{\text{BCE}} + \mathcal{L}_{\text{Dice}}
+    \]
+  </p>
+  <table class="param-table">
+    <tr><th>Simbol</th><th>Keterangan</th></tr>
+    <tr><td>\(y_i\)</td><td>Label ground truth piksel ke-\(i\) (0 atau 1)</td></tr>
+    <tr><td>\(\hat{y}_i\)</td><td>Prediksi probabilitas segmentasi piksel ke-\(i\)</td></tr>
+    <tr><td>\(\epsilon\)</td><td>Nilai kecil untuk menghindari pembagian nol (misal \(10^{-6}\))</td></tr>
+  </table>
+</div>
+
+<!-- ─── 4. GLCM ─── -->
+<h4>4. Ekstraksi Fitur Tekstur – GLCM (Gray Level Co-occurrence Matrix)</h4>
+<div class="formula-block">
+  <p>
+    Elemen matriks GLCM pada arah \(\theta\) dan jarak \(d\):
+    \[
+      P(i,j \mid d,\theta) = \frac{C(i,j \mid d,\theta)}{\displaystyle\sum_{i,j} C(i,j \mid d,\theta)}
+    \]
+  </p>
+  <p>Fitur-fitur yang diekstraksi dari GLCM:</p>
+  <p>
+    Kontras:
+    \(\displaystyle \text{Con} = \sum_{i,j}(i-j)^2 P(i,j)\)
+  </p>
+  <p>
+    Energi:
+    \(\displaystyle \text{Ene} = \sum_{i,j} P(i,j)^2\)
+  </p>
+  <p>
+    Homogenitas:
+    \(\displaystyle \text{Hom} = \sum_{i,j}\frac{P(i,j)}{1+|i-j|}\)
+  </p>
+  <p>
+    Korelasi:
+    \(\displaystyle \text{Cor} = \sum_{i,j}\frac{(i-\mu_i)(j-\mu_j)P(i,j)}{\sigma_i \sigma_j}\)
+  </p>
+  <table class="param-table">
+    <tr><th>Simbol</th><th>Keterangan</th></tr>
+    <tr><td>\(C(i,j)\)</td><td>Frekuensi kemunculan pasangan intensitas \((i,j)\)</td></tr>
+    <tr><td>\(\mu_i, \mu_j\)</td><td>Rata-rata intensitas baris dan kolom</td></tr>
+    <tr><td>\(\sigma_i, \sigma_j\)</td><td>Standar deviasi intensitas</td></tr>
+  </table>
+</div>
+
+<!-- ─── 5. LBP ─── -->
+<h4>5. Local Binary Pattern (LBP)</h4>
+<div class="formula-block">
+  <p>
+    Untuk piksel pusat \((x_c,y_c)\) dengan \(P\) tetangga pada radius \(R\):
+    \[
+      \text{LBP}_{P,R}(x_c,y_c) = \sum_{p=0}^{P-1} s\!\left(g_p - g_c\right)\, 2^p
+    \]
+    di mana fungsi tanda:
+    \[
+      s(u) = \begin{cases} 1, & u \geq 0 \\ 0, & u < 0 \end{cases}
+    \]
+  </p>
+  <table class="param-table">
+    <tr><th>Simbol</th><th>Keterangan</th></tr>
+    <tr><td>\(g_c\)</td><td>Nilai intensitas piksel pusat</td></tr>
+    <tr><td>\(g_p\)</td><td>Nilai intensitas piksel tetangga ke-\(p\)</td></tr>
+    <tr><td>\(P\)</td><td>Jumlah titik sampling (tetangga)</td></tr>
+    <tr><td>\(R\)</td><td>Radius lingkungan</td></tr>
+  </table>
+</div>
+
+<!-- ─── 6. AWC ─── -->
+<h4>6. Adaptive Weight Clustering (AWC)</h4>
+<div class="formula-block">
+  <p><strong>(a) Jarak Euclidean antar sampel</strong></p>
+  <p>
+    \[
+      d(x_i, x_j) = \|x_i - x_j\|_2 = \sqrt{\sum_{k=1}^{d}(x_{ik} - x_{jk})^2}
+    \]
+  </p>
+
+  <p style="margin-top:10px;"><strong>(b) Massa Empiris Overlap (irisan dua bola)</strong></p>
+  <p>
+    \[
+      m^{\text{ov}}_{ij} = \#\!\left\{x_l \in \mathcal{X} \;\Big|\; x_l \in B(x_i,r_t) \cap B(x_j,r_t),\; l \neq i,j\right\}
+    \]
+  </p>
+
+  <p style="margin-top:10px;"><strong>(c) Massa Empiris Komplemen</strong></p>
+  <p>
+    \[
+      m^{\text{co}}_{ij} = \#\!\left\{x_l \in B(x_i,r_t) \cup B(x_j,r_t) \;\Big|\; x_l \notin B(x_i,r_t) \cap B(x_j,r_t)\right\}
+    \]
+  </p>
+
+  <p style="margin-top:10px;"><strong>(d) Massa Union (gabungan)</strong></p>
+  <p>
+    \[
+      m^{\text{un}}_{ij} = m^{\text{ov}}_{ij} + m^{\text{co}}_{ij}
+    \]
+  </p>
+
+  <p style="margin-top:10px;"><strong>(e) Rasio Kepadatan Overlap</strong></p>
+  <p>
+    \[
+      \hat{\rho}_{ij} = \frac{m^{\text{ov}}_{ij}}{m^{\text{un}}_{ij}}
+    \]
+    Dibandingkan dengan rasio volume teoretis:
+    \[
+      \rho_0 = \frac{\text{Vol}\!\left(B(x_i,r_t) \cap B(x_j,r_t)\right)}{\text{Vol}\!\left(B(x_i,r_t) \cup B(x_j,r_t)\right)}
+    \]
+  </p>
+
+  <p style="margin-top:10px;"><strong>(f) Statistik Uji Likelihood Ratio (Hipotesis No-Gap)</strong></p>
+  <p>
+    \[
+      T_{ij} = 2\left[\,m^{\text{ov}}_{ij}\ln\!\frac{\hat{\rho}_{ij}}{\rho_0} + m^{\text{co}}_{ij}\ln\!\frac{1-\hat{\rho}_{ij}}{1-\rho_0}\right]
+    \]
+  </p>
+
+  <p style="margin-top:10px;"><strong>(g) Pembaruan Bobot</strong></p>
+  <p>
+    \[
+      w_{ij}^{(t+1)} =
+      \begin{cases}
+        1, & \text{jika } T_{ij} \leq \lambda \text{ (klaster digabung)} \\
+        0, & \text{jika } T_{ij} > \lambda  \text{ (klaster dipisah)}
+      \end{cases}
+    \]
+    di mana \(\lambda\) adalah hyperparameter sensitivitas (\(\lambda\) besar → cenderung menggabungkan klaster).
+  </p>
+
+  <p style="margin-top:10px;"><strong>(h) Softmax Normalization Bobot Fitur</strong></p>
+  <p>
+    \[
+      w_k = \frac{e^{\alpha_k}}{\displaystyle\sum_{j=1}^{K} e^{\alpha_j}}, \qquad \sum_{k=1}^K w_k = 1
+    \]
+  </p>
+  <table class="param-table">
+    <tr><th>Simbol</th><th>Keterangan</th></tr>
+    <tr><td>\(r_t\)</td><td>Radius neighborhood pada iterasi \(t\)</td></tr>
+    <tr><td>\(\lambda\)</td><td>Hyperparameter sensitivitas AWC</td></tr>
+    <tr><td>\(w_k\)</td><td>Bobot adaptif fitur ke-\(k\)</td></tr>
+    <tr><td>\(\alpha_k\)</td><td>Skor relevansi fitur ke-\(k\)</td></tr>
+    <tr><td>\(K\)</td><td>Total jumlah fitur</td></tr>
+  </table>
+</div>
+
+<!-- ─── 7. Evaluasi ─── -->
+<h4>7. Metrik Evaluasi Model</h4>
+<div class="formula-block">
+  <p>
+    Akurasi:
+    \[
+      \text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+    \]
+  </p>
+  <p>
+    Presisi:
+    \[
+      \text{Precision} = \frac{TP}{TP + FP}
+    \]
+  </p>
+  <p>
+    Recall (Sensitivitas):
+    \[
+      \text{Recall} = \frac{TP}{TP + FN}
+    \]
+  </p>
+  <p>
+    Spesifisitas:
+    \[
+      \text{Specificity} = \frac{TN}{TN + FP}
+    \]
+  </p>
+  <p>
+    F1-Score:
+    \[
+      F_1 = 2 \cdot \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
+    \]
+  </p>
+  <p>
+    Dice Coefficient (IoU Segmentasi):
+    \[
+      \text{DC} = \frac{2|A \cap B|}{|A| + |B|}, \qquad \text{IoU} = \frac{|A \cap B|}{|A \cup B|}
+    \]
+  </p>
+  <p>
+    Brier Score:
+    \[
+      \text{BS} = \frac{1}{N}\sum_{i=1}^{N}(\hat{p}_i - y_i)^2
+    \]
+  </p>
+  <table class="param-table">
+    <tr><th>Simbol</th><th>Keterangan</th></tr>
+    <tr><td>TP</td><td>True Positive – telur fertil terdeteksi benar</td></tr>
+    <tr><td>TN</td><td>True Negative – telur infertil terdeteksi benar</td></tr>
+    <tr><td>FP</td><td>False Positive – telur infertil salah diklasifikasi fertil</td></tr>
+    <tr><td>FN</td><td>False Negative – telur fertil salah diklasifikasi infertil</td></tr>
+    <tr><td>\(\hat{p}_i\)</td><td>Probabilitas prediksi model untuk sampel ke-\(i\)</td></tr>
+    <tr><td>\(A, B\)</td><td>Himpunan piksel prediksi dan ground truth (segmentasi)</td></tr>
+  </table>
+</div>
+
+</div><!-- end formula-section -->
+
+</body>
+</html>
