@@ -143,7 +143,7 @@ class AdaptiveWeightedClustering:
             
             if len(cluster_points) > 0:
                 # Calculate weighted centroid
-                weighted_centroid = np.average(cluster_points, axis=0, weights=self.weights[cluster_idx])
+                weighted_centroid = np.average(cluster_points, axis=0)
                 new_centroids[cluster_idx] = weighted_centroid
             else:
                 # If no points, keep previous centroid

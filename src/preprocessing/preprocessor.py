@@ -27,7 +27,13 @@ from typing import Optional, Union
 from .clahe       import apply_clahe, apply_clahe_he_hybrid
 from .homomorphic import apply_homomorphic_fast
 from .denoising   import apply_bilateral
-from .utils       import validate_image, convert_to_grayscale, normalize_image, compute_enhancement_metrics
+from .utils       import (
+    validate_image,
+    convert_to_grayscale,
+    normalize_image,
+    compute_enhancement_metrics,
+    gamma_correction as apply_gamma_correction,
+)
 from .advanced    import apply_multi_scale_retinex, apply_illumination_correction, apply_contrast_stretching
 
 
@@ -97,6 +103,40 @@ class DuckEggPreprocessor:
         self.use_illumination_correction = use_illumination_correction
         self.use_contrast_stretching = use_contrast_stretching
         self.gamma_correction = gamma_correction
+        if self.gamma_correction is not None and self.gamma_correction <= 0:
+            raise ValueError("gamma_correction harus > 0 jika diaktifkan")
+
+    def _apply_advanced_pipeline(self, image: np.ndarray, steps: Optional[dict] = None) -> np.ndarray:
+        """
+        Terapkan advanced enhancement sesuai flag yang aktif.
+
+        Args:
+            image: Grayscale image.
+            steps: dict untuk menyimpan intermediate outputs (optional).
+
+        Returns:
+            Enhanced grayscale image.
+        """
+        processed = image
+
+        if not self.use_advanced_enhancement:
+            return processed
+
+        processed = apply_multi_scale_retinex(processed)
+        if steps is not None:
+            steps["retinex"] = processed.copy()
+
+        if self.use_illumination_correction:
+            processed = apply_illumination_correction(processed)
+            if steps is not None:
+                steps["illumination"] = processed.copy()
+
+        if self.use_contrast_stretching:
+            processed = apply_contrast_stretching(processed)
+            if steps is not None:
+                steps["contrast"] = processed.copy()
+
+        return processed
 
     def preprocess(self, image: np.ndarray) -> np.ndarray:
         """
@@ -118,10 +158,7 @@ class DuckEggPreprocessor:
         img = cv2.resize(img, self.target_size, interpolation=cv2.INTER_AREA)
 
         # --- Step 2: Convert ke Grayscale ---
-        if len(img.shape) == 3:
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        else:
-            gray = img.copy()
+        gray = convert_to_grayscale(img)
 
         # --- Step 3: CLAHE (atau CLAHE-HE hybrid) ---
         if self.use_clahe_he_hybrid:
@@ -149,10 +186,7 @@ class DuckEggPreprocessor:
             homo = enhanced
 
         # --- Step 5: Advanced enhancement (optional) ---
-        if self.use_advanced_enhancement:
-            homo = apply_multi_scale_retinex(homo)
-            homo = apply_illumination_correction(homo)
-            homo = apply_contrast_stretching(homo)
+        homo = self._apply_advanced_pipeline(homo)
 
         # --- Step 6: Bilateral Denoising ---
         denoised = apply_bilateral(
@@ -162,7 +196,11 @@ class DuckEggPreprocessor:
             sigma_space=self.bilateral_sigma_space
         )
 
-        # --- Step 7: Final normalization ---
+        # --- Step 7: Gamma correction (optional) ---
+        if self.gamma_correction is not None:
+            denoised = apply_gamma_correction(denoised, self.gamma_correction)
+
+        # --- Step 8: Final normalization ---
         denoised = normalize_image(denoised)
 
         return denoised
@@ -209,10 +247,7 @@ class DuckEggPreprocessor:
         steps['resized'] = img.copy()
 
         # Step 3: Grayscale
-        if len(img.shape) == 3:
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        else:
-            gray = img.copy()
+        gray = convert_to_grayscale(img)
         steps['grayscale'] = gray.copy()
 
         # Step 4: CLAHE
@@ -230,21 +265,18 @@ class DuckEggPreprocessor:
         steps['homomorphic'] = homo.copy()
 
         # Step 6: Advanced enhancement
-        if self.use_advanced_enhancement:
-            homo = apply_multi_scale_retinex(homo)
-            steps['retinex'] = homo.copy()
-            
-            homo = apply_illumination_correction(homo)
-            steps['illumination'] = homo.copy()
-            
-            homo = apply_contrast_stretching(homo)
-            steps['contrast'] = homo.copy()
+        homo = self._apply_advanced_pipeline(homo, steps=steps)
 
         # Step 7: Bilateral
         denoised = apply_bilateral(homo, self.bilateral_d, self.bilateral_sigma_color, self.bilateral_sigma_space)
         steps['denoised'] = denoised.copy()
 
-        # Step 8: Final normalization
+        # Step 8: Gamma correction
+        if self.gamma_correction is not None:
+            denoised = apply_gamma_correction(denoised, self.gamma_correction)
+            steps['gamma_corrected'] = denoised.copy()
+
+        # Step 9: Final normalization
         final = normalize_image(denoised)
         steps['final'] = final.copy()
 
@@ -350,7 +382,9 @@ class PreprocessorConfig:
             bilateral_d=15,
             bilateral_sigma_color=150,
             bilateral_sigma_space=150,
-            use_advanced_enhancement=True
+            use_advanced_enhancement=True,
+            use_illumination_correction=True,
+            use_contrast_stretching=True
         )
 
     @staticmethod
