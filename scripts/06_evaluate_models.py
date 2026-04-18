@@ -24,6 +24,15 @@ from pathlib import Path
 import logging
 import sys
 import json
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        import numpy as np
+        if isinstance(obj, np.integer): return int(obj)
+        if isinstance(obj, np.floating): return float(obj)
+        if isinstance(obj, np.ndarray): return obj.tolist()
+        return super(NumpyEncoder, self).default(obj)
+
 from typing import Dict, List, Tuple, Optional
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -37,6 +46,18 @@ from src.clustering.awc import AdaptiveWeightedClustering, evaluate_clustering, 
 from src.utils.config import load_config
 from src.utils.logger import setup_logger
 from src.utils.file_utils import create_directories
+
+
+def _is_classification_target(targets: torch.Tensor) -> bool:
+    return targets.ndim <= 2 and (targets.ndim == 1 or (targets.ndim == 2 and targets.shape[1] == 1))
+
+
+def _reduce_logits_for_classification(outputs: torch.Tensor) -> torch.Tensor:
+    if outputs.ndim == 4:
+        return outputs.mean(dim=(2, 3)).squeeze(1)
+    if outputs.ndim == 2 and outputs.shape[1] == 1:
+        return outputs.squeeze(1)
+    return outputs.view(-1)
 
 
 class EvaluationMetrics:
@@ -112,41 +133,66 @@ def evaluate_unet_model(
     n_samples = 0
     
     with torch.no_grad():
-        for images, masks in dataloader:
+        for images, targets in dataloader:
             images = images.to(device)
-            masks = masks.to(device)
+            targets = targets.to(device)
             
             # Get predictions
             outputs = model(images)
-            pred_masks = (torch.sigmoid(outputs) > 0.5).float()
-            
-            # Calculate metrics
-            for i in range(len(images)):
-                iou = calculate_iou(outputs[i:i+1], masks[i:i+1])
-                dice = calculate_dice_coefficient(outputs[i:i+1], masks[i:i+1])
-                
-                # Calculate accuracy, precision, recall
-                pred_mask = pred_masks[i].byte()
-                true_mask = masks[i].byte()
-                
-                tp = (pred_mask & true_mask).sum().item()
-                fp = (pred_mask & ~true_mask).sum().item()
-                fn = (~pred_mask & true_mask).sum().item()
-                tn = (~pred_mask & ~true_mask).sum().item()
-                
-                accuracy = (tp + tn) / (tp + fp + fn + tn) if (tp + fp + fn + tn) > 0 else 0
-                precision = tp / (tp + fp) if (tp + fp) > 0 else 0
-                recall = tp / (tp + fn) if (tp + fn) > 0 else 0
-                
-                # Update metrics
+
+            if _is_classification_target(targets):
+                logits = _reduce_logits_for_classification(outputs)
+                probs = torch.sigmoid(logits)
+                pred_labels = (probs > 0.5)
+                true_labels = (targets.float().view(-1) > 0.5)
+
+                tp = torch.logical_and(pred_labels, true_labels).sum().item()
+                fp = torch.logical_and(pred_labels, ~true_labels).sum().item()
+                fn = torch.logical_and(~pred_labels, true_labels).sum().item()
+                tn = torch.logical_and(~pred_labels, ~true_labels).sum().item()
+
+                accuracy = (tp + tn) / (tp + fp + fn + tn) if (tp + fp + fn + tn) > 0 else 0.0
+                precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+                recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+                iou = tp / (tp + fp + fn) if (tp + fp + fn) > 0 else 1.0
+                dice = (2 * tp) / (2 * tp + fp + fn) if (2 * tp + fp + fn) > 0 else 1.0
+
                 metrics.update_unet(iou, dice, accuracy, precision, recall)
-                
+
                 total_iou += iou
                 total_dice += dice
                 total_accuracy += accuracy
                 total_precision += precision
                 total_recall += recall
                 n_samples += 1
+            else:
+                pred_masks = (torch.sigmoid(outputs) > 0.5).float()
+
+                # Calculate metrics for segmentation batches
+                for i in range(len(images)):
+                    iou = calculate_iou(outputs[i:i+1], targets[i:i+1])
+                    dice = calculate_dice_coefficient(outputs[i:i+1], targets[i:i+1])
+
+                    pred_mask = pred_masks[i].byte()
+                    true_mask = targets[i].byte()
+
+                    tp = (pred_mask & true_mask).sum().item()
+                    fp = (pred_mask & ~true_mask).sum().item()
+                    fn = (~pred_mask & true_mask).sum().item()
+                    tn = (~pred_mask & ~true_mask).sum().item()
+
+                    accuracy = (tp + tn) / (tp + fp + fn + tn) if (tp + fp + fn + tn) > 0 else 0.0
+                    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+                    recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+
+                    metrics.update_unet(iou, dice, accuracy, precision, recall)
+
+                    total_iou += iou
+                    total_dice += dice
+                    total_accuracy += accuracy
+                    total_precision += precision
+                    total_recall += recall
+                    n_samples += 1
     
     if n_samples > 0:
         avg_iou = total_iou / n_samples
@@ -166,7 +212,7 @@ def evaluate_awc_model(
     X: np.ndarray,
     true_labels: Optional[np.ndarray],
     metrics: EvaluationMetrics
-) -> None:
+) -> np.ndarray:
     """Evaluate AWC model on test dataset"""
     
     # Predict labels
@@ -192,7 +238,7 @@ def evaluate_awc_model(
     if 'normalized_mutual_info' in evaluation:
         print(f"Normalized Mutual Information: {evaluation['normalized_mutual_info']:.3f}")
     
-    return metrics
+    return pred_labels
 
 
 def generate_confusion_matrix(
@@ -307,7 +353,7 @@ def save_evaluation_results(
     # Save as JSON
     results_path = output_dir / 'evaluation_results.json'
     with open(results_path, 'w') as f:
-        json.dump(results, f, indent=4)
+        json.dump(results, f, indent=4, cls=NumpyEncoder)
     
     print(f"Evaluation results saved to: {results_path}")
 
@@ -402,7 +448,7 @@ def main():
     
     # Evaluate AWC model
     logger.info("\nEvaluating AWC model...")
-    evaluate_awc_model(awc_model, awc_X, awc_true_labels, metrics)
+    awc_pred_labels = evaluate_awc_model(awc_model, awc_X, awc_true_labels, metrics)
     
     # Generate visualizations
     logger.info("\nGenerating visualizations...")
@@ -415,8 +461,11 @@ def main():
         
         unet_model.eval()
         pred_masks = (torch.sigmoid(unet_model(images)) > 0.5).float()
-        
-        visualize_predictions(images, masks, pred_masks, output_dir)
+
+        if masks.ndim >= 3:
+            visualize_predictions(images, masks, pred_masks, output_dir)
+        else:
+            logger.info("Skipping segmentation visualization for classification labels.")
     
     # Generate confusion matrix and classification report
     if awc_true_labels is not None:
@@ -425,7 +474,7 @@ def main():
         # Generate confusion matrix
         cm = generate_confusion_matrix(
             awc_true_labels,
-            awc_model.labels_,
+            awc_pred_labels,
             labels=[f"Cluster {i}" for i in range(config['model']['n_clusters'])],
             output_dir=output_dir
         )
@@ -435,7 +484,7 @@ def main():
         # Generate classification report
         report = generate_classification_report(
             awc_true_labels,
-            awc_model.labels_,
+            awc_pred_labels,
             labels=[f"Cluster {i}" for i in range(config['model']['n_clusters'])],
             output_dir=output_dir
         )
@@ -457,4 +506,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main
+    main()
