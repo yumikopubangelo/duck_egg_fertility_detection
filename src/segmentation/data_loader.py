@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 import torch
+import numpy as np
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
@@ -34,9 +35,11 @@ class EggDataset(Dataset):
         transform: Optional[transforms.Compose] = None,
         image_dir: Optional[str] = None,
         mask_dir: Optional[str] = None,
+        joint_transform: Optional[Callable[[Image.Image, Image.Image], Tuple[Image.Image, Image.Image]]] = None,
     ):
         self.image_size = image_size
         self.transform = transform
+        self.joint_transform = joint_transform
         self.to_tensor = transforms.ToTensor()
         self.mode = "classification"
 
@@ -110,9 +113,35 @@ class EggDataset(Dataset):
         image = Image.open(image_path).convert("RGB")
         mask = Image.open(mask_path).convert("L")
 
+        if self.joint_transform is not None:
+            image, mask = self.joint_transform(image, mask)
+
         image_tensor = self._load_image_tensor(image)
+        # Resize mask using nearest neighbour to preserve class labels
         mask = mask.resize(self.image_size, Image.NEAREST)
-        mask_tensor = self.to_tensor(mask)
-        mask_tensor = (mask_tensor > 0.5).float()
+        mask_np = np.array(mask, dtype=np.uint8)
+
+        # Normalize mask values to class indices
+        unique_vals = np.unique(mask_np)
+        if set(unique_vals).issubset({0, 255}):
+            # legacy binary masks stored as 0/255 -> convert to 0/1
+            mask_np = (mask_np > 0).astype(np.uint8)
+        elif set(unique_vals).issubset({0, 1, 2}):
+            # already multiclass 0/1/2
+            pass
+        elif 255 in unique_vals or 128 in unique_vals:
+            # map common palette values to 0/1/2 (255->2, 128->1)
+            mask_np = np.where(mask_np >= 200, 2, np.where(mask_np >= 100, 1, 0)).astype(np.uint8)
+        else:
+            # fallback: threshold to binary
+            mask_np = (mask_np > 128).astype(np.uint8)
+
+        # Choose tensor type depending on target
+        if mask_np.max() <= 1:
+            # binary mask -> float tensor channel-first
+            mask_tensor = torch.from_numpy(mask_np).unsqueeze(0).float()
+        else:
+            # multiclass mask -> LongTensor (H, W)
+            mask_tensor = torch.from_numpy(mask_np).long()
 
         return image_tensor, mask_tensor
