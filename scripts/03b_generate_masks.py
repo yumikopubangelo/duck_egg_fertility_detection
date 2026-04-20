@@ -319,7 +319,19 @@ def process_split(
                     mask = np.zeros_like(egg_mask, dtype=np.uint8)
 
             dst_image = out_images_dir / img_path.name
-            shutil.copy2(img_path, dst_image)
+            try:
+                shutil.copy2(img_path, dst_image)
+            except OSError as e:
+                print(f"\n    WARNING: copy failed for {img_path.name}: {e}. Falling back to cv2 read/write")
+                img_read = cv2.imread(str(img_path))
+                if img_read is None:
+                    print(f"\n    ERROR: cannot read {img_path.name} with cv2, skipping")
+                    skipped += 1
+                    continue
+                if not cv2.imwrite(str(dst_image), img_read):
+                    print(f"\n    ERROR: cv2 failed to write {dst_image}")
+                    skipped += 1
+                    continue
 
             dst_mask = out_masks_dir / (img_path.stem + ".png")
             # ensure uint8 writing
