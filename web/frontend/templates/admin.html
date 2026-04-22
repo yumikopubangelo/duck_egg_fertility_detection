@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}Admin - Duck Egg Fertility Detection{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12">
+    <h4 class="fw-bold mb-0"><i class="bi bi-gear me-2 text-primary"></i>Admin Panel</h4>
+    <p class="text-muted small">Informasi sistem dan manajemen layanan</p>
+  </div>
+
+  <!-- System Health -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-transparent border-0 fw-semibold d-flex justify-content-between align-items-center">
+        Status Sistem
+        <button class="btn btn-outline-secondary btn-sm" onclick="loadSystemInfo()">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+      </div>
+      <div class="card-body" id="system-status-area">
+        <div class="text-center py-3 text-muted">
+          <div class="spinner-border spinner-border-sm me-2"></div>Memuat...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Info -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-transparent border-0 fw-semibold">Informasi Layanan</div>
+      <div class="card-body" id="service-info-area">
+        <div class="text-center py-3 text-muted">
+          <div class="spinner-border spinner-border-sm me-2"></div>Memuat...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dataset Split -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-transparent border-0 fw-semibold">Split Dataset</div>
+      <div class="card-body">
+        <p class="text-muted small">Bagi dataset secara otomatis ke train / val / test set.</p>
+        <div class="row g-2 mb-3">
+          <div class="col-4">
+            <label class="form-label small">Train</label>
+            <input type="number" class="form-control form-control-sm" id="split-train" value="0.7" step="0.05" />
+          </div>
+          <div class="col-4">
+            <label class="form-label small">Val</label>
+            <input type="number" class="form-control form-control-sm" id="split-val" value="0.15" step="0.05" />
+          </div>
+          <div class="col-4">
+            <label class="form-label small">Test</label>
+            <input type="number" class="form-control form-control-sm" id="split-test" value="0.15" step="0.05" />
+          </div>
+        </div>
+        <button class="btn btn-outline-primary w-100" onclick="splitDataset()">
+          <i class="bi bi-scissors me-2"></i>Jalankan Split
+        </button>
+        <div id="split-result" class="mt-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Health Check -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-transparent border-0 fw-semibold">Health Check</div>
+      <div class="card-body">
+        <p class="text-muted small">Cek koneksi ke semua endpoint API.</p>
+        <div id="health-checks" class="mb-3">
+          <div class="text-center py-2 text-muted">
+            <div class="spinner-border spinner-border-sm me-2"></div>Memeriksa...
+          </div>
+        </div>
+        <button class="btn btn-outline-success w-100" onclick="runHealthChecks()">
+          <i class="bi bi-heart-pulse me-2"></i>Cek Ulang
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const endpoints = [
+    { label: 'API Health', url: '/health' },
+    { label: 'Admin Health', url: '/api/admin/health' },
+    { label: 'Model Info', url: '/api/model/info' },
+    { label: 'Dataset Stats', url: '/api/dataset/stats' },
+    { label: 'History Stats', url: '/api/history/stats' },
+  ];
+
+  function loadSystemInfo() {
+    Promise.all([
+      fetch('/health').then(r => r.json()),
+      fetch('/api/admin/health').then(r => r.json()),
+    ]).then(([health, adminHealth]) => {
+      document.getElementById('system-status-area').innerHTML = `
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <span class="badge bg-success fs-6 px-3 py-2"><i class="bi bi-check-circle me-1"></i>Online</span>
+          <span class="text-muted small">Sistem berjalan normal</span>
+        </div>
+        <table class="table table-sm table-borderless mb-0">
+          <tbody>
+            <tr><th class="text-muted fw-normal" style="width:45%">Status API</th><td><span class="badge bg-success">${health.status}</span></td></tr>
+            <tr><th class="text-muted fw-normal">Status Admin</th><td><span class="badge bg-success">${adminHealth.status}</span></td></tr>
+            <tr><th class="text-muted fw-normal">Timestamp</th><td class="small">${new Date(adminHealth.timestamp).toLocaleString('id-ID')}</td></tr>
+          </tbody>
+        </table>`;
+    }).catch(() => {
+      document.getElementById('system-status-area').innerHTML =
+        '<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-triangle me-1"></i>Tidak dapat terhubung ke server</div>';
+    });
+  }
+
+  function loadServiceInfo() {
+    fetch('/api/admin/info')
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById('service-info-area').innerHTML = `
+          <table class="table table-sm table-borderless mb-0">
+            <tbody>
+              <tr><th class="text-muted fw-normal" style="width:45%">Layanan</th><td class="fw-semibold">${d.service}</td></tr>
+              <tr><th class="text-muted fw-normal">Versi</th><td>${d.version}</td></tr>
+              <tr><th class="text-muted fw-normal">Waktu Server</th><td class="small">${new Date(d.timestamp).toLocaleString('id-ID')}</td></tr>
+            </tbody>
+          </table>`;
+      })
+      .catch(() => {
+        document.getElementById('service-info-area').innerHTML =
+          '<p class="text-danger small mb-0">Gagal memuat informasi layanan.</p>';
+      });
+  }
+
+  function runHealthChecks() {
+    const area = document.getElementById('health-checks');
+    area.innerHTML = endpoints.map(e =>
+      `<div class="d-flex justify-content-between align-items-center py-1 border-bottom" id="check-${btoa(e.url).replace(/=/g,'')}">
+         <span class="small">${e.label}</span>
+         <span class="badge bg-secondary">Memeriksa...</span>
+       </div>`
+    ).join('');
+
+    endpoints.forEach(e => {
+      const id = `check-${btoa(e.url).replace(/=/g,'')}`;
+      fetch(e.url)
+        .then(r => {
+          const badge = document.querySelector(`#${id} .badge`);
+          badge.className = r.ok ? 'badge bg-success' : 'badge bg-danger';
+          badge.textContent = r.ok ? 'OK' : `Error ${r.status}`;
+        })
+        .catch(() => {
+          const badge = document.querySelector(`#${id} .badge`);
+          badge.className = 'badge bg-danger';
+          badge.textContent = 'Gagal';
+        });
+    });
+  }
+
+  function splitDataset() {
+    const train = parseFloat(document.getElementById('split-train').value);
+    const val = parseFloat(document.getElementById('split-val').value);
+    const test = parseFloat(document.getElementById('split-test').value);
+    const sum = (train + val + test).toFixed(2);
+    if (Math.abs(sum - 1.0) > 0.01) {
+      document.getElementById('split-result').innerHTML =
+        `<div class="alert alert-warning py-2 mt-2">Total rasio harus 1.0 (sekarang ${sum})</div>`;
+      return;
+    }
+    fetch('/api/dataset/split', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ train_ratio: train, val_ratio: val, test_ratio: test })
+    }).then(r => r.json()).then(d => {
+      document.getElementById('split-result').innerHTML =
+        `<div class="alert alert-success py-2 mt-2"><i class="bi bi-check-circle me-1"></i>${d.message}</div>`;
+    }).catch(() => {
+      document.getElementById('split-result').innerHTML =
+        '<div class="alert alert-danger py-2 mt-2">Gagal melakukan split dataset.</div>';
+    });
+  }
+
+  loadSystemInfo();
+  loadServiceInfo();
+  runHealthChecks();
+</script>
+{% endblock %}

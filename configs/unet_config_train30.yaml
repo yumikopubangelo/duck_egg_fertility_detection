@@ -1,0 +1,46 @@
+advanced:
+  distributed: false
+  gradient_accumulation_steps: 1
+  max_grad_norm: 1.0
+  mixed_precision: false
+  multi_gpu: false
+  resume: false
+  resume_checkpoint: ''
+data:
+  image_size:
+  - 256
+  - 256
+  num_workers: 0
+  pin_memory: true
+  train_image_dir: ./data/segmentation/train/images
+  train_mask_dir: ./data/segmentation/train/masks
+  val_image_dir: ./data/segmentation/val/images
+  val_mask_dir: ./data/segmentation/val/masks
+  test_image_dir: ./data/segmentation/test/images
+  test_mask_dir: ./data/segmentation/test/masks
+evaluation:
+  batch_size: 8
+  log_dir: ./results/unet_evaluation_logs
+  n_visualization_samples: 10
+  num_workers: 2
+  output_dir: ./results/unet_evaluation
+  visualize_predictions: true
+model:
+  bilinear: true
+  dropout_rate: 0.3
+  lightweight: true
+  n_channels: 3
+  n_classes: 3
+training:
+  batch_size: 8
+  checkpoint_interval: 10
+  early_stopping_patience: 15
+  learning_rate: 0.001
+  log_dir: ./results/unet_logs
+  loss_type: ce
+  lr_patience: 5
+  lr_reduce_factor: 0.5
+  num_epochs: 30
+  output_dir: ./results/unet_training
+  seed: 42
+  weight_decay: 0.0001

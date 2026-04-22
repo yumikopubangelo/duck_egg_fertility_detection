@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Duck Egg Fertility Detection{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+  <!-- Page Header -->
+  <div class="col-12">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div>
+        <h4 class="fw-bold mb-0">Dashboard</h4>
+        <p class="text-muted small mb-0 mt-1">Sistem Deteksi Kesuburan Telur Bebek — Classical Clustering + U-Net Segmentation</p>
+      </div>
+      <a href="/upload" class="btn btn-primary btn-sm px-3">
+        <i class="bi bi-cloud-upload me-1"></i>Prediksi Sekarang
+      </a>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card stat-card-primary h-100">
+      <div class="card-body d-flex align-items-center gap-3 p-3">
+        <div class="stat-icon text-primary" style="background:rgba(37,99,235,.12)">
+          <i class="bi bi-activity"></i>
+        </div>
+        <div>
+          <div class="stat-label text-primary">Total Prediksi</div>
+          <div class="stat-value text-primary" id="stat-total">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card stat-card-success h-100">
+      <div class="card-body d-flex align-items-center gap-3 p-3">
+        <div class="stat-icon text-success" style="background:rgba(22,163,74,.12)">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <div>
+          <div class="stat-label text-success">Telur Fertile</div>
+          <div class="stat-value text-success" id="stat-fertile">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card stat-card-danger h-100">
+      <div class="card-body d-flex align-items-center gap-3 p-3">
+        <div class="stat-icon text-danger" style="background:rgba(220,38,38,.12)">
+          <i class="bi bi-x-circle"></i>
+        </div>
+        <div>
+          <div class="stat-label text-danger">Telur Infertile</div>
+          <div class="stat-value text-danger" id="stat-infertile">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card stat-card-warning h-100">
+      <div class="card-body d-flex align-items-center gap-3 p-3">
+        <div class="stat-icon text-warning" style="background:rgba(217,119,6,.12)">
+          <i class="bi bi-graph-up"></i>
+        </div>
+        <div>
+          <div class="stat-label text-warning">Avg Confidence</div>
+          <div class="stat-value text-warning" id="stat-confidence">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Quick Actions + Pipeline + Model Live Info -->
+  <div class="col-md-3">
+    <div class="card h-100">
+      <div class="card-header">
+        <span class="section-title">Aksi Cepat</span>
+      </div>
+      <div class="card-body d-flex flex-column gap-2 p-3">
+        <a href="/upload" class="btn btn-primary btn-sm">
+          <i class="bi bi-cloud-upload me-2"></i>Upload &amp; Prediksi
+        </a>
+        <a href="/history" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-clock-history me-2"></i>Riwayat Prediksi
+        </a>
+        <a href="/dataset" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-database me-2"></i>Kelola Dataset
+        </a>
+        <a href="/retrain" class="btn btn-outline-warning btn-sm">
+          <i class="bi bi-arrow-repeat me-2"></i>Retrain Model
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-5">
+    <div class="card h-100">
+      <div class="card-header">
+        <span class="section-title">Pipeline Deteksi</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="pipeline-step">
+          <div class="step-badge bg-primary text-white">1</div>
+          <div>
+            <div class="fw-semibold" style="font-size:.875rem">Preprocessing</div>
+            <div class="text-muted" style="font-size:.78rem">CLAHE · Denoising · Normalisasi · Resize 256×256</div>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-badge bg-primary text-white">2</div>
+          <div>
+            <div class="fw-semibold" style="font-size:.875rem">Ekstraksi Fitur Klasikal</div>
+            <div class="text-muted" style="font-size:.78rem">50 fitur — warna, tekstur (LBP), bentuk, frekuensi (FFT)</div>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-badge bg-success text-white">3</div>
+          <div>
+            <div class="fw-semibold" style="font-size:.875rem">Klasifikasi AWC</div>
+            <div class="text-muted" style="font-size:.78rem">Adaptive Weighted Clustering · 2 cluster · Akurasi 87.5%</div>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-badge bg-info text-white">4</div>
+          <div>
+            <div class="fw-semibold" style="font-size:.875rem">Segmentasi U-Net</div>
+            <div class="text-muted" style="font-size:.78rem">3 kelas · Val IoU 0.665 · Val Dice 0.698 · Best epoch 22</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header">
+        <span class="section-title">Model Aktif (AWC)</span>
+      </div>
+      <div class="card-body p-3" id="model-info-card">
+        <div class="text-center py-3 text-muted small">
+          <div class="spinner-border spinner-border-sm me-2" role="status"></div>Memuat…
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Model Comparison -->
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <span class="section-title">Perbandingan Model Klasifikasi</span>
+        <span class="badge bg-secondary fw-normal" style="font-size:.73rem">24 sampel test · balanced 12/12</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-3 py-2">Model</th>
+                <th class="text-center py-2">Akurasi</th>
+                <th class="text-center py-2">Precision</th>
+                <th class="text-center py-2">Recall</th>
+                <th class="text-center py-2">F1-Score</th>
+                <th class="text-center pe-3 py-2">ROC-AUC</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="ps-3 py-2">
+                  <span class="fw-semibold">FCM</span>
+                  <span class="badge bg-success ms-1" style="font-size:.68rem">Best</span>
+                </td>
+                <td class="text-center py-2">
+                  <span class="fw-bold text-success">91.7%</span>
+                </td>
+                <td class="text-center py-2">85.7%</td>
+                <td class="text-center py-2"><span class="badge bg-success-subtle text-success border border-success-subtle">100%</span></td>
+                <td class="text-center py-2">92.3%</td>
+                <td class="text-center pe-3 py-2">91.7%</td>
+              </tr>
+              <tr class="table-primary">
+                <td class="ps-3 py-2">
+                  <span class="fw-semibold">AWC</span>
+                  <span class="badge bg-primary ms-1" style="font-size:.68rem">Aktif</span>
+                </td>
+                <td class="text-center py-2 fw-semibold">87.5%</td>
+                <td class="text-center py-2">80.0%</td>
+                <td class="text-center py-2"><span class="badge bg-success-subtle text-success border border-success-subtle">100%</span></td>
+                <td class="text-center py-2">88.9%</td>
+                <td class="text-center pe-3 py-2"><strong>95.1%</strong></td>
+              </tr>
+              <tr>
+                <td class="ps-3 py-2">K-Means</td>
+                <td class="text-center py-2">87.5%</td>
+                <td class="text-center py-2">80.0%</td>
+                <td class="text-center py-2"><span class="badge bg-success-subtle text-success border border-success-subtle">100%</span></td>
+                <td class="text-center py-2">88.9%</td>
+                <td class="text-center pe-3 py-2">94.4%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="px-3 py-2 border-top">
+          <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Recall 100% = tidak ada telur fertile yang terlewat oleh semua model.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- U-Net Card -->
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header">
+        <span class="section-title">U-Net Segmentasi</span>
+      </div>
+      <div class="card-body p-3">
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <div class="info-box">
+              <div class="info-value text-info">0.665</div>
+              <div class="text-muted" style="font-size:.75rem">Val IoU</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="info-box">
+              <div class="info-value text-info">0.698</div>
+              <div class="text-muted" style="font-size:.75rem">Val Dice</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="info-box">
+              <div class="info-value">3.13M</div>
+              <div class="text-muted" style="font-size:.75rem">Parameter</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="info-box">
+              <div class="info-value">Ep.22</div>
+              <div class="text-muted" style="font-size:.75rem">Best Epoch</div>
+            </div>
+          </div>
+        </div>
+        <div class="border-top pt-3">
+          <div class="text-muted fw-semibold mb-2" style="font-size:.8rem">Kelas Segmentasi</div>
+          <div class="d-flex flex-column gap-2">
+            <div class="d-flex align-items-center gap-2">
+              <span style="width:14px;height:14px;border-radius:4px;background:#1e293b;flex-shrink:0;border:1px solid #e2e8f0"></span>
+              <span style="font-size:.82rem"><strong>Kelas 0</strong> — Background</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span style="width:14px;height:14px;border-radius:4px;background:#dc2626;flex-shrink:0"></span>
+              <span style="font-size:.82rem"><strong>Kelas 1</strong> — Vaskularisasi</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span style="width:14px;height:14px;border-radius:4px;background:#16a34a;flex-shrink:0"></span>
+              <span style="font-size:.82rem"><strong>Kelas 2</strong> — Inti Embrio</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dataset Info -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <span class="section-title">Informasi Dataset</span>
+      </div>
+      <div class="card-body p-3">
+        <div class="row g-3">
+          <div class="col-6 col-sm-4 col-md-2">
+            <div class="info-box">
+              <div class="info-value text-primary">72</div>
+              <div class="text-muted" style="font-size:.75rem">Gambar Train</div>
+            </div>
+          </div>
+          <div class="col-6 col-sm-4 col-md-2">
+            <div class="info-box">
+              <div class="info-value text-warning">~18</div>
+              <div class="text-muted" style="font-size:.75rem">Gambar Val</div>
+            </div>
+          </div>
+          <div class="col-6 col-sm-4 col-md-2">
+            <div class="info-box">
+              <div class="info-value text-success">24</div>
+              <div class="text-muted" style="font-size:.75rem">Gambar Test</div>
+            </div>
+          </div>
+          <div class="col-6 col-sm-4 col-md-2">
+            <div class="info-box">
+              <div class="info-value">50</div>
+              <div class="text-muted" style="font-size:.75rem">Fitur / Gambar</div>
+            </div>
+          </div>
+          <div class="col-6 col-sm-4 col-md-2">
+            <div class="info-box">
+              <div class="info-value">256²</div>
+              <div class="text-muted" style="font-size:.75rem">Ukuran Input</div>
+            </div>
+          </div>
+          <div class="col-6 col-sm-4 col-md-2">
+            <div class="info-box">
+              <div class="info-value">3</div>
+              <div class="text-muted" style="font-size:.75rem">Kelas Segmentasi</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+fetch('/api/history/stats')
+  .then(r => r.json())
+  .then(d => {
+    document.getElementById('stat-total').textContent      = d.total_predictions ?? 0;
+    document.getElementById('stat-fertile').textContent    = d.fertile_count ?? 0;
+    document.getElementById('stat-infertile').textContent  = d.infertile_count ?? 0;
+    const conf = d.average_confidence
+      ? (d.average_confidence * 100).toFixed(1) + '%' : '0%';
+    document.getElementById('stat-confidence').textContent = conf;
+  })
+  .catch(() => {
+    ['stat-total','stat-fertile','stat-infertile','stat-confidence']
+      .forEach(id => document.getElementById(id).textContent = '0');
+  });
+
+fetch('/api/model/info')
+  .then(r => r.json())
+  .then(d => {
+    const acc = d.evaluation?.accuracy != null
+      ? (d.evaluation.accuracy * 100).toFixed(1) + '%' : '87.5%';
+    const testN      = d.evaluation?.test_samples ?? 24;
+    const nClusters  = d.n_clusters ?? 2;
+    const silhouette = d.silhouette_score != null ? d.silhouette_score.toFixed(3) : '—';
+
+    const clusterRows = Object.entries(d.cluster_stats || {}).map(([cid, s]) =>
+      `<tr>
+        <td class="text-muted">Cluster ${cid}</td>
+        <td><span class="badge bg-${s.label === 'fertile' ? 'success' : 'secondary'} ">${s.label}</span></td>
+        <td class="text-end">${(s.purity * 100).toFixed(0)}%</td>
+      </tr>`
+    ).join('');
+
+    document.getElementById('model-info-card').innerHTML = `
+      <table class="table table-sm table-borderless mb-0" style="font-size:.85rem">
+        <tbody>
+          <tr><td class="text-muted" style="width:55%">Akurasi Test</td>
+              <td><span class="badge bg-success">${acc}</span></td></tr>
+          <tr><td class="text-muted">Sampel Test</td><td>${testN}</td></tr>
+          <tr><td class="text-muted">Jumlah Cluster</td><td>${nClusters}</td></tr>
+          <tr><td class="text-muted">Silhouette</td><td>${silhouette}</td></tr>
+        </tbody>
+      </table>
+      ${clusterRows ? `
+        <div class="border-top mt-2 pt-2">
+          <div class="text-muted mb-1" style="font-size:.78rem;font-weight:600">Cluster Purity</div>
+          <table class="table table-sm table-borderless mb-0" style="font-size:.82rem">
+            <tbody>${clusterRows}</tbody>
+          </table>
+        </div>` : ''}`;
+  })
+  .catch(() => {
+    document.getElementById('model-info-card').innerHTML =
+      '<p class="text-danger small mb-0"><i class="bi bi-exclamation-circle me-1"></i>Gagal memuat info model.</p>';
+  });
+</script>
+{% endblock %}

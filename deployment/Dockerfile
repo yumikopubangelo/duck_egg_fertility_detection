@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libxrender-dev \
     libpq-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Create app directory
@@ -38,6 +39,11 @@ RUN useradd --create-home --shell /bin/bash appuser
 RUN chown -R appuser:appuser /app
 USER appuser
 
+# Set Flask environment variables
+ENV FLASK_APP=web.api.app:app
+ENV FLASK_ENV=production
+ENV PYTHONPATH=/app
+
 # Expose port
 EXPOSE 5000
 
@@ -45,5 +51,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5000/health || exit 1
 
-# Start the application
-CMD ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=5000"]
+# Start the application using gunicorn for production
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--timeout", "120", "web.api.app:app"]

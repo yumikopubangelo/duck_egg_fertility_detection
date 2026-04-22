@@ -1,0 +1,11 @@
+.drop-zone {
+  border-color: #dee2e6 !important;
+  cursor: pointer;
+  transition: border-color .2s, background-color .2s;
+  min-height: 180px;
+}
+
+.drop-zone.drag-over {
+  border-color: #0d6efd !important;
+  background-color: #e8f0fe;
+}

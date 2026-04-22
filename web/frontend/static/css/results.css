@@ -1,0 +1,7 @@
+.result-card-fertile {
+  border-left: 4px solid #198754;
+}
+
+.result-card-infertile {
+  border-left: 4px solid #dc3545;
+}

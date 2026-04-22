@@ -180,8 +180,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Version 1.1.0 (Planned)
 
-- Mobile app integration
-- Real-time video processing
 - Advanced analytics dashboard
 - Cloud deployment options
 
@@ -194,10 +192,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Contributors
 
-- [Your Name] - Project Lead
-- [Contributor Name] - ML Engineer
-- [Contributor Name] - Web Developer
-- [Contributor Name] - DevOps Engineer
+- Hegira Musyafa Kartiwan - Project Lead
 
 ## License
 

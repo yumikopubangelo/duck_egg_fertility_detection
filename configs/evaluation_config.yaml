@@ -1,0 +1,20 @@
+data:
+  awc_test_data: ./data/features/awc_test_features.npy
+  awc_test_labels: ./data/features/awc_test_labels.npy
+  image_size:
+  - 64
+  - 64
+  test_fertile_dir: ./data/preprocessed/test/fertile
+  test_infertile_dir: ./data/preprocessed/test/infertile
+evaluation:
+  batch_size: 8
+  log_dir: ./results/evaluation/logs
+  num_workers: 2
+  output_dir: ./results/evaluation
+model:
+  awc_checkpoint: ./models/awc/awc_model.pkl
+  bilinear: true
+  dropout_rate: 0.3
+  lightweight: true
+  n_clusters: 2
+  unet_checkpoint: ./results/unet_training/checkpoints/final_epoch_1_20260417_133215.pth

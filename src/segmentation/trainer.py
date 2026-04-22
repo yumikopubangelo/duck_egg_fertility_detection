@@ -66,6 +66,11 @@ class UNetTrainer:
         self.model.to(self.device)
         
         self.criterion = get_loss_function(loss_type)
+        # If model predicts multiple classes, prefer CrossEntropyLoss
+        self.is_multiclass = getattr(self.model, "n_classes", 1) > 1
+        if self.is_multiclass and not isinstance(self.criterion, nn.CrossEntropyLoss):
+            logger.info("Multiclass model detected — switching loss to CrossEntropyLoss")
+            self.criterion = nn.CrossEntropyLoss()
         self.optimizer = self._get_optimizer()
         
         self.train_losses: List[float] = []
@@ -92,7 +97,13 @@ class UNetTrainer:
         
         for images, masks in self.train_loader:
             images = images.to(self.device)
-            masks = masks.to(self.device)
+            # Prepare masks depending on multiclass vs binary
+            if self.is_multiclass:
+                # masks expected shape: (N, H, W) with dtype long
+                masks = masks.to(self.device, dtype=torch.long)
+            else:
+                # masks expected shape: (N, 1, H, W) float
+                masks = masks.to(self.device).float()
             
             self.optimizer.zero_grad()
             
@@ -105,7 +116,7 @@ class UNetTrainer:
             total_loss += loss.item()
             num_batches += 1
         
-        average_loss = total_loss / num_batches
+        average_loss = total_loss / num_batches if num_batches > 0 else 0.0
         return average_loss
     
     def validate_epoch(self) -> Tuple[float, float, float]:
@@ -140,30 +151,59 @@ class UNetTrainer:
         return average_loss, average_iou, average_dice
     
     def _calculate_iou(self, outputs: torch.Tensor, masks: torch.Tensor) -> float:
-        """Calculate Intersection over Union (IoU)"""
-        outputs = torch.sigmoid(outputs) > 0.5
-        masks = masks > 0.5
-        
-        intersection = (outputs & masks).sum().float()
-        union = (outputs | masks).sum().float()
-        
-        if union == 0:
-            return 1.0
-        
-        return (intersection / union).item()
+        """Calculate IoU for binary or multiclass outputs."""
+        if self.is_multiclass:
+            # outputs: logits (N,C,H,W), masks: (N,H,W) long
+            preds = torch.argmax(outputs, dim=1)
+            num_classes = outputs.shape[1]
+            ious = []
+            for c in range(num_classes):
+                pred_c = (preds == c)
+                mask_c = (masks == c)
+                intersection = (pred_c & mask_c).sum().float()
+                union = (pred_c | mask_c).sum().float()
+                if union == 0:
+                    iou_c = 1.0
+                else:
+                    iou_c = (intersection / union).item()
+                ious.append(iou_c)
+            return float(np.mean(ious)) if ious else 1.0
+        else:
+            probs = torch.sigmoid(outputs)
+            preds = probs > 0.5
+            masks = masks > 0.5
+            intersection = (preds & masks).sum().float()
+            union = (preds | masks).sum().float()
+            if union == 0:
+                return 1.0
+            return (intersection / union).item()
     
     def _calculate_dice_coefficient(self, outputs: torch.Tensor, masks: torch.Tensor) -> float:
-        """Calculate Dice coefficient"""
-        outputs = torch.sigmoid(outputs) > 0.5
-        masks = masks > 0.5
-        
-        intersection = 2.0 * (outputs & masks).sum().float()
-        union = outputs.sum().float() + masks.sum().float()
-        
-        if union == 0:
-            return 1.0
-        
-        return (intersection / union).item()
+        """Calculate Dice coefficient for binary or multiclass outputs."""
+        if self.is_multiclass:
+            preds = torch.argmax(outputs, dim=1)
+            num_classes = outputs.shape[1]
+            dices = []
+            for c in range(num_classes):
+                pred_c = (preds == c).float()
+                mask_c = (masks == c).float()
+                intersection = 2.0 * (pred_c * mask_c).sum().float()
+                union = pred_c.sum().float() + mask_c.sum().float()
+                if union == 0:
+                    dice_c = 1.0
+                else:
+                    dice_c = (intersection / union).item()
+                dices.append(dice_c)
+            return float(np.mean(dices)) if dices else 1.0
+        else:
+            probs = torch.sigmoid(outputs)
+            preds = probs > 0.5
+            masks = masks > 0.5
+            intersection = 2.0 * (preds & masks).sum().float()
+            union = preds.sum().float() + masks.sum().float()
+            if union == 0:
+                return 1.0
+            return (intersection / union).item()
     
     def train(
         self,
@@ -271,53 +311,78 @@ class UNetTrainer:
     def evaluate(self, test_loader: DataLoader) -> Dict:
         """
         Evaluate the model on test data.
-        
-        Args:
-            test_loader: DataLoader for test data
-        
-        Returns:
-            Evaluation metrics dictionary
+
+        Returns a dict of metrics. Supports multiclass evaluation when the model
+        predicts multiple classes.
         """
         self.model.eval()
-        all_predictions = []
-        all_masks = []
-        
         with torch.no_grad():
-            for images, masks in test_loader:
-                images = images.to(self.device)
-                masks = masks.to(self.device)
-                
-                outputs = self.model(images)
-                predictions = torch.sigmoid(outputs) > 0.5
-                
-                all_predictions.extend(predictions.cpu().numpy())
-                all_masks.extend(masks.cpu().numpy())
-        
-        # Calculate metrics
-        all_predictions = np.array(all_predictions).flatten()
-        all_masks = np.array(all_masks).flatten()
-        
-        # Confusion matrix
-        tn, fp, fn, tp = confusion_matrix(all_masks, all_predictions).ravel()
-        
-        # Calculate metrics
-        accuracy = (tp + tn) / (tp + tn + fp + fn)
-        precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-        recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-        f1_score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
-        
-        return {
-            'accuracy': accuracy,
-            'precision': precision,
-            'recall': recall,
-            'f1_score': f1_score,
-            'confusion_matrix': {
-                'true_positive': tp,
-                'true_negative': tn,
-                'false_positive': fp,
-                'false_negative': fn
-            }
-        }
+            if self.is_multiclass:
+                all_preds = []
+                all_masks = []
+                for images, masks in test_loader:
+                    images = images.to(self.device)
+                    masks = masks.to(self.device)
+                    outputs = self.model(images)
+                    preds = torch.argmax(outputs, dim=1).cpu().numpy()
+                    all_preds.append(preds)
+                    all_masks.append(masks.cpu().numpy())
+
+                # Flatten
+                all_preds = np.concatenate([p.reshape(-1) for p in all_preds])
+                all_masks = np.concatenate([m.reshape(-1) for m in all_masks])
+
+                metrics = {}
+                metrics['accuracy'] = float((all_preds == all_masks).mean())
+
+                classes = np.unique(np.concatenate([all_preds, all_masks]))
+                ious = []
+                for c in classes:
+                    pred_c = (all_preds == c)
+                    mask_c = (all_masks == c)
+                    inter = np.logical_and(pred_c, mask_c).sum()
+                    union = np.logical_or(pred_c, mask_c).sum()
+                    iou = float(inter / union) if union > 0 else 1.0
+                    metrics[f'iou_class_{int(c)}'] = iou
+                    ious.append(iou)
+
+                metrics['mean_iou'] = float(np.mean(ious)) if ious else 1.0
+                return metrics
+            else:
+                all_predictions = []
+                all_masks = []
+                for images, masks in test_loader:
+                    images = images.to(self.device)
+                    masks = masks.to(self.device)
+
+                    outputs = self.model(images)
+                    predictions = (torch.sigmoid(outputs) > 0.5).cpu().numpy()
+
+                    all_predictions.append(predictions)
+                    all_masks.append(masks.cpu().numpy())
+
+                all_predictions = np.concatenate([p.reshape(-1) for p in all_predictions])
+                all_masks = np.concatenate([m.reshape(-1) for m in all_masks])
+
+                tn, fp, fn, tp = confusion_matrix(all_masks, all_predictions).ravel()
+
+                accuracy = (tp + tn) / (tp + tn + fp + fn)
+                precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+                recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+                f1_score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+
+                return {
+                    'accuracy': accuracy,
+                    'precision': precision,
+                    'recall': recall,
+                    'f1_score': f1_score,
+                    'confusion_matrix': {
+                        'true_positive': tp,
+                        'true_negative': tn,
+                        'false_positive': fp,
+                        'false_negative': fn
+                    }
+                }
 
 
 def create_trainer(

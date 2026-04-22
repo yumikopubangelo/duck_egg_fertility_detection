@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(python -c \"import pickle; m=pickle.load\\(open\\('models/awc/awc_model.pkl','rb'\\)\\); print\\('Attributes:', [a for a in dir\\(m\\) if not a.startswith\\('_'\\)]\\); print\\('has scaler_:', hasattr\\(m, 'scaler_'\\)\\)\")"
+    ]
+  }
+}

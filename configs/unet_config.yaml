@@ -1,113 +1,46 @@
-# UNet Model Configuration
-# Configuration for training and evaluation of UNet model
-
-# Data Configuration
-data:
-  # Image size for training
-  image_size: [256, 256]
-  
-  # Training data paths
-  train_fertile_dir: ./data/train/fertile
-  train_infertile_dir: ./data/train/infertile
-  
-  # Validation data paths
-  val_fertile_dir: ./data/val/fertile
-  val_infertile_dir: ./data/val/infertile
-  
-  # Test data paths
-  test_fertile_dir: ./data/test/fertile
-  test_infertile_dir: ./data/test/infertile
-  
-  # Number of workers for data loading
-  num_workers: 4
-  
-  # Pin memory for faster data transfer
-  pin_memory: true
-
-# Model Configuration
-model:
-  # Use bilinear interpolation for upsampling
-  bilinear: true
-  
-  # Dropout rate for regularization
-  dropout_rate: 0.3
-  
-  # Use lightweight version of UNet
-  lightweight: false
-  
-  # Number of input channels (3 for RGB images)
-  n_channels: 3
-  
-  # Number of output classes (1 for binary segmentation)
-  n_classes: 1
-
-# Training Configuration
-training:
-  # Number of epochs
-  num_epochs: 100
-  
-  # Batch size
-  batch_size: 8
-  
-  # Learning rate
-  learning_rate: 0.001
-  
-  # Weight decay for regularization
-  weight_decay: 0.0001
-  
-  # Loss function type
-  loss_type: 'dice'  # Options: 'dice', 'bce', 'ce', 'focal'
-  
-  # Learning rate reduction
-  lr_reduce_factor: 0.5
-  lr_patience: 5
-  
-  # Random seed for reproducibility
-  seed: 42
-  
-  # Output directory for checkpoints and logs
-  output_dir: ./results/unet_training
-  log_dir: ./results/unet_logs
-  
-  # Save checkpoint every N epochs
-  checkpoint_interval: 10
-  
-  # Early stopping patience
-  early_stopping_patience: 15
-
-# Evaluation Configuration
-evaluation:
-  # Batch size for evaluation
-  batch_size: 8
-  
-  # Number of workers for evaluation
-  num_workers: 2
-  
-  # Output directory for evaluation results
-  output_dir: ./results/unet_evaluation
-  log_dir: ./results/unet_evaluation_logs
-  
-  # Visualization settings
-  visualize_predictions: true
-  n_visualization_samples: 10
-
-# Advanced Configuration
 advanced:
-  # Mixed precision training (if supported)
-  mixed_precision: false
-  
-  # Gradient accumulation steps
-  gradient_accumulation_steps: 1
-  
-  # Maximum gradient norm for clipping
-  max_grad_norm: 1.0
-  
-  # Resume training from checkpoint
-  resume: false
-  resume_checkpoint: ""
-  
-  # Use multiple GPUs
-  multi_gpu: false
-  
-  # Distributed training
   distributed: false
+  gradient_accumulation_steps: 1
+  max_grad_norm: 1.0
+  mixed_precision: false
+  multi_gpu: false
+  resume: false
+  resume_checkpoint: ''
+data:
+  image_size:
+  - 256
+  - 256
+  num_workers: 0
+  pin_memory: true
+  train_image_dir: ./data/segmentation/train/images
+  train_mask_dir: ./data/segmentation/train/masks
+  val_image_dir: ./data/segmentation/val/images
+  val_mask_dir: ./data/segmentation/val/masks
+  test_image_dir: ./data/segmentation/test/images
+  test_mask_dir: ./data/segmentation/test/masks
+evaluation:
+  batch_size: 8
+  log_dir: ./results/unet_evaluation_logs
+  n_visualization_samples: 10
+  num_workers: 2
+  output_dir: ./results/unet_evaluation
+  visualize_predictions: true
+model:
+  bilinear: true
+  dropout_rate: 0.3
+  lightweight: true
+  n_channels: 3
+  n_classes: 3
+training:
+  batch_size: 8
+  checkpoint_interval: 10
+  early_stopping_patience: 15
+  learning_rate: 0.001
+  log_dir: ./results/unet_logs
+  loss_type: ce
+  lr_patience: 5
+  lr_reduce_factor: 0.5
+  num_epochs: 100
+  output_dir: ./results/unet_training
+  seed: 42
+  weight_decay: 0.0001

@@ -21,6 +21,12 @@ from .losses import (
     FocalDiceLoss,
     get_loss_function
 )
+from .postprocessing import (
+    fill_mask_holes,
+    keep_largest_component,
+    remove_small_components,
+    constrain_mask_to_roi,
+)
 from .trainer import (
     UNetTrainer,
     create_trainer
@@ -40,6 +46,10 @@ __all__ = [
     "calculate_iou",
     "calculate_dice_coefficient",
     "get_loss_function",
+    "fill_mask_holes",
+    "keep_largest_component",
+    "remove_small_components",
+    "constrain_mask_to_roi",
     "UNetTrainer",
     "create_trainer"
 ]
