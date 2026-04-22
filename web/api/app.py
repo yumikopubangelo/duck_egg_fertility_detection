@@ -3,14 +3,7 @@
 import os
 from flask import Flask, render_template
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-
-# Initialize extensions
-db = SQLAlchemy()
-migrate = Migrate()
-jwt = JWTManager()
+from web.api.extensions import db, migrate, jwt
 
 # Resolve paths relative to this file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -36,6 +29,11 @@ def create_app():
     jwt.init_app(app)
     CORS(app)
 
+    # Register models so SQLAlchemy knows about them, then create tables
+    from web.api.models import PredictionRecord  # noqa: F401
+    with app.app_context():
+        db.create_all()
+
     # Create upload and model folders if they don't exist
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     os.makedirs(app.config['MODEL_FOLDER'], exist_ok=True)
@@ -47,6 +45,8 @@ def create_app():
     from web.api.routes.dataset import dataset_bp
     from web.api.routes.retrain import retrain_bp
     from web.api.routes.admin import admin_bp
+    from web.api.routes.analysis import analysis_bp
+    from web.api.routes.segmentation import segmentation_bp
 
     app.register_blueprint(prediction_bp, url_prefix='/api')
     app.register_blueprint(upload_bp, url_prefix='/api')
@@ -54,6 +54,8 @@ def create_app():
     app.register_blueprint(dataset_bp, url_prefix='/api')
     app.register_blueprint(retrain_bp, url_prefix='/api')
     app.register_blueprint(admin_bp, url_prefix='/api')
+    app.register_blueprint(analysis_bp, url_prefix='/api')
+    app.register_blueprint(segmentation_bp, url_prefix='/api')
 
     # --- HTML page routes ---
     @app.route('/')
@@ -79,6 +81,14 @@ def create_app():
     @app.route('/admin')
     def admin():
         return render_template('admin.html')
+
+    @app.route('/analysis')
+    def analysis():
+        return render_template('analysis.html')
+
+    @app.route('/batch')
+    def batch():
+        return render_template('batch.html')
 
     # Health check endpoint
     @app.route('/health')

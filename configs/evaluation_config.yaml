@@ -16,5 +16,5 @@ model:
   bilinear: true
   dropout_rate: 0.3
   lightweight: true
-  n_clusters: 3
+  n_clusters: 2
   unet_checkpoint: ./results/unet_training/checkpoints/final_epoch_1_20260417_133215.pth

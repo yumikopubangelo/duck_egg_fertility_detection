@@ -59,6 +59,7 @@ class AdaptiveWeightedClustering:
         self.labels_ = None
         self.inertia_ = None
         self.silhouette_ = None
+        self.scaler_ = None
         self.iterations_ = 0
         
         # Setup logger
@@ -201,8 +202,8 @@ class AdaptiveWeightedClustering:
             raise ValueError("n_samples={} should be >= n_clusters={}".format(n_samples, self.n_clusters))
         
         # Normalize features
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
+        self.scaler_ = StandardScaler()
+        X_scaled = self.scaler_.fit_transform(X)
         
         # Initialize centroids
         self.centroids_ = self._initialize_centroids(X_scaled)
@@ -264,9 +265,14 @@ class AdaptiveWeightedClustering:
         if X.ndim != 2:
             raise ValueError("X should be 2-dimensional")
         
-        # Normalize features
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
+        # Normalize features with the training scaler. Older pickle files may
+        # not contain scaler_, so they fall back to the legacy behavior.
+        scaler = getattr(self, "scaler_", None)
+        if scaler is not None:
+            X_scaled = scaler.transform(X)
+        else:
+            scaler = StandardScaler()
+            X_scaled = scaler.fit_transform(X)
         
         # Calculate distances with weights
         distances = np.linalg.norm(X_scaled[:, np.newaxis] - self.centroids_, axis=2)

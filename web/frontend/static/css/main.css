@@ -1,30 +1,206 @@
+/* ============================================================
+   Duck Egg Fertility Detection — Global Styles
+   ============================================================ */
+
+:root {
+  --primary:   #2563eb;
+  --success:   #16a34a;
+  --danger:    #dc2626;
+  --warning:   #d97706;
+  --info:      #0891b2;
+  --surface:   #ffffff;
+  --bg:        #f1f5f9;
+  --border:    #e2e8f0;
+  --text:      #1e293b;
+  --muted:     #64748b;
+  --radius-md: 14px;
+  --radius-sm: 8px;
+  --shadow:    0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.06);
+  --shadow-lg: 0 4px 6px rgba(0,0,0,.05), 0 10px 30px rgba(0,0,0,.10);
+}
+
+/* Base */
 body {
-  background-color: #f8f9fa;
+  background: var(--bg);
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  font-size: .9375rem;
 }
 
+/* ── Navbar ─────────────────────────────────────────────── */
 .navbar {
-  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%) !important;
+  box-shadow: 0 2px 12px rgba(37,99,235,.35);
+  padding-top: .6rem;
+  padding-bottom: .6rem;
+}
+.navbar-brand {
+  font-size: 1.1rem;
+  letter-spacing: -.01em;
+}
+.nav-link {
+  font-size: .875rem;
+  border-radius: var(--radius-sm);
+  padding: .35rem .7rem !important;
+  transition: background .15s;
+}
+.nav-link:hover, .nav-link.active {
+  background: rgba(255,255,255,.15);
 }
 
+/* ── Cards ──────────────────────────────────────────────── */
 .card {
-  border-radius: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  background: var(--surface);
+  transition: box-shadow .2s, transform .2s;
+}
+.card:hover {
+  box-shadow: var(--shadow-lg);
+}
+.card-header {
+  border-bottom: 1px solid var(--border);
+  padding: .85rem 1.1rem;
+  font-size: .9rem;
 }
 
-.icon-box {
-  flex-shrink: 0;
-  width: 56px;
-  height: 56px;
+/* ── Stat Cards ─────────────────────────────────────────── */
+.stat-card {
+  border: none !important;
+  overflow: hidden;
+  position: relative;
+}
+.stat-card .stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+.stat-card .stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+}
+.stat-card .stat-label {
+  font-size: .78rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.stat-card-primary  { background: linear-gradient(135deg,#eff6ff,#dbeafe); }
+.stat-card-success  { background: linear-gradient(135deg,#f0fdf4,#dcfce7); }
+.stat-card-danger   { background: linear-gradient(135deg,#fff1f2,#ffe4e6); }
+.stat-card-warning  { background: linear-gradient(135deg,#fffbeb,#fef3c7); }
+
+/* ── Icon Box (legacy) ──────────────────────────────────── */
+.icon-box {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
 }
 
+/* ── Pipeline Steps ─────────────────────────────────────── */
+.pipeline-step {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  padding: .65rem .9rem;
+  border-radius: var(--radius-sm);
+  transition: background .15s;
+}
+.pipeline-step:hover { background: #f8fafc; }
+.pipeline-step + .pipeline-step {
+  border-top: 1px solid var(--border);
+}
+.step-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── Tables ─────────────────────────────────────────────── */
+.table {
+  font-size: .875rem;
+}
 .table th {
   font-weight: 600;
-  font-size: .85rem;
+  font-size: .8rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--muted);
+}
+.table-hover tbody tr:hover {
+  background: #f8fafc;
 }
 
+/* ── Badges ─────────────────────────────────────────────── */
 .badge {
   font-weight: 500;
+  letter-spacing: .01em;
 }
+
+/* ── Progress ───────────────────────────────────────────── */
+.progress {
+  border-radius: 99px;
+  background: #e2e8f0;
+}
+.progress-bar {
+  border-radius: 99px;
+}
+
+/* ── Section Headers ────────────────────────────────────── */
+.section-title {
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+/* ── Dataset Info Boxes ─────────────────────────────────── */
+.info-box {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  text-align: center;
+  transition: border-color .15s;
+}
+.info-box:hover { border-color: var(--primary); }
+.info-box .info-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+/* ── Footer ─────────────────────────────────────────────── */
+footer {
+  font-size: .82rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border) !important;
+  background: var(--surface);
+}
+
+/* ── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }

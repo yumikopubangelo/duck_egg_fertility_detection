@@ -1,0 +1,18 @@
+2026-04-22 00:50:54 - egg-detector - INFO - Using device: cpu
+INFO:egg-detector:Using device: cpu
+2026-04-22 00:50:54 - egg-detector - INFO - Model created: UNetLightWeight
+INFO:egg-detector:Model created: UNetLightWeight
+2026-04-22 00:50:54 - egg-detector - INFO - Model has 3,130,947 parameters
+INFO:egg-detector:Model has 3,130,947 parameters
+2026-04-22 00:50:54 - egg-detector - INFO - Epoch 1/30
+INFO:egg-detector:Epoch 1/30
+Epoch 1 [0/156] Loss: 1.2218, IoU: 0.014, Dice: 0.027, Acc: nan, LR: 0.001000
+Epoch 1 [80/156] Loss: 0.7487, IoU: 0.089, Dice: 0.163, Acc: nan, LR: 0.001000
+2026-04-22 00:56:43 - egg-detector - INFO - Training - Loss: 0.8159, IoU: 0.130, Dice: 0.199, Acc: nan, Precision: nan, Recall: nan, F1: nan, LR: 0.001000
+INFO:egg-detector:Training - Loss: 0.8159, IoU: 0.130, Dice: 0.199, Acc: nan, Precision: nan, Recall: nan, F1: nan, LR: 0.001000
+2026-04-22 00:56:43 - egg-detector - INFO - Validation - Loss: 0.8130, IoU: 0.254, Dice: 0.258, Acc: nan, Precision: nan, Recall: nan, F1: nan, LR: 0.001000
+INFO:egg-detector:Validation - Loss: 0.8130, IoU: 0.254, Dice: 0.258, Acc: nan, Precision: nan, Recall: nan, F1: nan, LR: 0.001000
+2026-04-22 00:56:43 - egg-detector - INFO - Best checkpoint updated: results\unet_training\checkpoints\best_epoch_1_20260422_005643.pth
+INFO:egg-detector:Best checkpoint updated: results\unet_training\checkpoints\best_epoch_1_20260422_005643.pth
+2026-04-22 00:56:43 - egg-detector - INFO - Epoch 2/30
+INFO:egg-detector:Epoch 2/30

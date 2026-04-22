@@ -121,27 +121,14 @@ class EggDataset(Dataset):
         mask = mask.resize(self.image_size, Image.NEAREST)
         mask_np = np.array(mask, dtype=np.uint8)
 
-        # Normalize mask values to class indices
+        # Normalize to class indices 0/1/2 — always return LongTensor [H, W]
+        # so every sample in a batch has the same shape regardless of class content.
         unique_vals = np.unique(mask_np)
         if set(unique_vals).issubset({0, 255}):
-            # legacy binary masks stored as 0/255 -> convert to 0/1
-            mask_np = (mask_np > 0).astype(np.uint8)
-        elif set(unique_vals).issubset({0, 1, 2}):
-            # already multiclass 0/1/2
-            pass
+            mask_np = (mask_np > 0).astype(np.int64)
         elif 255 in unique_vals or 128 in unique_vals:
-            # map common palette values to 0/1/2 (255->2, 128->1)
-            mask_np = np.where(mask_np >= 200, 2, np.where(mask_np >= 100, 1, 0)).astype(np.uint8)
+            mask_np = np.where(mask_np >= 200, 2, np.where(mask_np >= 100, 1, 0)).astype(np.int64)
         else:
-            # fallback: threshold to binary
-            mask_np = (mask_np > 128).astype(np.uint8)
+            mask_np = mask_np.astype(np.int64)
 
-        # Choose tensor type depending on target
-        if mask_np.max() <= 1:
-            # binary mask -> float tensor channel-first
-            mask_tensor = torch.from_numpy(mask_np).unsqueeze(0).float()
-        else:
-            # multiclass mask -> LongTensor (H, W)
-            mask_tensor = torch.from_numpy(mask_np).long()
-
-        return image_tensor, mask_tensor
+        return image_tensor, torch.from_numpy(mask_np)

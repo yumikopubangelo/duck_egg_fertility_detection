@@ -1,0 +1,229 @@
+"""Analysis API — feature importance, cluster visualisation, confusion matrix."""
+
+from __future__ import annotations
+
+import traceback
+
+import numpy as np
+from flask import Blueprint, current_app, jsonify
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+
+from src.features.classical_features import ClassicalFeatureExtractor
+from src.web.model_manager import get_default_model_manager
+
+analysis_bp = Blueprint("analysis", __name__)
+
+_viz_cache: dict = {}
+
+
+def _manager():
+    return get_default_model_manager(current_app.config)
+
+
+def _feature_importance(model, X: np.ndarray, clusters: np.ndarray) -> np.ndarray:
+    n_features = X.shape[1]
+    stored = getattr(model, "feature_importance", None)
+    if stored is not None and len(stored) == n_features:
+        imp = np.array(stored, dtype=float)
+    else:
+        unique = np.unique(clusters)
+        if len(unique) < 2:
+            imp = np.ones(n_features, dtype=float)
+        else:
+            c0 = X[clusters == unique[0]]
+            c1 = X[clusters == unique[1]]
+            mean_diff = np.abs(c0.mean(axis=0) - c1.mean(axis=0))
+            pooled_std = np.sqrt((c0.std(axis=0) ** 2 + c1.std(axis=0) ** 2) / 2 + 1e-8)
+            imp = mean_diff / pooled_std
+
+    imp = np.clip(imp, 0, None)
+    total = imp.sum()
+    return imp / total if total > 0 else np.ones(n_features) / n_features
+
+
+@analysis_bp.route("/analysis/feature-importance", methods=["GET"])
+def feature_importance():
+    try:
+        mgr = _manager()
+        mgr.load()
+
+        extractor = ClassicalFeatureExtractor()
+        feature_names = extractor.feature_names
+        n_features = len(feature_names)
+
+        X_train = np.load(mgr.train_features_path)
+        clusters = mgr._nearest_clusters(X_train)
+        imp = _feature_importance(mgr.model, X_train, clusters)
+        if len(imp) != n_features:
+            imp = np.ones(n_features) / n_features
+
+        group_map: dict[str, list[int]] = {
+            "Statistik Intensitas": list(range(0, 5)),
+            "Histogram": list(range(5, 37)),
+            "Tekstur LBP": list(range(37, 47)),
+            "Tepi (Edge)": list(range(47, 50)),
+        }
+        groups = {name: round(float(imp[idxs].sum()) * 100, 2) for name, idxs in group_map.items()}
+
+        sorted_idx = np.argsort(imp)[::-1]
+        top_features = []
+        for rank, idx in enumerate(sorted_idx[:15], 1):
+            group = next((g for g, idxs in group_map.items() if idx in idxs), "Lainnya")
+            top_features.append(
+                {
+                    "rank": rank,
+                    "index": int(idx),
+                    "name": feature_names[idx],
+                    "importance": round(float(imp[idx]), 6),
+                    "importance_pct": round(float(imp[idx]) * 100, 3),
+                    "group": group,
+                }
+            )
+
+        return jsonify(
+            {
+                "feature_names": feature_names,
+                "importance": imp.tolist(),
+                "top_features": top_features,
+                "groups": groups,
+                "total_features": n_features,
+            }
+        ), 200
+
+    except Exception as exc:
+        current_app.logger.exception("feature-importance failed")
+        return jsonify({"error": str(exc), "trace": traceback.format_exc()}), 500
+
+
+@analysis_bp.route("/analysis/cluster-visualization", methods=["GET"])
+def cluster_visualization():
+    if "data" in _viz_cache:
+        return jsonify(_viz_cache["data"]), 200
+
+    try:
+        mgr = _manager()
+        mgr.load()
+
+        X_train = np.load(mgr.train_features_path).astype(np.float64)
+        y_train = np.load(mgr.train_labels_path).astype(int)
+        X_scaled = mgr.scaler.transform(X_train.astype(np.float32)).astype(np.float64)
+        clusters = mgr._nearest_clusters(X_train.astype(np.float32))
+        labels = [mgr.cluster_label_map.get(int(c), str(c)) for c in clusters]
+
+        # PCA
+        pca = PCA(n_components=2, random_state=42)
+        X_pca = pca.fit_transform(X_scaled)
+        var_explained = [round(float(v) * 100, 1) for v in pca.explained_variance_ratio_]
+
+        # Project centroids (already in scaled space)
+        centroids_scaled = np.asarray(mgr.centroids, dtype=np.float64)
+        pca_centroids = pca.transform(centroids_scaled)
+
+        # t-SNE
+        perplexity = min(30, max(5, len(X_scaled) - 1))
+        tsne = TSNE(
+            n_components=2, random_state=42, perplexity=perplexity, max_iter=1000, init="random"
+        )
+        X_tsne = tsne.fit_transform(X_scaled)
+
+        def _points(coords):
+            return [
+                {
+                    "x": round(float(coords[i, 0]), 4),
+                    "y": round(float(coords[i, 1]), 4),
+                    "label": labels[i],
+                    "cluster_id": int(clusters[i]),
+                    "true_label": "fertile" if int(y_train[i]) == 1 else "infertile",
+                }
+                for i in range(len(X_train))
+            ]
+
+        result = {
+            "pca": {
+                "points": _points(X_pca),
+                "variance_explained": var_explained,
+                "centroids": [
+                    {
+                        "x": round(float(pca_centroids[ci, 0]), 4),
+                        "y": round(float(pca_centroids[ci, 1]), 4),
+                        "cluster_id": ci,
+                        "label": mgr.cluster_label_map.get(ci, str(ci)),
+                    }
+                    for ci in range(len(pca_centroids))
+                ],
+            },
+            "tsne": {
+                "points": _points(X_tsne),
+            },
+            "n_samples": int(len(X_train)),
+            "n_fertile": int((y_train == 1).sum()),
+            "n_infertile": int((y_train == 0).sum()),
+        }
+
+        _viz_cache["data"] = result
+        return jsonify(result), 200
+
+    except Exception as exc:
+        current_app.logger.exception("cluster-visualization failed")
+        return jsonify({"error": str(exc), "trace": traceback.format_exc()}), 500
+
+
+@analysis_bp.route("/analysis/confusion-matrix", methods=["GET"])
+def confusion_matrix_data():
+    try:
+        mgr = _manager()
+        mgr.load()
+        ev = mgr.evaluation
+
+        if not ev or "confusion_matrix" not in ev:
+            return jsonify(
+                {"error": "Evaluation data not available. Run model evaluation first."}
+            ), 404
+
+        cm = ev["confusion_matrix"]  # [[TN, FP], [FN, TP]]
+        tn, fp = int(cm[0][0]), int(cm[0][1])
+        fn, tp = int(cm[1][0]), int(cm[1][1])
+
+        total = tn + fp + fn + tp
+        accuracy = (tn + tp) / total if total > 0 else 0
+
+        sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0  # recall fertile
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0  # recall infertile
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+        f1 = (
+            2 * precision * sensitivity / (precision + sensitivity)
+            if (precision + sensitivity) > 0
+            else 0
+        )
+        npv = tn / (tn + fn) if (tn + fn) > 0 else 0
+
+        return jsonify(
+            {
+                "matrix": {
+                    "tn": tn,
+                    "fp": fp,
+                    "fn": fn,
+                    "tp": tp,
+                },
+                "metrics": {
+                    "accuracy": round(accuracy, 4),
+                    "sensitivity": round(sensitivity, 4),  # recall fertile
+                    "specificity": round(specificity, 4),  # recall infertile
+                    "precision": round(precision, 4),  # PPV
+                    "npv": round(npv, 4),  # NPV
+                    "f1_score": round(f1, 4),
+                },
+                "test_samples": int(ev.get("test_samples", total)),
+            }
+        ), 200
+
+    except Exception as exc:
+        current_app.logger.exception("confusion-matrix failed")
+        return jsonify({"error": str(exc)}), 500
+
+
+@analysis_bp.route("/analysis/cache/clear", methods=["POST"])
+def clear_cache():
+    _viz_cache.clear()
+    return jsonify({"message": "Cache cleared"}), 200

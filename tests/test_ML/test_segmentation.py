@@ -2,6 +2,7 @@
 Tests for segmentation module.
 """
 
+import numpy as np
 import pytest
 import torch
 from src.segmentation import (
@@ -11,7 +12,11 @@ from src.segmentation import (
     create_unet_lightweight,
     DiceLoss,
     FocalLoss,
-    get_loss_function
+    get_loss_function,
+    fill_mask_holes,
+    keep_largest_component,
+    remove_small_components,
+    constrain_mask_to_roi,
 )
 
 
@@ -117,6 +122,58 @@ def test_create_unet_factory():
     
     assert standard_params > lightweight_params
     assert lightweight_params < standard_params / 4  # Should be at least 4x smaller
+
+
+def test_fill_mask_holes_closes_internal_void():
+    """Test that holes inside a connected mask are filled."""
+    mask = np.zeros((9, 9), dtype=np.uint8)
+    mask[1:8, 1:8] = 255
+    mask[3:6, 3:6] = 0
+
+    filled = fill_mask_holes(mask)
+
+    assert np.all(filled[1:8, 1:8] == 255)
+
+
+def test_keep_largest_component_discards_smaller_regions():
+    """Test that only the largest connected component remains."""
+    mask = np.zeros((20, 20), dtype=np.uint8)
+    mask[1:5, 1:5] = 255
+    mask[10:19, 10:18] = 255
+
+    largest = keep_largest_component(mask)
+
+    assert largest.sum() == mask[10:19, 10:18].sum()
+    assert largest[2, 2] == 0
+    assert largest[12, 12] == 255
+
+
+def test_remove_small_components_filters_noise():
+    """Test that tiny blobs are removed while main regions stay."""
+    mask = np.zeros((30, 30), dtype=np.uint8)
+    mask[2:14, 2:14] = 255
+    mask[18:27, 18:27] = 255
+    mask[0:2, 20:22] = 255
+
+    cleaned = remove_small_components(mask, min_area=30, min_relative_area=0.2)
+
+    assert cleaned[1, 20] == 0
+    assert cleaned[5, 5] == 255
+    assert cleaned[20, 20] == 255
+
+
+def test_constrain_mask_to_roi_clips_outside_pixels():
+    """Test that a mask is clipped to the ROI boundary."""
+    mask = np.zeros((10, 10), dtype=np.uint8)
+    mask[2:8, 2:8] = 255
+
+    roi = np.zeros((10, 10), dtype=np.uint8)
+    roi[4:9, 4:9] = 255
+
+    constrained = constrain_mask_to_roi(mask, roi)
+
+    assert constrained[3, 3] == 0
+    assert constrained[5, 5] == 255
 
 
 if __name__ == "__main__":

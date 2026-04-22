@@ -1,0 +1,4 @@
+model,accuracy,precision,recall,specificity,f1,roc_auc,brier_score
+AWC,0.875,0.8,1.0,0.75,0.8889,0.9514,0.2071
+KMeans,0.875,0.8,1.0,0.75,0.8889,0.9444,0.1015
+FCM,0.9167,0.8571,1.0,0.8333,0.9231,0.9167,0.1216

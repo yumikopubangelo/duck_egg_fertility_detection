@@ -47,6 +47,9 @@ x-app-volumes: &app-volumes
     - ./data:/app/data
     - ./models:/app/models
     - ./logs:/app/logs
+    - ./web:/app/web
+    - ./src:/app/src
+    - ./configs:/app/configs
 
 x-depends-ready: &depends-ready
   depends_on:

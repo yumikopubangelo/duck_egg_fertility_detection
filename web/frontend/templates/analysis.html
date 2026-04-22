@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}Analisis Model - Duck Egg Fertility Detection{% endblock %}
+{% block extra_css %}
+<style>
+.chart-container { position: relative; }
+.legend-dot { width:12px; height:12px; border-radius:50%; display:inline-block; margin-right:6px; flex-shrink:0; }
+.group-badge { display:inline-block; padding:2px 8px; border-radius:99px; font-size:.72rem; font-weight:600; }
+.tab-btn { border:none; background:transparent; padding:.45rem 1rem; border-radius:8px; font-size:.85rem; font-weight:500; color:#64748b; transition:background .15s,color .15s; cursor:pointer; }
+.tab-btn.active { background:#2563eb; color:#fff; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+  <div class="col-12">
+    <h4 class="fw-bold mb-0">Analisis Model</h4>
+    <p class="text-muted small mb-0 mt-1">Feature importance AWC dan visualisasi cluster dalam ruang fitur 50 dimensi</p>
+  </div>
+
+  <!-- ── Feature Importance ─────────────────────────────── -->
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <span class="section-title">Top 15 Fitur Terpenting</span>
+        <span class="badge bg-secondary fw-normal" style="font-size:.72rem" id="fi-total-badge">memuat…</span>
+      </div>
+      <div class="card-body p-3">
+        <div id="fi-loading" class="text-center py-4 text-muted small">
+          <div class="spinner-border spinner-border-sm me-2"></div>Mengambil data fitur…
+        </div>
+        <div id="fi-chart-wrap" class="d-none chart-container" style="height:360px">
+          <canvas id="fi-chart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header"><span class="section-title">Kontribusi Kelompok Fitur</span></div>
+      <div class="card-body p-3 d-flex flex-column align-items-center">
+        <div id="fg-loading" class="text-center py-4 text-muted small w-100">
+          <div class="spinner-border spinner-border-sm me-2"></div>Memuat…
+        </div>
+        <div id="fg-chart-wrap" class="d-none" style="max-width:220px;width:100%">
+          <canvas id="fg-chart"></canvas>
+        </div>
+        <div id="fg-legend" class="d-none mt-3 w-100" style="font-size:.82rem"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Cluster Visualisation ─────────────────────────── -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <span class="section-title">Visualisasi Cluster dalam Ruang Fitur</span>
+        <div class="d-flex gap-1" id="viz-tabs">
+          <button class="tab-btn active" data-tab="pca">PCA</button>
+          <button class="tab-btn" data-tab="tsne">t-SNE</button>
+        </div>
+      </div>
+      <div class="card-body p-3">
+        <div id="viz-loading" class="text-center py-5 text-muted small">
+          <div class="spinner-border text-primary me-2"></div>
+          Menghitung proyeksi… t-SNE mungkin membutuhkan beberapa detik.
+        </div>
+        <div id="viz-wrap" class="d-none">
+          <div class="row g-3 mb-3">
+            <div class="col-sm-4">
+              <div class="info-box"><div class="info-value" id="viz-n-total">—</div><div class="text-muted" style="font-size:.75rem">Total Sampel</div></div>
+            </div>
+            <div class="col-sm-4">
+              <div class="info-box"><div class="info-value text-success" id="viz-n-fertile">—</div><div class="text-muted" style="font-size:.75rem">Fertile</div></div>
+            </div>
+            <div class="col-sm-4">
+              <div class="info-box"><div class="info-value text-danger" id="viz-n-infertile">—</div><div class="text-muted" style="font-size:.75rem">Infertile</div></div>
+            </div>
+          </div>
+          <div id="viz-pca-info" class="text-muted small mb-2"></div>
+          <div class="chart-container" style="height:420px">
+            <canvas id="viz-chart"></canvas>
+          </div>
+          <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:.82rem">
+            <span><span class="legend-dot" style="background:#16a34a"></span>Fertile (predicted)</span>
+            <span><span class="legend-dot" style="background:#dc2626"></span>Infertile (predicted)</span>
+            <span><span class="legend-dot" style="background:#000;border:2px solid #fff;outline:2px solid #000;width:16px;height:16px;border-radius:3px"></span>Centroid Cluster</span>
+          </div>
+          <p class="text-muted mt-2 mb-0" style="font-size:.77rem">
+            Setiap titik = satu gambar telur. Warna menunjukkan label yang diprediksi oleh AWC. Centroid (★) adalah pusat setiap cluster dalam ruang fitur.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Confusion Matrix ─────────────────────────────── -->
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span class="section-title">Confusion Matrix</span>
+        <span class="badge bg-secondary fw-normal" style="font-size:.72rem" id="cm-samples-badge">memuat…</span>
+      </div>
+      <div class="card-body p-3" id="cm-body">
+        <div class="text-center py-4 text-muted small">
+          <div class="spinner-border spinner-border-sm me-2"></div>Memuat…
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Per-class Metrics ─────────────────────────────── -->
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header"><span class="section-title">Metrik Per-Kelas</span></div>
+      <div class="card-body p-3" id="metrics-body">
+        <div class="text-center py-4 text-muted small">
+          <div class="spinner-border spinner-border-sm me-2"></div>Memuat…
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Feature Interpretation ────────────────────────── -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header"><span class="section-title">Interpretasi Kelompok Fitur</span></div>
+      <div class="card-body p-3">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <div class="p-3 rounded-3 h-100" style="background:#eff6ff;border:1px solid #bfdbfe">
+              <div class="fw-semibold mb-1" style="font-size:.875rem">Statistik Intensitas</div>
+              <p class="text-muted mb-0" style="font-size:.8rem">Mean, std, min, max, median piksel grayscale. Telur fertile cenderung memiliki distribusi intensitas lebih terang karena pembuluh darah menyerap cahaya.</p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="p-3 rounded-3 h-100" style="background:#f0fdf4;border:1px solid #bbf7d0">
+              <div class="fw-semibold mb-1" style="font-size:.875rem">Histogram (32 bin)</div>
+              <p class="text-muted mb-0" style="font-size:.8rem">Distribusi frekuensi intensitas piksel. Menangkap pola gelap-terang yang khas dari vaskularisasi embrio dalam telur fertile.</p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="p-3 rounded-3 h-100" style="background:#fefce8;border:1px solid #fef08a">
+              <div class="fw-semibold mb-1" style="font-size:.875rem">Tekstur LBP (10 bin)</div>
+              <p class="text-muted mb-0" style="font-size:.8rem">Local Binary Pattern — mendeskripsikan pola tekstur lokal. Struktur pembuluh darah menciptakan pola transisi yang khas berbeda dari telur kosong.</p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="p-3 rounded-3 h-100" style="background:#fff1f2;border:1px solid #fecdd3">
+              <div class="fw-semibold mb-1" style="font-size:.875rem">Tepi / Edge (3 fitur)</div>
+              <p class="text-muted mb-0" style="font-size:.8rem">Kepadatan, mean, dan std tepi Canny. Embrio dan vaskularisasi menghasilkan tepi yang lebih banyak dan terstruktur dibanding latar belakang homogen.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/analysis.js') }}"></script>
+{% endblock %}

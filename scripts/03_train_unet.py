@@ -14,6 +14,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
 
+import random
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -21,6 +23,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import transforms
+import torchvision.transforms.functional as TF
 
 # Add src to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
@@ -128,12 +131,29 @@ def _classification_stats(logits: torch.Tensor, target: torch.Tensor) -> Dict[st
     }
 
 
+def _is_multiclass_target(target: torch.Tensor) -> bool:
+    """Multi-class segmentation: LongTensor of shape [B, H, W]."""
+    return target.dtype == torch.long and target.ndim == 3
+
+
 def calculate_iou(pred: torch.Tensor, target: torch.Tensor) -> float:
-    """Calculate IoU for either segmentation tensors or classification logits."""
+    """Mean IoU over foreground classes (ignores background class 0)."""
     if _is_classification_target(target):
         target = target.float().view(-1)
         logits = _reduce_logits_for_classification(pred)
         return _classification_stats(logits, target)["iou"]
+
+    if _is_multiclass_target(target):
+        n_classes = pred.shape[1]
+        pred_cls = torch.argmax(pred, dim=1)
+        ious = []
+        for c in range(1, n_classes):  # skip background
+            p = pred_cls == c
+            t = target == c
+            intersection = torch.logical_and(p, t).sum().float()
+            union = torch.logical_or(p, t).sum().float()
+            ious.append(float(intersection / union) if union > 0 else 1.0)
+        return float(np.mean(ious)) if ious else 1.0
 
     pred = torch.sigmoid(pred) > 0.5
     target = target > 0.5
@@ -145,11 +165,23 @@ def calculate_iou(pred: torch.Tensor, target: torch.Tensor) -> float:
 
 
 def calculate_dice_coefficient(pred: torch.Tensor, target: torch.Tensor) -> float:
-    """Calculate Dice for either segmentation tensors or classification logits."""
+    """Mean Dice over foreground classes (ignores background class 0)."""
     if _is_classification_target(target):
         target = target.float().view(-1)
         logits = _reduce_logits_for_classification(pred)
         return _classification_stats(logits, target)["dice"]
+
+    if _is_multiclass_target(target):
+        n_classes = pred.shape[1]
+        pred_cls = torch.argmax(pred, dim=1)
+        dices = []
+        for c in range(1, n_classes):
+            p = pred_cls == c
+            t = target == c
+            intersection = 2.0 * torch.logical_and(p, t).sum().float()
+            union = p.sum().float() + t.sum().float()
+            dices.append(float(intersection / union) if union > 0 else 1.0)
+        return float(np.mean(dices)) if dices else 1.0
 
     pred = torch.sigmoid(pred) > 0.5
     target = target > 0.5
@@ -187,6 +219,8 @@ def train_epoch(
             logits = _reduce_logits_for_classification(outputs)
             cls_target = targets.float().view(-1)
             loss = F.binary_cross_entropy_with_logits(logits, cls_target)
+        elif _is_multiclass_target(targets):
+            loss = F.cross_entropy(outputs, targets)
         else:
             loss = criterion(outputs, targets)
 
@@ -292,6 +326,19 @@ def save_checkpoint(
     return path
 
 
+class SegmentationTransform:
+    """Joint spatial augmentation — applies identical random flips to image and mask."""
+
+    def __call__(self, image, mask):
+        if random.random() > 0.5:
+            image = TF.hflip(image)
+            mask = TF.hflip(mask)
+        if random.random() > 0.5:
+            image = TF.vflip(image)
+            mask = TF.vflip(mask)
+        return image, mask
+
+
 def main():
     parser = argparse.ArgumentParser(description="UNet Training Script")
     parser.add_argument("--config", type=str, required=True, help="Path to config file")
@@ -309,11 +356,13 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logger.info(f"Using device: {device}")
 
+    # Spatial augmentation applied jointly to image + mask to keep them in sync.
+    # ColorJitter and normalization are image-only and stay in train_transform.
+    joint_transform = SegmentationTransform()
+
     train_transform = transforms.Compose(
         [
             transforms.Resize(config["data"]["image_size"]),
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomVerticalFlip(p=0.5),
             transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
@@ -328,17 +377,33 @@ def main():
     )
 
     train_dataset = EggDataset(
-        fertile_dir=config["data"]["train_fertile_dir"],
-        infertile_dir=config["data"]["train_infertile_dir"],
+        image_dir=config["data"]["train_image_dir"],
+        mask_dir=config["data"]["train_mask_dir"],
         image_size=tuple(config["data"]["image_size"]),
         transform=train_transform,
+        joint_transform=joint_transform,
     )
     val_dataset = EggDataset(
-        fertile_dir=config["data"]["val_fertile_dir"],
-        infertile_dir=config["data"]["val_infertile_dir"],
+        image_dir=config["data"]["val_image_dir"],
+        mask_dir=config["data"]["val_mask_dir"],
         image_size=tuple(config["data"]["image_size"]),
         transform=val_transform,
     )
+
+    if len(train_dataset) == 0:
+        raise RuntimeError(
+            f"Training dataset is empty. "
+            f"Run 03b_generate_masks.py first to populate:\n"
+            f"  {config['data']['train_image_dir']}\n"
+            f"  {config['data']['train_mask_dir']}"
+        )
+    if len(val_dataset) == 0:
+        raise RuntimeError(
+            f"Validation dataset is empty. "
+            f"Run 03b_generate_masks.py first to populate:\n"
+            f"  {config['data']['val_image_dir']}\n"
+            f"  {config['data']['val_mask_dir']}"
+        )
 
     train_loader = DataLoader(
         train_dataset,
@@ -357,7 +422,7 @@ def main():
 
     model = create_unet_for_eggs(
         n_channels=3,
-        n_classes=1,
+        n_classes=config["model"]["n_classes"],
         bilinear=config["model"]["bilinear"],
         dropout_rate=config["model"]["dropout_rate"],
         lightweight=config["model"]["lightweight"],

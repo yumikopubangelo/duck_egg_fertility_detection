@@ -4,7 +4,7 @@
 # Data Configuration
 data:
   # Number of clusters
-  n_clusters: 3
+  n_clusters: 2
   
   # Training data paths
   train_data: ./data/features/awc_features.npy
@@ -80,7 +80,7 @@ training:
   n_runs: 5
   
   # Cross-validation
-  cross_validation: false
+  cross_validation: true
   cv_folds: 5
 
 # Evaluation Configuration
@@ -134,7 +134,7 @@ advanced:
 # Egg Fertility Specific Configuration
 eg_fertility:
   # Fertility classes
-  classes: ["infertile", "fertile", "uncertain"]
+  classes: ["infertile", "fertile"]
   
   # Class weights (for imbalanced data)
   class_weights: [1.0, 1.0, 1.0]
