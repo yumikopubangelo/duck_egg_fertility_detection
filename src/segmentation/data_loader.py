@@ -35,7 +35,9 @@ class EggDataset(Dataset):
         transform: Optional[transforms.Compose] = None,
         image_dir: Optional[str] = None,
         mask_dir: Optional[str] = None,
-        joint_transform: Optional[Callable[[Image.Image, Image.Image], Tuple[Image.Image, Image.Image]]] = None,
+        joint_transform: Optional[
+            Callable[[Image.Image, Image.Image], Tuple[Image.Image, Image.Image]]
+        ] = None,
     ):
         self.image_size = image_size
         self.transform = transform
@@ -131,4 +133,5 @@ class EggDataset(Dataset):
         else:
             mask_np = mask_np.astype(np.int64)
 
+        # Return (H, W) LongTensor — CrossEntropyLoss needs [B, H, W] class indices
         return image_tensor, torch.from_numpy(mask_np)
