@@ -10,7 +10,7 @@ def test_prediction_service_runs_on_known_image():
     result = PredictionService().predict_file(image_path)
 
     assert result.label in {"fertile", "infertile"}
-    assert result.feature_count == 50
+    assert result.feature_count == 70
     assert result.preprocessed_shape == (256, 256)
     assert 0.0 <= result.confidence <= 1.0
 
@@ -33,4 +33,4 @@ def test_predict_endpoint_returns_prediction(tmp_path):
     assert data["prediction"] in {"fertile", "infertile"}
     assert 0.0 <= data["confidence"] <= 1.0
     assert "cluster_id" in data
-    assert data["feature_count"] == 50
+    assert data["feature_count"] == 70

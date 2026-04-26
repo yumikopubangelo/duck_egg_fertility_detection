@@ -42,7 +42,14 @@ def _feature_schema() -> tuple[list[str], dict[str, list[int]]]:
 def _feature_importance(model, X: np.ndarray, clusters: np.ndarray) -> np.ndarray:
     n_features = X.shape[1]
     stored = getattr(model, "feature_importance", None)
-    if stored is not None and len(stored) == n_features:
+    feature_indices = getattr(model, "feature_indices_", None)
+    if feature_indices is None:
+        feature_indices = getattr(model, "feature_indices", None)
+
+    if stored is not None and feature_indices is not None and len(stored) == len(feature_indices):
+        imp = np.zeros(n_features, dtype=float)
+        imp[np.asarray(feature_indices, dtype=int)] = np.array(stored, dtype=float)
+    elif stored is not None and len(stored) == n_features:
         imp = np.array(stored, dtype=float)
     else:
         unique = np.unique(clusters)
@@ -120,7 +127,8 @@ def cluster_visualization():
 
         X_train = np.load(mgr.train_features_path).astype(np.float64)
         y_train = np.load(mgr.train_labels_path).astype(int)
-        X_scaled = mgr.scaler.transform(X_train.astype(np.float32)).astype(np.float64)
+        X_model = mgr._model_features(X_train.astype(np.float32))
+        X_scaled = mgr.scaler.transform(X_model).astype(np.float64)
         clusters = mgr._nearest_clusters(X_train.astype(np.float32))
         labels = [mgr.cluster_label_map.get(int(c), str(c)) for c in clusters]
 

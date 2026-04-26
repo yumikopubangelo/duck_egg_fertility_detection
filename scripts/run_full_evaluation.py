@@ -49,6 +49,7 @@ from sklearn.metrics import (
     roc_auc_score, brier_score_loss, confusion_matrix,
     roc_curve, precision_recall_curve, average_precision_score,
 )
+from sklearn.feature_selection import SelectKBest, f_classif
 from scipy.stats import wilcoxon
 
 from src.clustering.awc import AdaptiveWeightedClustering
@@ -56,6 +57,10 @@ from src.clustering.kmeans_baseline import KMeansBaseline
 from src.clustering.fuzzy_cmeans import FuzzyCMeans
 
 warnings.filterwarnings("ignore")
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except AttributeError:
+    pass
 
 # ── colour palette ──────────────────────────────────────────────────────────
 PALETTE = {
@@ -94,6 +99,30 @@ def compute_all_metrics(y_true, y_pred, y_proba_pos):
         "roc_auc":     float(roc_auc_score(y_true, y_proba_pos)),
         "brier_score": float(brier_score_loss(y_true, y_proba_pos)),
     }
+
+
+def select_awc_feature_indices(X_train, y_train, method="anova", k_best=20):
+    """Return selected feature indices for the AWC model."""
+    method = (method or "none").lower()
+    if method in {"none", "off", "false"}:
+        return None
+    if method != "anova":
+        raise ValueError(f"Unsupported AWC feature selection method: {method}")
+
+    k_best = max(1, min(int(k_best), X_train.shape[1]))
+    selector = SelectKBest(score_func=f_classif, k=k_best)
+    selector.fit(X_train, y_train)
+    return selector.get_support(indices=True).astype(int).tolist()
+
+
+def awc_positive_scores(model, X, cluster_to_label):
+    """Distance-softmax probability for the fertile label in AWC's scaled space."""
+    cluster_probs = model.predict_proba(X)
+    positive = np.zeros(cluster_probs.shape[0], dtype=np.float32)
+    for cid, label in cluster_to_label.items():
+        if int(label) == 1:
+            positive += cluster_probs[:, int(cid)]
+    return positive
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -305,6 +334,7 @@ def generate_text_report(results_dict, wilcoxon_results, out_path, meta):
         f"  Dataset  : {meta['n_test']} sampel uji "
         f"(fertil={meta['n_fertile']}, infertil={meta['n_infertile']})",
         f"  Fitur    : {meta['n_features']} dimensi",
+        f"  AWC      : {meta.get('awc_selected_features', meta['n_features'])} fitur terpilih",
         "",
         "-" * 65,
         "  METRIK PERBANDINGAN",
@@ -374,17 +404,23 @@ def run_evaluation(args):
 
     # -- AWC --
     print("  → AWC …")
-    awc_path = Path(args.awc_model)
-    if awc_path.exists() and awc_path.stat().st_size > 100:
-        try:
-            awc = AdaptiveWeightedClustering.load(str(awc_path))
-            print("     (dimuat dari checkpoint)")
-        except Exception:
-            awc = None
+
+    feature_indices = select_awc_feature_indices(
+        X_train,
+        y_train,
+        method=args.awc_feature_selection,
+        k_best=args.awc_k_best,
+    )
+    if feature_indices is not None:
+        print(f"     seleksi fitur: ANOVA top-{len(feature_indices)} dari {X_train.shape[1]} fitur")
 
     # Always retrain AWC with n_clusters=2 for binary classification
     awc = AdaptiveWeightedClustering(
-        n_clusters=2, max_iter=100, tol=1e-4, random_state=42
+        n_clusters=2,
+        max_iter=100,
+        tol=1e-4,
+        feature_indices=feature_indices,
+        random_state=42,
     )
     awc.fit(X_train)
     awc_pred  = awc.predict(X_test)
@@ -399,19 +435,7 @@ def run_evaluation(args):
     awc_pred_mapped  = np.array([cluster_to_label.get(c, c) for c in awc_pred])
     train_pred_mapped = np.array([cluster_to_label.get(c, c) for c in train_pred])
 
-    # Soft scores: distance-based probability
-    try:
-        centroids = awc.centroids_
-        dists = np.linalg.norm(X_test[:, None, :] - centroids[None, :, :], axis=2)
-        neg   = -dists
-        exp_  = np.exp(neg - neg.max(axis=1, keepdims=True))
-        soft  = exp_ / exp_.sum(axis=1, keepdims=True)
-        awc_proba = np.zeros(n_test, dtype=np.float32)
-        for cid, lbl in cluster_to_label.items():
-            if lbl == 1:
-                awc_proba += soft[:, cid]
-    except Exception:
-        awc_proba = awc_pred_mapped.astype(np.float32)
+    awc_proba = awc_positive_scores(awc, X_test, cluster_to_label)
 
     results_dict["AWC"] = {
         "y_true": y_test.tolist(),
@@ -483,6 +507,8 @@ def run_evaluation(args):
         "n_fertile":  n_fertile,
         "n_infertile": n_infertile,
         "n_features": n_features,
+        "awc_feature_selection": args.awc_feature_selection,
+        "awc_selected_features": len(feature_indices) if feature_indices is not None else n_features,
     }
 
     # Full JSON results
@@ -508,9 +534,11 @@ def run_evaluation(args):
     report_path = out_dir / "evaluation_report.txt"
     generate_text_report(results_dict, wilcoxon_results, report_path, meta)
 
-    # Save trained baseline models
+    # Save trained models
+    awc.save(ROOT / args.awc_model)
     km.save(ROOT / "models" / "baselines" / "kmeans_model.pkl")
     fcm.save(ROOT / "models" / "baselines" / "fcm_model.pkl")
+    print(f"  [saved] {args.awc_model}")
     print(f"  [saved] models/baselines/kmeans_model.pkl")
     print(f"  [saved] models/baselines/fcm_model.pkl")
 
@@ -530,6 +558,8 @@ def parse_args():
     p.add_argument("--train-labels",   default="data/features/awc_labels.npy")
     p.add_argument("--awc-model",      default="models/awc/awc_model.pkl")
     p.add_argument("--output-dir",     default="results/evaluation/full")
+    p.add_argument("--awc-feature-selection", default="anova", choices=["none", "anova"])
+    p.add_argument("--awc-k-best", type=int, default=20)
     return p.parse_args()
 
 

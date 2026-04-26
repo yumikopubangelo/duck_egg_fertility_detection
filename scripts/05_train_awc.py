@@ -17,12 +17,31 @@ import sys
 from pathlib import Path
 
 import numpy as np
+from sklearn.feature_selection import SelectKBest, f_classif
 
 sys.path.append(str(Path(__file__).parent.parent))
 
 from src.clustering.awc import AdaptiveWeightedClustering, evaluate_clustering
 from src.utils.config import load_config
 from src.utils.file_utils import create_directories
+
+
+def _select_feature_indices(config: dict, X_train: np.ndarray, y_train: np.ndarray | None) -> list[int] | None:
+    advanced = config.get("advanced", {})
+    if not advanced.get("feature_selection", False):
+        return None
+
+    method = str(advanced.get("selection_method", "variance")).lower()
+    if method != "anova":
+        raise ValueError(f"Unsupported AWC feature selection method: {method}")
+    if y_train is None:
+        raise ValueError("ANOVA feature selection requires training labels")
+
+    k_best = int(advanced.get("k_best", min(20, X_train.shape[1])))
+    k_best = max(1, min(k_best, X_train.shape[1]))
+    selector = SelectKBest(score_func=f_classif, k=k_best)
+    selector.fit(X_train, y_train)
+    return selector.get_support(indices=True).astype(int).tolist()
 
 
 def main():
@@ -40,6 +59,7 @@ def main():
     y_train = np.load(train_labels_path) if train_labels_path.exists() else None
     X_test = np.load(test_data_path) if test_data_path.exists() else X_train
     y_test = np.load(test_labels_path) if test_labels_path.exists() else None
+    feature_indices = _select_feature_indices(config, X_train, y_train)
 
     model = AdaptiveWeightedClustering(
         n_clusters=config["data"]["n_clusters"],
@@ -47,6 +67,7 @@ def main():
         tol=config["algorithm"]["tol"],
         initial_weights=config["algorithm"]["initial_weights"],
         feature_importance=config["algorithm"]["feature_importance"],
+        feature_indices=feature_indices,
         random_state=config["algorithm"]["random_state"],
     )
 
@@ -72,6 +93,8 @@ def main():
         "checkpoint_path": str(checkpoint_path),
         "train_shape": list(X_train.shape),
         "test_shape": list(X_test.shape),
+        "selected_feature_count": len(feature_indices) if feature_indices is not None else X_train.shape[1],
+        "selected_feature_indices": feature_indices,
         "train_labels_available": y_train is not None,
         "test_labels_available": y_test is not None,
     }
@@ -80,6 +103,8 @@ def main():
         json.dump(output, f, indent=2, cls=NumpyEncoder)
 
     print(f"Model saved: {checkpoint_path}")
+    if feature_indices is not None:
+        print(f"Selected ANOVA features: {len(feature_indices)}/{X_train.shape[1]}")
     print(f"Metrics saved: {metrics_path}")
     print("Evaluation:")
     for key, value in eval_metrics.items():

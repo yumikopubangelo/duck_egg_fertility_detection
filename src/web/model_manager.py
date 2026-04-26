@@ -84,6 +84,7 @@ class AWCModelManager:
         self.model = None
         self.scaler: StandardScaler | None = None
         self.centroids: np.ndarray | None = None
+        self.feature_indices: np.ndarray | None = None
         self.cluster_stats: Dict[int, ClusterStats] = {}
         self.cluster_label_map: Dict[int, str] = {}
         self.evaluation: Dict[str, object] = {}
@@ -125,16 +126,24 @@ class AWCModelManager:
                 f"{len(X_train)} features vs {len(y_train)} labels"
             )
 
+        indices = getattr(self.model, "feature_indices_", None)
+        if indices is None:
+            indices = getattr(self.model, "feature_indices", None)
+        self.feature_indices = None if indices is None else np.asarray(indices, dtype=int)
+
+        X_model = self._model_features(X_train)
         self.centroids = np.asarray(self.model.centroids_, dtype=np.float32)
         if self.centroids.ndim != 2:
             raise ValueError(f"AWC centroids must be 2D, got shape {self.centroids.shape}")
-        if X_train.shape[1] != self.centroids.shape[1]:
+        if X_model.shape[1] != self.centroids.shape[1]:
             raise ValueError(
                 "Feature dimension mismatch: "
-                f"training has {X_train.shape[1]}, model expects {self.centroids.shape[1]}"
+                f"training has {X_model.shape[1]}, model expects {self.centroids.shape[1]}"
             )
 
-        self.scaler = StandardScaler().fit(X_train)
+        self.scaler = getattr(self.model, "scaler_", None)
+        if self.scaler is None:
+            self.scaler = StandardScaler().fit(X_model)
         train_clusters = self._nearest_clusters(X_train)
         self.cluster_stats = self._build_cluster_stats(train_clusters, y_train)
         self.cluster_label_map = {
@@ -151,9 +160,25 @@ class AWCModelManager:
     def _nearest_clusters(self, features: np.ndarray) -> np.ndarray:
         if self.scaler is None or self.centroids is None:
             raise RuntimeError("AWC artifacts are not loaded")
-        scaled = self.scaler.transform(np.asarray(features, dtype=np.float32))
+        model_features = self._model_features(np.asarray(features, dtype=np.float32))
+        scaled = self.scaler.transform(model_features)
         distances = np.linalg.norm(scaled[:, np.newaxis, :] - self.centroids[np.newaxis, :, :], axis=2)
         return np.argmin(distances, axis=1)
+
+    def _model_features(self, features: np.ndarray) -> np.ndarray:
+        matrix = np.asarray(features, dtype=np.float32)
+        if matrix.ndim == 1:
+            matrix = matrix.reshape(1, -1)
+        if self.feature_indices is None:
+            return matrix
+        if matrix.shape[1] == len(self.feature_indices):
+            return matrix
+        if int(self.feature_indices.max()) >= matrix.shape[1]:
+            raise ValueError(
+                f"Feature matrix has {matrix.shape[1]} values, "
+                f"but selected feature index {int(self.feature_indices.max())} is required"
+            )
+        return matrix[:, self.feature_indices]
 
     def _build_cluster_stats(self, clusters: np.ndarray, labels: np.ndarray) -> Dict[int, ClusterStats]:
         stats: Dict[int, ClusterStats] = {}
@@ -222,12 +247,13 @@ class AWCModelManager:
             raise RuntimeError("AWC artifacts are not loaded")
 
         vector = np.asarray(features, dtype=np.float32).reshape(1, -1)
-        if vector.shape[1] != self.centroids.shape[1]:
+        model_vector = self._model_features(vector)
+        if model_vector.shape[1] != self.centroids.shape[1]:
             raise ValueError(
-                f"Feature vector has {vector.shape[1]} values, expected {self.centroids.shape[1]}"
+                f"Feature vector has {model_vector.shape[1]} model values, expected {self.centroids.shape[1]}"
             )
 
-        scaled = self.scaler.transform(vector)
+        scaled = self.scaler.transform(model_vector)
         distances = np.linalg.norm(scaled - self.centroids, axis=1)
         cluster_probs = self._softmax_negative_distances(distances)
         cluster_id = int(np.argmin(distances))
@@ -264,6 +290,12 @@ class AWCModelManager:
             "model_path": str(self.model_path),
             "train_features_path": str(self.train_features_path),
             "n_clusters": int(getattr(self.model, "n_clusters", len(self.cluster_stats))),
+            "selected_feature_count": (
+                int(len(self.feature_indices)) if self.feature_indices is not None else None
+            ),
+            "selected_feature_indices": (
+                self.feature_indices.astype(int).tolist() if self.feature_indices is not None else None
+            ),
             "cluster_label_map": self.cluster_label_map,
             "cluster_stats": {
                 cluster_id: {

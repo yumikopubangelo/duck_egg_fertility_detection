@@ -127,8 +127,9 @@ advanced:
   metrics: ["silhouette", "davies_bouldin", "calinski_harabasz"]
   
   # Feature selection
-  feature_selection: false
-  selection_method: "variance"
+  feature_selection: true
+  selection_method: "anova"
+  k_best: 20
   variance_threshold: 0.1
 
 # Egg Fertility Specific Configuration

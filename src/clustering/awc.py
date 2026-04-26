@@ -34,12 +34,17 @@ class AdaptiveWeightedClustering:
         tol: float = 1e-4,
         initial_weights: Optional[List[float]] = None,
         feature_importance: Optional[List[float]] = None,
+        feature_indices: Optional[List[int]] = None,
         random_state: Optional[int] = None
     ):
         self.n_clusters = n_clusters
         self.max_iter = max_iter
         self.tol = tol
         self.random_state = random_state
+        self.feature_indices = None if feature_indices is None else np.array(feature_indices, dtype=int)
+        self.feature_indices_ = self.feature_indices
+        self.n_input_features_ = None
+        self.n_selected_features_ = None
         
         # Initialize weights
         if initial_weights is None:
@@ -74,8 +79,31 @@ class AdaptiveWeightedClustering:
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         ch.setFormatter(formatter)
         
-        # Add handler to logger
-        self.logger.addHandler(ch)
+        # Add handler to logger once; experiments create many short-lived models.
+        if not self.logger.handlers:
+            self.logger.addHandler(ch)
+
+    def transform_features(self, X: np.ndarray) -> np.ndarray:
+        """Apply the stored feature subset, if this model was trained with one."""
+        X = np.asarray(X)
+        indices = getattr(self, "feature_indices_", None)
+        if indices is None:
+            indices = getattr(self, "feature_indices", None)
+        if indices is None:
+            return X
+
+        indices = np.asarray(indices, dtype=int)
+        if X.ndim != 2:
+            raise ValueError("X should be 2-dimensional")
+        if len(indices) == 0:
+            raise ValueError("feature_indices cannot be empty")
+        if X.shape[1] == len(indices):
+            return X
+        if int(indices.max()) >= X.shape[1]:
+            raise ValueError(
+                f"X has {X.shape[1]} features, but selected feature index {int(indices.max())} is required"
+            )
+        return X[:, indices]
     
     def _initialize_centroids(self, X: np.ndarray) -> np.ndarray:
         """Initialize centroids using k-means++"""
@@ -195,6 +223,10 @@ class AdaptiveWeightedClustering:
         
         if X.ndim != 2:
             raise ValueError("X should be 2-dimensional")
+
+        self.n_input_features_ = X.shape[1]
+        X = self.transform_features(X)
+        self.n_selected_features_ = X.shape[1]
         
         n_samples, n_features = X.shape
         
@@ -264,6 +296,8 @@ class AdaptiveWeightedClustering:
         
         if X.ndim != 2:
             raise ValueError("X should be 2-dimensional")
+
+        X = self.transform_features(X)
         
         # Normalize features with the training scaler. Older pickle files may
         # not contain scaler_, so they fall back to the legacy behavior.
@@ -277,6 +311,28 @@ class AdaptiveWeightedClustering:
         # Calculate distances with weights
         distances = np.linalg.norm(X_scaled[:, np.newaxis] - self.centroids_, axis=2)
         return np.argmin(distances, axis=1)
+
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
+        """Return distance-based cluster probabilities."""
+        if self.centroids_ is None:
+            raise ValueError("Model not fitted yet")
+
+        X = np.array(X)
+        if X.ndim != 2:
+            raise ValueError("X should be 2-dimensional")
+
+        X = self.transform_features(X)
+        scaler = getattr(self, "scaler_", None)
+        if scaler is not None:
+            X_scaled = scaler.transform(X)
+        else:
+            scaler = StandardScaler()
+            X_scaled = scaler.fit_transform(X)
+
+        distances = np.linalg.norm(X_scaled[:, np.newaxis] - self.centroids_, axis=2)
+        scores = -distances
+        exp_scores = np.exp(scores - scores.max(axis=1, keepdims=True))
+        return exp_scores / (exp_scores.sum(axis=1, keepdims=True) + 1e-12)
     
     def fit_predict(self, X: np.ndarray) -> np.ndarray:
         """Fit model and return cluster labels"""
@@ -295,7 +351,14 @@ class AdaptiveWeightedClustering:
             'silhouette_score': self.silhouette_,
             'weights': self.weights.tolist(),
             'feature_importance': self.feature_importance.tolist(),
-            'centroids': self.centroids_.tolist()
+            'centroids': self.centroids_.tolist(),
+            'feature_indices': (
+                self.feature_indices_.tolist()
+                if getattr(self, "feature_indices_", None) is not None
+                else None
+            ),
+            'n_input_features': self.n_input_features_,
+            'n_selected_features': self.n_selected_features_,
         }
         
         return cluster_info

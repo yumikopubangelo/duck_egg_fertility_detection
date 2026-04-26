@@ -114,14 +114,14 @@
           <div class="step-badge bg-primary text-white">2</div>
           <div>
             <div class="fw-semibold" style="font-size:.875rem">Ekstraksi Fitur Klasikal</div>
-            <div class="text-muted" style="font-size:.78rem">50 fitur — warna, tekstur (LBP), bentuk, frekuensi (FFT)</div>
+            <div class="text-muted" style="font-size:.78rem">70 fitur — warna, tekstur (LBP/GLCM), bentuk, frekuensi (FFT)</div>
           </div>
         </div>
         <div class="pipeline-step">
           <div class="step-badge bg-success text-white">3</div>
           <div>
             <div class="fw-semibold" style="font-size:.875rem">Klasifikasi AWC</div>
-            <div class="text-muted" style="font-size:.78rem">Adaptive Weighted Clustering · 2 cluster · Akurasi 87.5%</div>
+            <div class="text-muted" style="font-size:.78rem">Adaptive Weighted Clustering · 2 cluster · Akurasi 91.7%</div>
           </div>
         </div>
         <div class="pipeline-step">
@@ -171,8 +171,9 @@
             <tbody>
               <tr>
                 <td class="ps-3 py-2">
-                  <span class="fw-semibold">FCM</span>
+                  <span class="fw-semibold">AWC</span>
                   <span class="badge bg-success ms-1" style="font-size:.68rem">Best</span>
+                  <span class="badge bg-primary ms-1" style="font-size:.68rem">Aktif</span>
                 </td>
                 <td class="text-center py-2">
                   <span class="fw-bold text-success">91.7%</span>
@@ -184,22 +185,21 @@
               </tr>
               <tr class="table-primary">
                 <td class="ps-3 py-2">
-                  <span class="fw-semibold">AWC</span>
-                  <span class="badge bg-primary ms-1" style="font-size:.68rem">Aktif</span>
+                  <span class="fw-semibold">FCM</span>
                 </td>
-                <td class="text-center py-2 fw-semibold">87.5%</td>
-                <td class="text-center py-2">80.0%</td>
-                <td class="text-center py-2"><span class="badge bg-success-subtle text-success border border-success-subtle">100%</span></td>
-                <td class="text-center py-2">88.9%</td>
-                <td class="text-center pe-3 py-2"><strong>95.1%</strong></td>
+                <td class="text-center py-2 fw-semibold">83.3%</td>
+                <td class="text-center py-2">83.3%</td>
+                <td class="text-center py-2">83.3%</td>
+                <td class="text-center py-2">83.3%</td>
+                <td class="text-center pe-3 py-2">87.5%</td>
               </tr>
               <tr>
                 <td class="ps-3 py-2">K-Means</td>
-                <td class="text-center py-2">87.5%</td>
-                <td class="text-center py-2">80.0%</td>
-                <td class="text-center py-2"><span class="badge bg-success-subtle text-success border border-success-subtle">100%</span></td>
-                <td class="text-center py-2">88.9%</td>
-                <td class="text-center pe-3 py-2">94.4%</td>
+                <td class="text-center py-2">79.2%</td>
+                <td class="text-center py-2">81.8%</td>
+                <td class="text-center py-2">75.0%</td>
+                <td class="text-center py-2">78.3%</td>
+                <td class="text-center pe-3 py-2"><strong>95.1%</strong></td>
               </tr>
             </tbody>
           </table>
@@ -293,7 +293,7 @@
           </div>
           <div class="col-6 col-sm-4 col-md-2">
             <div class="info-box">
-              <div class="info-value">50</div>
+              <div class="info-value">70</div>
               <div class="text-muted" style="font-size:.75rem">Fitur / Gambar</div>
             </div>
           </div>
@@ -338,7 +338,7 @@ fetch('/api/model/info')
   .then(r => r.json())
   .then(d => {
     const acc = d.evaluation?.accuracy != null
-      ? (d.evaluation.accuracy * 100).toFixed(1) + '%' : '87.5%';
+      ? (d.evaluation.accuracy * 100).toFixed(1) + '%' : '91.7%';
     const testN      = d.evaluation?.test_samples ?? 24;
     const nClusters  = d.n_clusters ?? 2;
     const silhouette = d.silhouette_score != null ? d.silhouette_score.toFixed(3) : '—';

@@ -150,7 +150,7 @@ btnPredict.addEventListener('click', () => {
         + '<div class="col-5 text-muted">File</div><div class="col-7 fw-semibold text-truncate">' + (d.original_filename || selectedFile.name) + '</div>'
         + '<div class="col-5 text-muted">Metode</div><div class="col-7">Adaptive Weighted Clustering</div>'
         + '<div class="col-5 text-muted">Cluster ID</div><div class="col-7">#' + d.cluster_id + ' &middot; purity ' + purityPct + '%</div>'
-        + '<div class="col-5 text-muted">Fitur diekstrak</div><div class="col-7">' + (d.feature_count || 50) + ' fitur</div>'
+        + '<div class="col-5 text-muted">Fitur diekstrak</div><div class="col-7">' + (d.feature_count || 70) + ' fitur</div>'
         + '<div class="col-5 text-muted">Ukuran input</div><div class="col-7">' + imgShape + ' px</div>'
         + '<div class="col-5 text-muted">ID Prediksi</div><div class="col-7 font-monospace">' + (d.id || '-').substring(0,8) + '…</div>'
         + '<div class="col-5 text-muted">Waktu</div><div class="col-7">' + (d.timestamp ? new Date(d.timestamp).toLocaleString('id-ID') : '-') + '</div>'
