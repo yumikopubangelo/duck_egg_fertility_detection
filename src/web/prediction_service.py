@@ -1,4 +1,4 @@
-"""Image-to-fertility prediction service."""
+﻿"""Image-to-fertility prediction service."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ import cv2
 import numpy as np
 
 from src.features.classical_features import ClassicalFeatureExtractor
+from src.features.hybrid_features import build_default_feature_extractor
 from src.preprocessing import DuckEggPreprocessor
 from src.web.model_manager import AWCModelManager, FeaturePrediction, get_default_model_manager
 
@@ -37,11 +38,17 @@ class PredictionService:
         self,
         model_manager: AWCModelManager | None = None,
         preprocessor: DuckEggPreprocessor | None = None,
-        extractor: ClassicalFeatureExtractor | None = None,
+        extractor=None,
     ) -> None:
         self.model_manager = model_manager or get_default_model_manager()
         self.preprocessor = preprocessor or DuckEggPreprocessor()
-        self.extractor = extractor or ClassicalFeatureExtractor()
+        self.extractor = extractor or self._default_extractor()
+
+    def _default_extractor(self):
+        metadata_path = self.model_manager.train_features_path.parent / "feature_metadata.json"
+        if metadata_path.exists():
+            return build_default_feature_extractor(metadata_path, preprocess_override=False)
+        return ClassicalFeatureExtractor()
 
     def predict_file(self, image_path: str | Path) -> ImagePrediction:
         path = Path(image_path)

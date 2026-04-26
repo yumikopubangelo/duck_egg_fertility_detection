@@ -1,0 +1,198 @@
+﻿DRAF REVISI BAB III DAN BAB IV
+Diselaraskan dengan penelitian Pak Andi dan arah revisi pada file BAB 3-4 revisi
+
+BAB III
+KERANGKA BERPIKIR, KONSEP PENELITIAN, DAN HIPOTESIS
+
+3.1 Kerangka Berpikir
+Penelitian ini dilandasi oleh permasalahan rendahnya efisiensi seleksi telur bebek fertil pada tahap awal inkubasi akibat keterbatasan metode candling manual. Pada praktik konvensional, penilaian fertilitas masih sangat bergantung pada pengalaman operator dalam mengamati perubahan visual di dalam telur melalui pencahayaan belakang. Pendekatan tersebut bersifat subjektif, tidak selalu konsisten antarpengamat, dan sulit diterapkan secara stabil pada skala produksi yang lebih besar. Keterbatasan ini menjadi semakin nyata pada telur bebek karena karakteristik cangkangnya relatif lebih tebal, lebih buram, dan memiliki transmisi cahaya yang lebih rendah dibandingkan telur ayam, sehingga struktur internal telur lebih sukar diamati secara visual.
+
+Di sisi lain, perkembangan computer vision dan deep learning membuka peluang untuk membangun sistem deteksi fertilitas telur yang lebih objektif, terukur, dan non-destruktif. Namun, sebagian besar penelitian terdahulu masih berfokus pada telur ayam, kondisi pencahayaan laboratorium yang ideal, dan model klasifikasi langsung berbasis citra utuh. Pendekatan tersebut belum sepenuhnya menjawab tantangan khas telur bebek, khususnya pada citra candling yang cenderung memiliki kontras rendah, noise relatif tinggi, dan pola vaskularisasi embrio yang tipis atau kurang tegas pada masa inkubasi awal.
+
+Berdasarkan kajian pustaka, dapat diidentifikasi beberapa kesenjangan penelitian. Pertama, masih terbatas penelitian yang secara khusus mengembangkan model deteksi fertilitas untuk telur bebek dengan mempertimbangkan karakteristik optiknya. Kedua, sebagian pendekatan sebelumnya belum mengintegrasikan segmentasi area biologis dengan strategi ekstraksi fitur hibrida yang mampu mewakili informasi tekstural, morfologis, dan representasi abstrak secara bersamaan. Ketiga, pendekatan clustering konvensional seperti K-Means dan Fuzzy C-Means pada umumnya belum memberikan mekanisme pembobotan fitur yang cukup adaptif terhadap variasi kualitas citra dan keragaman biologis objek.
+
+Atas dasar kesenjangan tersebut, penelitian ini dirancang dengan alur berpikir sebagai berikut. Tahap pertama adalah membangun kualitas citra yang layak analisis melalui praproses berbasis Contrast Limited Adaptive Histogram Equalization, homomorphic filtering, dan bilateral denoising. Tahap kedua adalah memisahkan atau menandai region of interest biologis menggunakan arsitektur U-Net lightweight, sehingga analisis tidak lagi dilakukan pada citra mentah secara keseluruhan, tetapi pada area yang paling relevan terhadap penentuan fertilitas. Tahap ketiga adalah mengekstraksi dua kelompok fitur yang saling melengkapi, yaitu fitur klasik dan deep embedding. Fitur klasik berfungsi menangkap karakteristik yang dapat dijelaskan secara visual dan statistik, sedangkan deep embedding berfungsi menangkap pola non-linear yang lebih kompleks. Tahap keempat adalah melakukan klasifikasi atau pengelompokan fertilitas menggunakan Adaptive Weight Clustering, yaitu algoritma yang memberi bobot adaptif pada fitur berdasarkan kontribusi informasinya.
+
+Secara logis, penelitian ini berangkat dari asumsi bahwa kualitas citra yang lebih baik akan memperbaiki hasil segmentasi, hasil segmentasi yang lebih tepat akan meningkatkan mutu fitur yang diekstraksi, dan kombinasi fitur yang lebih informatif akan menghasilkan klasifikasi yang lebih akurat. Dengan demikian, hubungan antartahap dalam penelitian ini bersifat hirarkis dan kausal: kualitas input memengaruhi kualitas segmentasi, kualitas segmentasi memengaruhi kualitas representasi fitur, dan kualitas fitur memengaruhi kinerja klasifikasi.
+
+Kerangka berpikir penelitian ini tidak hanya menempatkan U-Net dan AWC sebagai dua komponen teknis yang terpisah, tetapi sebagai bagian dari satu sistem adaptif yang saling mendukung. U-Net digunakan untuk memfokuskan analisis pada area biologis penting, sedangkan AWC digunakan untuk mengoptimalkan pemanfaatan fitur hasil segmentasi tersebut. Integrasi keduanya diharapkan menghasilkan sistem yang lebih akurat, lebih stabil terhadap variasi data, dan lebih relevan untuk diterapkan pada konteks industri hatchery atau penelitian peternakan berbasis pencitraan.
+
+Secara teoritis, penelitian ini berkontribusi pada pengembangan model integratif dalam bio-image analysis non-destruktif, terutama melalui penggabungan segmentasi citra, fusi fitur hibrida, dan pembobotan adaptif. Secara praktis, penelitian ini diharapkan menghasilkan model deteksi fertilitas telur bebek yang dapat membantu proses seleksi telur sebelum inkubasi lanjutan, menekan pemborosan energi dan waktu, serta meningkatkan efisiensi manajemen penetasan.
+
+[Gambar 3.1 Kerangka Berpikir Penelitian]
+
+3.2 Konsep Penelitian
+Konsep penelitian ini dibangun di atas gagasan bahwa deteksi fertilitas telur bebek akan lebih efektif apabila dilakukan melalui pipeline bertahap yang memadukan pengolahan citra, segmentasi, ekstraksi fitur, dan klasifikasi adaptif. Input utama penelitian adalah citra candling telur bebek berumur 5-7 hari inkubasi yang diperoleh menggunakan sistem pencahayaan belakang terkontrol. Pada usia tersebut, perbedaan struktur internal antara telur fertil dan infertil mulai tampak, tetapi belum selalu mudah dikenali secara visual, sehingga memerlukan bantuan pemodelan komputasional.
+
+Tahap pertama dalam konsep penelitian adalah praproses citra. Pada tahap ini, citra mentah ditingkatkan kualitasnya melalui CLAHE untuk memperbaiki kontras lokal, homomorphic filtering untuk menormalkan pencahayaan tidak seragam, dan bilateral filtering untuk menurunkan noise sambil mempertahankan tepi penting. Tahap praproses juga dapat mencakup cropping, resizing, dan registrasi sederhana agar posisi serta skala objek telur lebih seragam. Tujuan utama tahap ini adalah menghasilkan citra dengan visibilitas struktur internal yang lebih baik sebagai dasar segmentasi.
+
+Tahap kedua adalah segmentasi citra menggunakan U-Net lightweight. Arsitektur ini dipilih karena memiliki struktur encoder-decoder dengan skip connections yang efektif untuk mempertahankan detail spasial sekaligus membangun representasi semantik tingkat tinggi. Pada penelitian ini, segmentasi diarahkan untuk menandai region biologis utama dan area embrionik yang relevan terhadap identifikasi fertilitas. Hasil segmentasi diperlakukan sebagai region of interest yang kemudian digunakan untuk ekstraksi fitur yang lebih terarah. Dengan demikian, model tidak menilai seluruh citra secara seragam, tetapi berfokus pada area yang memiliki makna biologis lebih tinggi.
+
+Tahap ketiga adalah ekstraksi dan fusi fitur. Ekstraksi dilakukan melalui dua jalur. Jalur pertama adalah fitur klasik yang mencakup GLCM untuk tekstur spasial, LBP untuk pola mikro, histogram intensitas untuk distribusi terang-gelap, statistik intensitas untuk memperjelas karakter visual global, serta fitur morfologi area hasil segmentasi seperti luas area, perimeter, densitas, kekompakan, dan indikator struktur vaskular atau embrionik. Jalur kedua adalah fitur deep embedding yang diperoleh dari lapisan bottleneck U-Net melalui Global Average Pooling atau mekanisme pooling serupa. Kedua jalur ini digabungkan menjadi satu vektor fitur hibrida yang dinormalisasi sehingga siap diproses pada tahap klasifikasi.
+
+Tahap keempat adalah klasifikasi dengan Adaptive Weight Clustering. Secara konseptual, AWC digunakan untuk membentuk dua kelompok utama, yaitu fertil dan infertil, dengan mempertimbangkan relevansi relatif setiap fitur. Berbeda dari metode clustering yang menggunakan bobot tetap, AWC melakukan penyesuaian bobot secara iteratif sehingga fitur yang lebih diskriminatif memiliki kontribusi lebih besar dalam pembentukan klaster. Pada implementasi evaluatif, penamaan klaster fertil atau infertil dilakukan berdasarkan label ground truth pada data acuan atau data pelatihan sehingga hasil clustering dapat dibandingkan langsung dengan kondisi aktual telur.
+
+Tahap kelima adalah evaluasi. Evaluasi dilakukan pada dua level. Pertama, evaluasi segmentasi menggunakan metrik seperti Dice Coefficient, Intersection over Union, dan Pixel Accuracy. Kedua, evaluasi klasifikasi menggunakan accuracy, precision, recall atau sensitivity, specificity, F1-score, ROC-AUC, dan Brier Score. Untuk memperkuat validitas penelitian, hasil AWC dibandingkan dengan baseline K-Means, Fuzzy C-Means, dan model deep learning end-to-end seperti MobileNetV3.
+
+Dengan konsep tersebut, penelitian ini memandang sistem deteksi fertilitas bukan sebagai satu model tunggal, melainkan sebagai rangkaian proses yang saling menguatkan. Praproses memperjelas citra, segmentasi memfokuskan analisis, fusi fitur memperkaya representasi, dan AWC menyeleksi kontribusi fitur secara adaptif. Rangkaian inilah yang menjadi inti kebaruan penelitian.
+
+[Tabel 3.1 Parameter Penelitian per Tahap Sistem]
+Tahap praproses: parameter utama berupa kontras, pencahayaan, noise, dan ukuran citra; metode berupa CLAHE, homomorphic filtering, bilateral filtering, cropping, dan resizing; output berupa citra praproses dengan kualitas visual lebih baik; evaluasi menggunakan PSNR, SSIM, entropy, dan inspeksi visual.
+Tahap segmentasi: parameter utama berupa region biologis dan area embrionik; metode berupa U-Net lightweight encoder-decoder dengan skip connections; output berupa mask atau peta area biologis; evaluasi menggunakan Dice, IoU, dan Pixel Accuracy.
+Tahap ekstraksi fitur klasik: parameter utama berupa tekstur, intensitas, dan morfologi; metode berupa GLCM, LBP, histogram intensitas, statistik intensitas, dan fitur morfologi; output berupa vektor fitur klasik; evaluasi menggunakan analisis kontribusi fitur.
+Tahap ekstraksi fitur deep: parameter utama berupa representasi abstrak citra; metode berupa bottleneck U-Net dan Global Average Pooling; output berupa deep embedding; evaluasi menggunakan analisis ablation.
+Tahap fusi fitur: parameter utama berupa integrasi multi-level; metode berupa concatenation dan normalisasi z-score; output berupa vektor fitur hibrida; evaluasi berupa perbandingan fitur tunggal dan fitur gabungan.
+Tahap klasifikasi: parameter utama berupa bobot fitur dan separasi klaster; metode berupa AWC, K-Means, Fuzzy C-Means, dan MobileNetV3 baseline; output berupa label fertil atau infertil; evaluasi menggunakan accuracy, precision, recall, specificity, F1-score, ROC-AUC, dan Brier Score.
+
+3.3 Hipotesis Penelitian
+Berdasarkan latar belakang, rumusan masalah, kajian pustaka, dan kerangka berpikir yang telah dikemukakan, penelitian ini berangkat dari dugaan bahwa integrasi praproses citra adaptif, segmentasi berbasis U-Net lightweight, ekstraksi fitur hibrida, dan klasifikasi menggunakan Adaptive Weight Clustering mampu meningkatkan kinerja deteksi fertilitas telur bebek secara non-destruktif.
+
+Hipotesis umum penelitian ini adalah bahwa sistem deteksi fertilitas telur bebek yang dibangun melalui segmentasi citra dan fusi fitur hibrida akan memberikan performa klasifikasi yang lebih baik dibandingkan metode clustering konvensional maupun model pembanding yang tidak memanfaatkan pembobotan fitur adaptif.
+
+Secara khusus, hipotesis penelitian dirumuskan sebagai berikut.
+H1: Penerapan praproses citra berbasis CLAHE, homomorphic filtering, dan bilateral denoising meningkatkan kualitas citra candling telur bebek secara signifikan ditinjau dari peningkatan kontras, kestabilan pencahayaan, dan kejelasan struktur biologis.
+H2: Model U-Net lightweight mampu menghasilkan segmentasi region biologis yang lebih akurat dibandingkan pendekatan segmentasi konvensional, ditinjau dari nilai Dice Coefficient, Intersection over Union, dan Pixel Accuracy.
+H3: Penggabungan fitur klasik dan deep embedding menghasilkan representasi citra yang lebih informatif dan lebih stabil terhadap variasi optik dibandingkan penggunaan fitur klasik saja atau fitur deep saja.
+H4: Algoritma Adaptive Weight Clustering memberikan performa klasifikasi yang lebih baik daripada K-Means dan Fuzzy C-Means karena mampu menyesuaikan bobot kontribusi fitur secara adaptif selama proses pembentukan klaster.
+H5: Model yang dibangun melalui integrasi praproses, segmentasi, fusi fitur, dan AWC mampu menghasilkan kinerja klasifikasi yang kompetitif atau lebih baik dibandingkan baseline CNN end-to-end seperti MobileNetV3 pada data candling telur bebek yang terbatas dan heterogen.
+
+Seluruh hipotesis tersebut akan diuji melalui eksperimen terstruktur dan evaluasi kuantitatif. Hasil pengujian diharapkan memperlihatkan bahwa peningkatan performa bukan hanya berasal dari satu komponen tunggal, melainkan dari keterpaduan seluruh tahapan dalam pipeline penelitian.
+
+BAB IV
+METODE PENELITIAN
+
+4.1 Rancangan Penelitian
+Penelitian ini menggunakan pendekatan kuantitatif eksperimental dengan orientasi engineering research. Tujuan utamanya adalah mengembangkan, menguji, dan mengevaluasi model deteksi fertilitas telur bebek berbasis segmentasi citra dan deep learning dengan algoritma Adaptive Weight Clustering. Rancangan penelitian disusun agar setiap komponen sistem dapat diuji secara bertahap, diukur kontribusinya, dan dibandingkan dengan metode pembanding yang relevan.
+
+Secara umum, rancangan penelitian terdiri atas lima fase utama, yaitu: akuisisi dan penyusunan dataset, praproses citra, pengembangan model segmentasi, ekstraksi dan fusi fitur, serta klasifikasi dan evaluasi model. Setiap fase dihubungkan secara berurutan sehingga keluaran dari satu tahap menjadi masukan bagi tahap berikutnya.
+
+Pada fase akuisisi data, citra candling telur bebek dikumpulkan dari peternakan mitra dengan sistem pencahayaan belakang yang terkontrol. Jumlah sampel yang digunakan ditetapkan minimal 125-250 butir telur untuk eksperimen inti, dengan opsi perluasan dataset apabila ketersediaan sampel lapangan memungkinkan. Jumlah tersebut dipandang memadai untuk membangun eksperimen awal yang terukur, tetapi tetap terbuka untuk diperluas agar analisis model lebih kuat. Setiap telur diberi label fertil atau infertil berdasarkan hasil pengamatan inkubasi aktual setelah periode verifikasi.
+
+Pada fase praproses, seluruh citra dibersihkan dari variasi pencahayaan dan noise agar siap masuk ke tahap segmentasi. Pada fase segmentasi, model U-Net lightweight dikembangkan untuk menandai area biologis penting. Model dilatih menggunakan data beranotasi dan dievaluasi secara terpisah sebelum digunakan untuk menghasilkan region of interest pada tahap ekstraksi fitur.
+
+Pada fase ekstraksi fitur, citra hasil segmentasi diproses menjadi representasi numerik menggunakan dua kelompok fitur: fitur klasik dan deep embedding. Fitur-fitur tersebut kemudian dinormalisasi dan digabungkan menjadi vektor fitur hibrida. Pada fase klasifikasi, AWC digunakan untuk membentuk kelompok fertil dan infertil, kemudian hasilnya dibandingkan dengan K-Means, Fuzzy C-Means, dan MobileNetV3 sebagai baseline end-to-end.
+
+Untuk pengujian model, data dibagi ke dalam set pelatihan, validasi, dan pengujian dengan komposisi yang terkontrol, misalnya 70:15:15 atau skema serupa yang mempertahankan distribusi kelas. Selain itu, 5-fold cross-validation diterapkan pada tahap evaluasi klasifikasi untuk menguji stabilitas generalisasi model. Dengan rancangan ini, penelitian tidak hanya mengejar performa terbaik, tetapi juga menekankan reprodusibilitas, keterukuran, dan kekuatan justifikasi metodologis.
+
+[Gambar 4.1 Tahapan Penelitian]
+
+4.2 Lokasi dan Waktu Penelitian
+Penelitian ini dilaksanakan pada dua lingkungan utama. Pertama, lingkungan lapangan untuk pengambilan data primer berupa citra candling telur bebek, yaitu di peternakan bebek Desa Cihateup, Kecamatan Rajapolah, Kabupaten Tasikmalaya, Provinsi Jawa Barat. Lokasi ini dipilih karena memiliki ketersediaan telur bebek yang memadai, aktivitas inkubasi yang representatif, dan kondisi lapangan yang memungkinkan pengambilan data secara berulang.
+
+Kedua, lingkungan komputasi atau laboratorium untuk pengolahan data, pengembangan model, pelatihan, dan evaluasi hasil. Kegiatan ini dapat dilaksanakan di laboratorium komputasi yang mendukung penelitian doktoral atau pada workstation komputasi yang memiliki spesifikasi GPU memadai. Pemisahan dua lingkungan ini penting karena proses akuisisi data dan proses pemodelan membutuhkan sarana yang berbeda.
+
+Waktu penelitian disusun secara bertahap mengikuti urutan kerja ilmiah, yaitu persiapan, pengumpulan data, anotasi dan praproses, pelatihan model segmentasi, ekstraksi fitur, pelatihan atau pengujian klasifikasi, evaluasi statistik, dan penulisan hasil. Secara administratif, waktu pelaksanaan dapat mengikuti kalender penelitian program doktor, sedangkan secara teknis penelitian dibagi ke dalam fase-fase operasional agar progres setiap tahap dapat dipantau dengan jelas.
+
+[Tabel 4.1 Jadwal Penelitian]
+
+4.3 Ruang Lingkup Penelitian
+Ruang lingkup penelitian ini dibatasi pada pengembangan model deteksi fertilitas telur bebek secara non-destruktif berbasis citra candling. Objek penelitian adalah telur bebek pada usia inkubasi 5-7 hari karena pada rentang ini perbedaan awal antara telur fertil dan infertil mulai terlihat, tetapi masih cukup menantang untuk diamati secara manual. Penelitian tidak mencakup telur dari spesies unggas lain agar karakteristik objek tetap homogen dan fokus pembahasan tetap pada telur bebek.
+
+Dari sisi teknis, penelitian mencakup akuisisi citra, praproses, segmentasi menggunakan U-Net lightweight, ekstraksi fitur klasik dan deep embedding, fusi fitur, klasifikasi dengan AWC, serta perbandingan dengan metode baseline. Penelitian tidak membahas aspek kimiawi, fisiologis, atau genetik telur secara langsung, melainkan fokus pada aspek visual, komputasional, dan pemodelan machine learning.
+
+Dari sisi hasil, penelitian difokuskan pada pengembangan prototipe model cerdas dan evaluasi performanya. Penelitian ini tidak mencakup perancangan mesin hatchery industri secara penuh, integrasi IoT skala besar, atau otomasi produksi massal. Meski demikian, keluaran penelitian diharapkan dapat menjadi dasar menuju pengembangan sistem seleksi telur yang lebih terotomasi.
+
+4.4 Penentuan Sumber Data
+Sumber data dalam penelitian ini terdiri atas data primer dan data sekunder. Data primer berupa citra candling telur bebek yang diperoleh langsung dari lapangan melalui proses akuisisi terkontrol. Data primer inilah yang menjadi dataset utama untuk pelatihan, validasi, dan pengujian model.
+
+Pengumpulan data primer dilakukan melalui beberapa tahapan. Pertama, dilakukan seleksi sampel telur berdasarkan kondisi fisik, umur inkubasi, dan kelayakan visual. Kedua, telur diambil citranya menggunakan sistem pencahayaan belakang yang dijaga konsisten. Ketiga, hasil fertilitas diverifikasi melalui observasi inkubasi aktual sehingga tersedia label ground truth yang dapat digunakan untuk evaluasi.
+
+Data sekunder digunakan sebagai pendukung konseptual dan pembanding metodologis. Data sekunder meliputi artikel jurnal, buku referensi, prosiding, standar teknis, dan laporan statistik yang berkaitan dengan telur bebek, pengolahan citra biologis, segmentasi U-Net, serta algoritma clustering adaptif. Data sekunder ini digunakan untuk memperkuat landasan teori, menyusun indikator evaluasi, dan menempatkan hasil penelitian dalam konteks state of the art.
+
+Kriteria inklusi data primer meliputi telur bebek sehat, tidak retak, ukuran relatif seragam, dan berada pada umur inkubasi yang telah ditentukan. Kriteria eksklusi meliputi telur retak, citra yang buram, citra dengan pencahayaan gagal, atau data yang tidak memiliki verifikasi hasil inkubasi. Penetapan kriteria ini bertujuan menjaga kualitas dataset agar hasil eksperimen tidak bias oleh data yang memang tidak layak dianalisis.
+
+4.5 Variabel Penelitian
+4.5.1 Variabel Independen
+Variabel independen adalah faktor-faktor yang diduga memengaruhi performa sistem deteksi fertilitas. Dalam penelitian ini, variabel independen meliputi: metode praproses citra, yaitu CLAHE, homomorphic filtering, bilateral denoising, serta kombinasi atau ablation antar-metode; konfigurasi model segmentasi, termasuk arsitektur U-Net lightweight, ukuran input, optimizer, loss function, dan strategi regularisasi; jenis fitur yang digunakan, yaitu fitur klasik, fitur deep embedding, dan fitur hibrida hasil fusi keduanya; metode klasifikasi atau clustering, yaitu AWC sebagai metode utama, serta K-Means, Fuzzy C-Means, dan MobileNetV3 sebagai baseline pembanding; serta parameter AWC seperti bobot awal, mekanisme pembaruan bobot, dan parameter iterasi atau konvergensi.
+
+4.5.2 Variabel Dependen
+Variabel dependen adalah keluaran yang diukur untuk menilai keberhasilan sistem. Variabel dependen pada penelitian ini meliputi kualitas hasil segmentasi yang diukur menggunakan Dice Coefficient, Intersection over Union, dan Pixel Accuracy; kinerja klasifikasi fertilitas yang diukur menggunakan accuracy, precision, recall atau sensitivity, specificity, F1-score, ROC-AUC, dan Brier Score; serta efisiensi komputasi yang dapat diamati melalui waktu inferensi, kebutuhan memori, atau kestabilan proses pelatihan.
+
+4.5.3 Variabel Kontrol
+Variabel kontrol adalah faktor-faktor yang dijaga tetap agar perubahan hasil benar-benar mencerminkan pengaruh variabel independen. Variabel kontrol dalam penelitian ini mencakup usia inkubasi telur pada saat akuisisi citra, yaitu 5-7 hari; jenis dan temperatur warna sumber cahaya, yaitu LED putih sekitar 6500K; posisi dan jarak kamera terhadap objek telur; spesifikasi kamera, resolusi citra, dan parameter eksposur; kondisi lingkungan saat akuisisi, termasuk cahaya sekitar dan stabilitas posisi alat; format serta resolusi penyimpanan data citra; dan prosedur penetapan label ground truth berdasarkan verifikasi inkubasi aktual.
+
+[Tabel 4.2 Variabel Kontrol Penelitian]
+
+4.6 Bahan Penelitian
+Bahan utama penelitian adalah telur bebek (Anas platyrhynchos domesticus) yang diperoleh dari peternakan mitra. Sampel dipilih dari telur yang tidak retak, tidak mengalami deformasi visual, dan memiliki ukuran yang relatif seragam agar variasi citra lebih merefleksikan kondisi fertilitas, bukan cacat fisik sampel. Untuk eksperimen inti, penelitian menargetkan minimal 125-250 butir telur berumur 5-7 hari inkubasi, dengan kemungkinan penambahan jumlah sampel apabila proses akuisisi di lapangan berlangsung lancar.
+
+Selain bahan biologis, penelitian menggunakan bahan pendukung dalam bentuk data citra digital, anotasi mask segmentasi, dan label ground truth hasil verifikasi inkubasi. Citra sebaiknya disimpan dalam format yang mempertahankan detail visual dengan baik, seperti TIFF, PNG, atau JPEG berkualitas tinggi, sesuai kapasitas penyimpanan dan kebutuhan eksperimen.
+
+Bahan lain yang bersifat konseptual adalah kumpulan referensi ilmiah yang menjadi dasar pemilihan metode. Bahan ini penting karena penelitian tidak hanya berorientasi pada hasil akhir, tetapi juga pada ketepatan argumentasi ilmiah terhadap pilihan metode yang digunakan.
+
+4.7 Instrumen Penelitian
+4.7.1 Instrumen Akuisisi Data
+Instrumen akuisisi data digunakan untuk menghasilkan citra candling yang seragam dan cukup representatif. Instrumen tersebut meliputi kamera digital resolusi tinggi untuk menangkap detail struktur internal telur; sumber cahaya LED putih 6500K sebagai pencahayaan belakang; dudukan telur agar posisi objek tetap stabil selama pemotretan; tripod atau sistem penyangga kamera untuk menjaga sudut dan jarak pengambilan gambar; kotak atau ruang semi-kedap cahaya untuk meminimalkan gangguan cahaya luar; serta mesin inkubasi atau sarana verifikasi untuk memastikan label fertil atau infertil berdasarkan perkembangan aktual.
+
+[Tabel 4.3 Spesifikasi Instrumen Akuisisi Data]
+1. Kamera digital, spesifikasi minimum 24 MP, fungsi untuk akuisisi citra candling.
+2. Lampu LED, spesifikasi 6500K dengan intensitas stabil, fungsi sebagai backlight illumination.
+3. Dudukan telur, fungsi menjaga orientasi objek.
+4. Tripod kamera, fungsi menjaga konsistensi sudut pemotretan.
+5. Ruang akuisisi minim cahaya luar, fungsi mengontrol lingkungan pencahayaan.
+6. Mesin inkubasi, fungsi verifikasi label ground truth.
+
+4.7.2 Instrumen Komputasi
+Instrumen komputasi digunakan untuk praproses, pelatihan model, evaluasi, dan visualisasi hasil. Instrumen ini mencakup perangkat keras dan perangkat lunak. Perangkat keras meliputi komputer atau workstation dengan prosesor multi-core, RAM minimal 16-32 GB, dan GPU yang memadai untuk pelatihan model deep learning. Perangkat lunak meliputi Python 3.10 atau versi setara, PyTorch untuk implementasi U-Net dan baseline deep learning, OpenCV untuk praproses citra, NumPy dan Pandas untuk pengolahan data, serta pustaka machine learning dan statistik untuk evaluasi model dan uji signifikansi.
+
+[Tabel 4.4 Spesifikasi Instrumen Komputasi]
+1. CPU multi-core setara Intel i7 atau Ryzen 7 untuk pengolahan umum dan I/O.
+2. GPU NVIDIA dengan VRAM memadai untuk pelatihan model deep learning.
+3. RAM 16-32 GB untuk pemrosesan data dan training batch.
+4. Storage SSD untuk penyimpanan dataset dan model.
+5. Python 3.10 atau setara sebagai bahasa pemrograman utama.
+6. PyTorch sebagai implementasi U-Net dan baseline CNN.
+7. OpenCV untuk praproses dan manipulasi citra.
+8. NumPy dan Pandas untuk komputasi numerik dan tabular.
+9. scikit-learn untuk evaluasi, normalisasi, dan baseline tertentu.
+10. Matplotlib dan Seaborn untuk visualisasi hasil.
+
+4.8 Prosedur Penelitian
+Prosedur penelitian disusun secara sistematis agar seluruh tahapan dapat direplikasi. Tahapan tersebut dijelaskan sebagai berikut.
+
+4.8.1 Tahap Persiapan dan Studi Literatur
+Tahap ini mencakup identifikasi masalah, penelusuran literatur ilmiah, analisis state of the art, dan perumusan desain penelitian. Pada tahap ini juga dilakukan penentuan variabel, penyusunan kebutuhan alat dan bahan, penyiapan format dataset, serta penyusunan rancangan anotasi dan evaluasi.
+
+4.8.2 Tahap Pengumpulan dan Preparasi Data
+Pada tahap ini dilakukan seleksi telur, pengambilan citra candling, dan verifikasi label. Setiap telur yang memenuhi kriteria diambil citranya dalam kondisi pencahayaan terkontrol. Hasil inkubasi aktual digunakan untuk menetapkan label fertil atau infertil. Data yang terkumpul kemudian disusun ke dalam struktur dataset yang rapi untuk kebutuhan segmentasi dan klasifikasi.
+
+4.8.3 Tahap Praproses Citra
+Tahap praproses dilakukan untuk meningkatkan kualitas visual citra sebelum segmentasi. Langkah-langkah yang dilakukan meliputi cropping area citra agar fokus pada objek telur, resizing citra ke ukuran input model yang seragam, penerapan CLAHE untuk memperbaiki kontras lokal, penerapan homomorphic filtering untuk menormalkan pencahayaan, penerapan bilateral filtering untuk mengurangi noise sambil menjaga tepi, serta penyimpanan citra hasil praproses untuk evaluasi dan eksperimen berikutnya. Pada tahap ini, kombinasi praproses terbaik ditentukan melalui evaluasi kuantitatif dan inspeksi visual.
+
+4.8.4 Tahap Pengembangan Model Segmentasi U-Net Lightweight
+Model segmentasi dikembangkan menggunakan arsitektur U-Net lightweight dengan encoder-decoder dan skip connections. Tahap ini meliputi penyiapan data anotasi, pembagian data latih-validasi-uji, pelatihan model, penyetelan hyperparameter, dan evaluasi hasil segmentasi. Model dilatih menggunakan optimizer seperti Adam dengan loss function gabungan Cross-Entropy Loss dan Dice Loss agar mampu menjaga keseimbangan antara akurasi piksel dan kualitas overlap area segmentasi. Untuk mengurangi risiko overfitting, dapat diterapkan early stopping, dropout, dan penyesuaian learning rate. Hasil segmentasi terbaik kemudian digunakan pada tahap ekstraksi fitur.
+
+4.8.5 Tahap Ekstraksi Fitur dan Fusi Fitur
+Tahap ini dilakukan pada citra atau region of interest hasil segmentasi. Fitur klasik yang diekstraksi meliputi GLCM untuk karakteristik tekstur spasial, LBP untuk pola tekstur mikro, histogram intensitas dan statistik intensitas, serta fitur morfologi area hasil segmentasi seperti luas, perimeter, kekompakan, densitas, dan indikator struktur vaskular atau embrionik. Secara paralel, deep embedding diambil dari bottleneck U-Net melalui Global Average Pooling. Seluruh fitur kemudian digabungkan dan dinormalisasi menjadi vektor fitur hibrida yang siap dipakai untuk klasifikasi.
+
+4.8.6 Tahap Implementasi dan Optimasi Adaptive Weight Clustering
+Vektor fitur hibrida yang telah dihasilkan kemudian diproses menggunakan Adaptive Weight Clustering. Proses ini mencakup inisialisasi klaster, pembaruan bobot fitur secara iteratif, evaluasi konvergensi, dan penentuan hasil pengelompokan akhir. Untuk kepentingan pembacaan hasil secara klasifikasi, klaster yang terbentuk dipetakan ke label fertil atau infertil menggunakan data acuan berlabel. Pada tahap ini juga dilakukan pembandingan dengan K-Means dan Fuzzy C-Means. Jika baseline deep learning end-to-end digunakan, maka MobileNetV3 atau model sejenis dilatih langsung pada citra praproses untuk melihat perbedaan pendekatan antara sistem berbasis pipeline dan sistem klasifikasi langsung.
+
+4.8.7 Tahap Evaluasi dan Validasi Model
+Evaluasi dilakukan dalam beberapa bentuk: evaluasi kualitas praproses, evaluasi segmentasi, evaluasi kontribusi fitur, evaluasi klasifikasi, dan evaluasi statistik terhadap perbedaan performa antarmetode. Validasi model dilakukan melalui hold-out test set dan 5-fold cross-validation. Untuk menguji signifikansi perbedaan hasil, dapat digunakan uji statistik non-parametrik seperti Wilcoxon signed-rank test pada metrik yang relevan.
+
+[Gambar 4.2 Diagram Alir Pengumpulan Data]
+[Gambar 4.3 Diagram Alir Prosedur Penelitian]
+
+4.9 Analisis Data
+Analisis data dilakukan secara bertahap untuk memastikan setiap pertanyaan penelitian dapat dijawab secara langsung oleh hasil eksperimen.
+
+4.9.1 Analisis Kualitas Citra Praproses
+Pada tahap ini dilakukan perbandingan antara citra mentah dan citra hasil praproses. Analisis diarahkan pada peningkatan kontras, pemerataan pencahayaan, pengurangan noise, dan keterlihatan struktur internal telur. Parameter seperti PSNR, SSIM, entropy, dan evaluasi visual digunakan untuk memilih konfigurasi praproses terbaik.
+
+4.9.2 Analisis Kinerja Segmentasi
+Analisis segmentasi dilakukan dengan menilai kesesuaian hasil mask model terhadap anotasi ground truth. Evaluasi menggunakan Dice Coefficient, IoU, Pixel Accuracy, dan pengamatan visual pada kasus berhasil maupun gagal. Analisis ini penting untuk memastikan bahwa fitur yang diekstraksi benar-benar berasal dari area biologis yang relevan.
+
+4.9.3 Analisis Kontribusi Fitur
+Analisis kontribusi fitur bertujuan menilai apakah fusi fitur memang lebih baik daripada fitur tunggal. Tiga skenario utama dapat diuji, yaitu hanya fitur klasik, hanya deep embedding, dan kombinasi fitur klasik dan deep. Hasil ketiga skenario ini dibandingkan untuk melihat peningkatan performa dan memperkuat validasi terhadap hipotesis penelitian.
+
+4.9.4 Analisis Perbandingan Metode Klasifikasi
+Pada tahap ini, hasil klasifikasi AWC dibandingkan dengan K-Means, Fuzzy C-Means, dan baseline CNN end-to-end. Analisis dilakukan menggunakan accuracy, precision, recall, specificity, F1-score, ROC-AUC, Brier Score, serta confusion matrix. Tujuannya adalah menunjukkan posisi AWC secara obyektif dibandingkan metode pembanding.
+
+4.9.5 Analisis Sensitivitas dan Stabilitas Model
+Analisis sensitivitas dilakukan untuk melihat pengaruh parameter penting, seperti konfigurasi praproses, ukuran input model, komposisi fitur, dan parameter pembobotan AWC. Analisis stabilitas dilakukan melalui cross-validation, sehingga tidak hanya diperoleh hasil rata-rata, tetapi juga tingkat konsistensi performa model pada berbagai pembagian data.
+
+4.9.6 Analisis Kesimpulan dan Rekomendasi
+Tahap akhir analisis data adalah menafsirkan seluruh hasil eksperimen dalam kaitannya dengan hipotesis dan tujuan penelitian. Pada tahap ini ditentukan apakah model yang dikembangkan benar-benar memberikan peningkatan yang bermakna, bagian mana yang paling berkontribusi terhadap performa, serta keterbatasan apa saja yang masih tersisa. Berdasarkan temuan tersebut, dirumuskan rekomendasi untuk pengembangan penelitian lanjutan, baik dari sisi perluasan dataset, penyempurnaan anotasi, optimasi arsitektur segmentasi, maupun integrasi sistem ke arah aplikasi yang lebih operasional.
+
+[Gambar 4.4 Diagram Alir Analisis Data]

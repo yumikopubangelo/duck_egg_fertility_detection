@@ -1,4 +1,4 @@
-# 🥚 Duck Egg Fertility Detection System
+# Duck Egg Fertility Detection System
 
 <div align="center">
 
@@ -19,7 +19,7 @@
 
 ---
 
-## 📌 Overview
+## Overview
 
 This project implements a complete AI system for detecting the fertility of duck eggs using **candling images** — a non-destructive inspection method where eggs are illuminated from behind to reveal embryo development.
 
@@ -27,7 +27,7 @@ The system is developed as part of a **PhD dissertation** titled:
 
 > *"Pengembangan Model Deteksi Fertilitas Telur Bebek Menggunakan Segmentasi Citra dan Deep Learning dengan Algoritma Adaptive Weight Clustering"*
 
-### 🐣 Why Duck Eggs?
+### Why Duck Eggs?
 
 Most existing research focuses on **chicken eggs**. Duck eggs present unique challenges:
 
@@ -42,21 +42,21 @@ Most existing research focuses on **chicken eggs**. Duck eggs present unique cha
 
 ---
 
-## ✨ Features
+## Features
 
-- 🔬 **Advanced preprocessing** — CLAHE + Homomorphic Filtering + Bilateral Denoising
-- 🧠 **U-Net segmentation** — lightweight deep learning segmentation (PyTorch)
-- 🔀 **Hybrid feature extraction** — Classical (GLCM, LBP, Morphology) + Deep embeddings
-- ⚖️ **Adaptive Weight Clustering (AWC)** — novel adaptive classification algorithm
-- 🌐 **Web interface** — upload images and get instant results
-- 📊 **Dashboard** — prediction history, model performance tracking
-- 🔄 **Continuous learning** — users can correct predictions and retrain the model
-- 📦 **Model versioning** — automatic versioning of retrained models
-- 🏷️ **Annotation tool** — built-in web-based tool for creating segmentation masks
+- **Advanced preprocessing** — CLAHE + Homomorphic Filtering + Bilateral Denoising
+- **U-Net segmentation** — lightweight deep learning segmentation (PyTorch)
+- **Hybrid feature extraction** — Classical (GLCM, LBP, Morphology) + Deep embeddings
+- **Adaptive Weight Clustering (AWC)** — novel adaptive classification algorithm
+- **Web interface** — upload images and get instant results
+- **Dashboard** — prediction history, model performance tracking
+- **Continuous learning** — users can correct predictions and retrain the model
+- **Model versioning** — automatic versioning of retrained models
+- **Annotation tool** — built-in web-based tool for creating segmentation masks
 
 ---
 
-## 🔬 ML Pipeline
+## ML Pipeline
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -94,7 +94,7 @@ Most existing research focuses on **chicken eggs**. Duck eggs present unique cha
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 🏆 Novel Contributions
+### Novel Contributions
 
 1. **First application** of U-Net + Hybrid Features + AWC for duck egg fertility detection
 2. **Hybrid feature fusion** — classical interpretable features + deep abstract embeddings
@@ -102,7 +102,7 @@ Most existing research focuses on **chicken eggs**. Duck eggs present unique cha
 
 ---
 
-## 📊 Target Performance
+## Target Performance
 
 | Metric | Target | Baseline (K-Means) |
 |--------|--------|-------------------|
@@ -114,7 +114,7 @@ Most existing research focuses on **chicken eggs**. Duck eggs present unique cha
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Component | Technology |
 |-----------|-----------|
@@ -140,7 +140,7 @@ Most existing research focuses on **chicken eggs**. Duck eggs present unique cha
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/duck-egg-fertility-detection.git
+git clone https://github.com/yourusername/duckb-egg-fertility-detection.git
 cd duck-egg-fertility-detection
 ```
 
@@ -154,6 +154,15 @@ venv\Scripts\activate
 # Linux / macOS
 python -m venv venv
 source venv/bin/activate
+
+./run.sh setup        # install semua dependensi
+./run.sh pipeline     # jalankan steps 1–8
+./run.sh train        # training U-Net saja
+./run.sh predict      # inference
+./run.sh web          # Flask API
+./run.sh streamlit    # Streamlit dashboard
+./run.sh test         # pytest
+./run.sh help         # lihat semua perintah
 ```
 
 ### 3. Install Dependencies
@@ -352,6 +361,15 @@ data/annotations/masks/
 
 ## 📈 Development Progress
 
+**Kondisi Proyek Saat Ini (Current State):**
+
+*   **🧠 Data & Model**: Data gambar tersedia (>100) & konfigurasi model U-Net/AWC sudah siap ✅. File *split* dataset (train/val/test) belum dibuat & proses *Training* belum dilakukan ❌.
+*   **⚙️ Backend**: Struktur *routing* API & pengaturan database (PostgreSQL/Redis) menggunakan Docker sudah ada ✅. File implementasi fungsionalnya masih kosong ❌.
+*   **🎨 Frontend**: Struktur UI (HTML/CSS/JS) dengan fitur upload & riwayat sudah selesai ✅. Integrasi antara UI dengan backend API belum dilakukan ❌.
+*   **🚀 Deployment**: File konfigurasi Docker Compose sudah disiapkan ✅. Proses *build* sedang dalam tahap pengerjaan ⚠️.
+
+### Detailed Project Phases
+
 | Phase | Task | Status |
 |-------|------|--------|
 | 1A | Preprocessing module | ✅ Done |
@@ -365,6 +383,16 @@ data/annotations/masks/
 | 3 | Web frontend | ⏳ Pending |
 | 4 | Integration & testing | ⏳ Pending |
 | 5 | Docker deployment | ⏳ Pending |
+| 1B | U-Net & AWC Architecture Config | ✅ Done |
+| 1C | Dataset Splitting & Masking | ❌ Pending |
+| 1D | Model Training (U-Net & AWC) | ❌ Pending |
+| 1E | Model evaluation & testing | ⏳ Pending |
+| 2A | Backend API Routes & DB Setup | ✅ Done |
+| 2B | Backend Endpoint Implementation | ❌ Pending |
+| 3A | Frontend UI Components | ✅ Done |
+| 3B | API Integration (Frontend-Backend)| ❌ Pending |
+| 4 | Docker Compose Setup | ✅ Done |
+| 5 | Production Deployment & Build | ⚠️ In Progress |
 
 ---
 
@@ -422,7 +450,7 @@ training:
 
 ---
 
-## 📚 References
+## References
 
 | # | Paper | Used For |
 |---|-------|----------|
@@ -472,5 +500,5 @@ open http://localhost:5000
 ---
 
 <div align="center">
-  <sub>Built with ❤️ for PhD dissertation research on duck egg fertility detection</sub>
+  <sub>Built   for PhD dissertation research on duck egg fertility detection</sub>
 </div>

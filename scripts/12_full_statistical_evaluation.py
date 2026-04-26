@@ -7,7 +7,7 @@ complete statistical test suite (Wilcoxon, McNemar, Friedman) on real data.
 
 Workflow:
   1. Collect all images from data/preprocessed/{train,val,test}/{fertile,infertile}/
-  2. Extract classical features (50 features per image)
+  2. Extract classical features (including GLCM texture descriptors)
   3. Re-fit K-Means and FCM on train split, AWC loaded from checkpoint
   4. Predict on test + val split (held-out)
   5. Save per-sample predictions to results/evaluation/
@@ -212,7 +212,7 @@ def main() -> None:
     OUT_STAT.mkdir(parents=True, exist_ok=True)
 
     extractor = ClassicalFeatureExtractor()
-    feature_names = extractor.feature_names   # 50 named features
+    feature_names = extractor.feature_names
 
     # ------------------------------------------------------------------ #
     # 1. Load data

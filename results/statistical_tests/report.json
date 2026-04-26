@@ -1,0 +1,182 @@
+{
+  "alpha": 0.01,
+  "wilcoxon": [
+    {
+      "test": "Wilcoxon signed-rank",
+      "metric": "silhouette",
+      "model_a": "AWC",
+      "model_b": "KMeans",
+      "n_samples": 30,
+      "mean_a": 0.24008489979135192,
+      "mean_b": 0.17033508490778496,
+      "mean_diff": 0.06974981488356696,
+      "ci_95_diff": [
+        0.055755986752350994,
+        0.08357773094465833
+      ],
+      "statistic_W": 2.0,
+      "p_value": 5.587935447692871e-09,
+      "interpretation": "highly significant (p < 0.001)",
+      "significant": true,
+      "effect_size_r": 0.9913978494623656,
+      "effect_size_d": 1.7954133009788682,
+      "effect_magnitude": "large"
+    },
+    {
+      "test": "Wilcoxon signed-rank",
+      "metric": "davies_bouldin",
+      "model_a": "AWC",
+      "model_b": "KMeans",
+      "n_samples": 30,
+      "mean_a": 1.0,
+      "mean_b": 0.9109847436213412,
+      "mean_diff": 0.08901525637865881,
+      "ci_95_diff": [
+        0.07282533128013248,
+        0.10574244909119618
+      ],
+      "statistic_W": 0.0,
+      "p_value": 2.5630832507250074e-06,
+      "interpretation": "highly significant (p < 0.001)",
+      "significant": true,
+      "effect_size_r": 1.0,
+      "effect_size_d": 1.8748288988449262,
+      "effect_magnitude": "large"
+    },
+    {
+      "test": "Wilcoxon signed-rank",
+      "metric": "calinski_harabasz",
+      "model_a": "AWC",
+      "model_b": "KMeans",
+      "n_samples": 30,
+      "mean_a": 1.0,
+      "mean_b": 0.9225544949996961,
+      "mean_diff": 0.0774455050003039,
+      "ci_95_diff": [
+        0.06678589949515656,
+        0.08875870403312441
+      ],
+      "statistic_W": 0.0,
+      "p_value": 1.862645149230957e-09,
+      "interpretation": "highly significant (p < 0.001)",
+      "significant": true,
+      "effect_size_r": 1.0,
+      "effect_size_d": 2.463444017674563,
+      "effect_magnitude": "large"
+    },
+    {
+      "test": "Wilcoxon signed-rank",
+      "metric": "silhouette",
+      "model_a": "AWC",
+      "model_b": "FCM",
+      "n_samples": 30,
+      "mean_a": 0.24008489979135192,
+      "mean_b": 0.18405791805743482,
+      "mean_diff": 0.0560269817339171,
+      "ci_95_diff": [
+        0.036924917846292454,
+        0.07625509548591779
+      ],
+      "statistic_W": 27.0,
+      "p_value": 2.348795533180237e-06,
+      "interpretation": "highly significant (p < 0.001)",
+      "significant": true,
+      "effect_size_r": 0.8838709677419355,
+      "effect_size_d": 1.003539169270679,
+      "effect_magnitude": "large"
+    },
+    {
+      "test": "Wilcoxon signed-rank",
+      "metric": "davies_bouldin",
+      "model_a": "AWC",
+      "model_b": "FCM",
+      "n_samples": 30,
+      "mean_a": 1.0,
+      "mean_b": 0.9481863944987955,
+      "mean_diff": 0.05181360550120451,
+      "ci_95_diff": [
+        0.04096596927186502,
+        0.06317316600229794
+      ],
+      "statistic_W": 0.0,
+      "p_value": 5.606116527496014e-06,
+      "interpretation": "highly significant (p < 0.001)",
+      "significant": true,
+      "effect_size_r": 1.0,
+      "effect_size_d": 1.6049934090884896,
+      "effect_magnitude": "large"
+    },
+    {
+      "test": "Wilcoxon signed-rank",
+      "metric": "calinski_harabasz",
+      "model_a": "AWC",
+      "model_b": "FCM",
+      "n_samples": 30,
+      "mean_a": 1.0,
+      "mean_b": 0.9485362339783029,
+      "mean_diff": 0.05146376602169711,
+      "ci_95_diff": [
+        0.037954116793512856,
+        0.06497653991659108
+      ],
+      "statistic_W": 0.0,
+      "p_value": 5.606116527496014e-06,
+      "interpretation": "highly significant (p < 0.001)",
+      "significant": true,
+      "effect_size_r": 1.0,
+      "effect_size_d": 1.324917322161362,
+      "effect_magnitude": "large"
+    }
+  ],
+  "mcnemar": [
+    {
+      "test": "McNemar (exact binomial)",
+      "model_a": "AWC",
+      "model_b": "KMeans",
+      "n_samples": 24,
+      "contingency_b": 4,
+      "contingency_c": 5,
+      "n_discordant": 9,
+      "statistic": 4.0,
+      "p_value": 1.0,
+      "interpretation": "not significant (p = 1.0000 >= 0.01)",
+      "significant": false,
+      "accuracy_a": 0.4583333333333333,
+      "accuracy_b": 0.4166666666666667,
+      "accuracy_diff": 0.04166666666666663
+    },
+    {
+      "test": "McNemar (exact binomial)",
+      "model_a": "AWC",
+      "model_b": "FCM",
+      "n_samples": 24,
+      "contingency_b": 7,
+      "contingency_c": 7,
+      "n_discordant": 14,
+      "statistic": 7.0,
+      "p_value": 1.0,
+      "interpretation": "not significant (p = 1.0000 >= 0.01)",
+      "significant": false,
+      "accuracy_a": 0.4583333333333333,
+      "accuracy_b": 0.4583333333333333,
+      "accuracy_diff": 0.0
+    },
+    {
+      "test": "McNemar (exact binomial)",
+      "model_a": "KMeans",
+      "model_b": "FCM",
+      "n_samples": 24,
+      "contingency_b": 5,
+      "contingency_c": 4,
+      "n_discordant": 9,
+      "statistic": 4.0,
+      "p_value": 1.0,
+      "interpretation": "not significant (p = 1.0000 >= 0.01)",
+      "significant": false,
+      "accuracy_a": 0.4166666666666667,
+      "accuracy_b": 0.4583333333333333,
+      "accuracy_diff": -0.04166666666666663
+    }
+  ],
+  "friedman": []
+}

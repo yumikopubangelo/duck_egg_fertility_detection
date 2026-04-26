@@ -75,6 +75,7 @@ data/segmentation/**/*.png
 data/segmentation/**/*.bmp
 data/segmentation/**/*.tif
 data/segmentation/**/*.tiff
+data/segmentation/**/*.rar
 data/annotations/**/*.jpg
 data/annotations/**/*.jpeg
 data/annotations/**/*.png
@@ -91,6 +92,16 @@ models/versions/*
 results/figures/*
 results/logs/*
 results/tables/*
+# Ignore common image formats anywhere under results/
+results/**/*.png
+results/**/*.jpg
+results/**/*.jpeg
+results/**/*.gif
+results/**/*.svg
+results/**/*.webp
+results/**/*.bmp
+results/**/*.tif
+results/**/*.tiff
 *.h5
 *.pth
 *.pkl
@@ -98,6 +109,17 @@ results/tables/*
 *.pt
 *.onnx
 *.model
+*.rar
+*.zip
+*.7z
+*.tar
+*.tar.gz
+*.aac
+*.wav
+*.mp3
+*.mp4
+*.avi
+*.mov
 
 # ===========================================
 # Jupyter Notebooks

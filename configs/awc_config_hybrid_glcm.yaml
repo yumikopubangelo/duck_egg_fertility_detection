@@ -1,0 +1,82 @@
+# AWC config for hybrid features with classical + GLCM + morphology + deep bottleneck.
+
+data:
+  n_clusters: 2
+  train_data: ./data/features_hybrid_glcm/awc_features.npy
+  train_labels: ./data/features_hybrid_glcm/awc_labels.npy
+  test_data: ./data/features_hybrid_glcm/awc_test_features.npy
+  test_labels: ./data/features_hybrid_glcm/awc_test_labels.npy
+  normalize: true
+  standardize: true
+
+algorithm:
+  max_iter: 100
+  tol: 0.0001
+  initial_weights: null
+  feature_importance: null
+  random_state: 42
+  weighted_centroids: true
+  weight_update_interval: 5
+
+model:
+  adaptive_weights: true
+  use_feature_importance: true
+  logging: true
+  verbose: true
+
+training:
+  output_dir: ./results/awc_training/hybrid_glcm
+  log_dir: ./results/awc_logs/hybrid_glcm
+  save_checkpoint: true
+  checkpoint_path: ./models/awc/awc_model_hybrid_glcm.pkl
+  load_model: false
+  load_path: ""
+  n_runs: 5
+  cross_validation: true
+  cv_folds: 5
+
+evaluation:
+  output_dir: ./results/awc_evaluation/hybrid_glcm
+  log_dir: ./results/awc_evaluation_logs/hybrid_glcm
+  generate_visualizations: true
+  n_visualization_samples: 100
+  save_metrics: true
+  metrics_path: ./results/awc_evaluation/hybrid_glcm/metrics.json
+  generate_confusion_matrix: true
+  generate_classification_report: true
+
+advanced:
+  parallel: false
+  n_jobs: -1
+  memory_efficient: false
+  early_stopping: true
+  early_stopping_patience: 10
+  calculate_metrics: true
+  metrics: ["silhouette", "davies_bouldin", "calinski_harabasz"]
+  feature_selection: false
+  selection_method: "variance"
+  variance_threshold: 0.1
+
+eg_fertility:
+  classes: ["infertile", "fertile"]
+  class_weights: [1.0, 1.0]
+  min_cluster_size: 10
+  max_cluster_size: 1000
+  purity_threshold: 0.7
+  importance_threshold: 0.1
+
+output:
+  save_summary: true
+  summary_path: ./results/awc_evaluation/hybrid_glcm/model_summary.txt
+  save_cluster_info: true
+  cluster_info_path: ./results/awc_evaluation/hybrid_glcm/cluster_info.json
+  save_feature_importance: true
+  feature_importance_path: ./results/awc_evaluation/hybrid_glcm/feature_importance.json
+  save_training_history: true
+  history_path: ./results/awc_training/hybrid_glcm/history.json
+
+debug:
+  debug: false
+  debug_sample_size: 100
+  save_intermediate: false
+  print_debug: false

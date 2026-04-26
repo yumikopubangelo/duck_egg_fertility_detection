@@ -1,0 +1,26 @@
+2026-04-22 16:43:44 - egg-detector - INFO - Loading evaluation results from results\evaluation\evaluation_results.json
+2026-04-22 16:43:44 - egg-detector - WARNING - Per-sample data has only 1 entries — expanding to 30 synthetic samples for illustration.
+2026-04-22 16:43:44 - egg-detector - WARNING - NOTE: Results based on synthetic expansion are ILLUSTRATIVE only. Collect more real samples for publication-grade statistics.
+2026-04-22 16:43:44 - egg-detector - INFO - Models with metric data: ['UNet', 'AWC', 'KMeans', 'FCM']
+2026-04-22 16:43:44 - egg-detector - WARNING - No stored per-sample predictions found — generating synthetic predictions.
+2026-04-22 16:43:47 - egg-detector - INFO - Full report saved to results\statistical_tests\report.json
+2026-04-22 16:43:47 - egg-detector - INFO - LaTeX table saved to results\statistical_tests\wilcoxon_table.tex
+2026-04-22 16:43:47 - egg-detector - INFO - Text summary saved to results\statistical_tests\summary.txt
+2026-04-22 16:43:47 - egg-detector - WARNING - 
+NOTE: Some or all tests used SYNTHETIC data expansion because fewer than 6 real per-sample observations were available.
+For publication-quality results, collect a larger test set and re-run this script.
+
+2026-04-22 16:43:47 - egg-detector - INFO - Statistical testing complete.
+2026-04-22 17:50:13 - egg-detector - INFO - Loading evaluation results from results\evaluation\evaluation_results.json
+2026-04-22 17:50:13 - egg-detector - WARNING - Per-sample data has only 1 entries — expanding to 30 synthetic samples for illustration.
+2026-04-22 17:50:13 - egg-detector - WARNING - NOTE: Results based on synthetic expansion are ILLUSTRATIVE only. Collect more real samples for publication-grade statistics.
+2026-04-22 17:50:13 - egg-detector - INFO - Models with metric data: ['UNet', 'AWC', 'KMeans', 'FCM']
+2026-04-22 17:50:13 - egg-detector - WARNING - No stored per-sample predictions found — generating synthetic predictions.
+2026-04-22 17:50:15 - egg-detector - INFO - Full report saved to results\statistical_tests\report.json
+2026-04-22 17:50:15 - egg-detector - INFO - LaTeX table saved to results\statistical_tests\wilcoxon_table.tex
+2026-04-22 17:50:15 - egg-detector - INFO - Text summary saved to results\statistical_tests\summary.txt
+2026-04-22 17:50:15 - egg-detector - WARNING - 
+NOTE: Some or all tests used SYNTHETIC data expansion because fewer than 6 real per-sample observations were available.
+For publication-quality results, collect a larger test set and re-run this script.
+
+2026-04-22 17:50:15 - egg-detector - INFO - Statistical testing complete.

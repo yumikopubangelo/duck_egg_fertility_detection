@@ -1,0 +1,225 @@
+2026-04-22 16:25:06 - egg-detector - INFO - Device: cpu
+2026-04-22 16:25:15 - egg-detector - INFO - U-Net loaded from results\unet_training\checkpoints\final_epoch_1_20260417_133215.pth
+2026-04-22 16:25:15 - egg-detector - INFO - Grad-CAM: processing 20 images (layer=bottleneck, mode=fertile)
+2026-04-22 16:25:16 - egg-detector - INFO -   [1/20] Saved results\xai\gradcam\IMG_8188_bottleneck_fertile.png
+2026-04-22 16:25:17 - egg-detector - INFO -   [2/20] Saved results\xai\gradcam\IMG_8198_bottleneck_fertile.png
+2026-04-22 16:25:18 - egg-detector - INFO -   [3/20] Saved results\xai\gradcam\IMG_8199_bottleneck_fertile.png
+2026-04-22 16:25:18 - egg-detector - INFO -   [4/20] Saved results\xai\gradcam\IMG_8202_bottleneck_fertile.png
+2026-04-22 16:25:19 - egg-detector - INFO -   [5/20] Saved results\xai\gradcam\IMG_8213_bottleneck_fertile.png
+2026-04-22 16:25:20 - egg-detector - INFO -   [6/20] Saved results\xai\gradcam\IMG_8216_bottleneck_fertile.png
+2026-04-22 16:25:21 - egg-detector - INFO -   [7/20] Saved results\xai\gradcam\IMG_8220_bottleneck_fertile.png
+2026-04-22 16:25:22 - egg-detector - INFO -   [8/20] Saved results\xai\gradcam\IMG_8257_bottleneck_fertile.png
+2026-04-22 16:25:23 - egg-detector - INFO -   [9/20] Saved results\xai\gradcam\IMG_8269_bottleneck_fertile.png
+2026-04-22 16:25:24 - egg-detector - INFO -   [10/20] Saved results\xai\gradcam\IMG_8274_bottleneck_fertile.png
+2026-04-22 16:25:25 - egg-detector - INFO -   [11/20] Saved results\xai\gradcam\IMG_8283_bottleneck_fertile.png
+2026-04-22 16:25:25 - egg-detector - INFO -   [12/20] Saved results\xai\gradcam\IMG_8289_bottleneck_fertile.png
+2026-04-22 16:25:26 - egg-detector - INFO -   [13/20] Saved results\xai\gradcam\IMG_8320_bottleneck_fertile.png
+2026-04-22 16:25:27 - egg-detector - INFO -   [14/20] Saved results\xai\gradcam\IMG_8333_bottleneck_fertile.png
+2026-04-22 16:25:28 - egg-detector - INFO -   [15/20] Saved results\xai\gradcam\IMG_8343_bottleneck_fertile.png
+2026-04-22 16:25:29 - egg-detector - INFO -   [16/20] Saved results\xai\gradcam\IMG_8351_bottleneck_fertile.png
+2026-04-22 16:25:30 - egg-detector - INFO -   [17/20] Saved results\xai\gradcam\IMG_8356_bottleneck_fertile.png
+2026-04-22 16:25:31 - egg-detector - INFO -   [18/20] Saved results\xai\gradcam\IMG_8365_bottleneck_fertile.png
+2026-04-22 16:25:32 - egg-detector - INFO -   [19/20] Saved results\xai\gradcam\IMG_8375_bottleneck_fertile.png
+2026-04-22 16:25:33 - egg-detector - INFO -   [20/20] Saved results\xai\gradcam\IMG_8376_bottleneck_fertile.png
+2026-04-22 16:25:33 - egg-detector - INFO - Grad-CAM done. Results in results\xai\gradcam
+2026-04-22 16:25:36 - egg-detector - INFO - AWC loaded from models\awc\awc_model.pkl
+2026-04-22 16:25:36 - egg-detector - INFO - SHAP: background=156 samples, explaining 24 test samples
+2026-04-22 16:25:36 - egg-detector - INFO - Fitting KernelSHAP background ...
+2026-04-22 16:25:40 - egg-detector - INFO - Computing SHAP values (this may take a few minutes) ...
+2026-04-22 16:41:58 - egg-detector - INFO - Device: cpu
+2026-04-22 16:42:02 - egg-detector - INFO - U-Net loaded from results\unet_training\checkpoints\final_epoch_1_20260417_133215.pth
+2026-04-22 16:42:02 - egg-detector - INFO - Grad-CAM: processing 20 images (layer=bottleneck, mode=fertile)
+2026-04-22 16:42:03 - egg-detector - INFO -   [1/20] Saved results\xai\gradcam\IMG_8188_bottleneck_fertile.png
+2026-04-22 16:42:04 - egg-detector - INFO -   [2/20] Saved results\xai\gradcam\IMG_8198_bottleneck_fertile.png
+2026-04-22 16:42:05 - egg-detector - INFO -   [3/20] Saved results\xai\gradcam\IMG_8199_bottleneck_fertile.png
+2026-04-22 16:42:06 - egg-detector - INFO -   [4/20] Saved results\xai\gradcam\IMG_8202_bottleneck_fertile.png
+2026-04-22 16:42:06 - egg-detector - INFO -   [5/20] Saved results\xai\gradcam\IMG_8213_bottleneck_fertile.png
+2026-04-22 16:42:07 - egg-detector - INFO -   [6/20] Saved results\xai\gradcam\IMG_8216_bottleneck_fertile.png
+2026-04-22 16:42:08 - egg-detector - INFO -   [7/20] Saved results\xai\gradcam\IMG_8220_bottleneck_fertile.png
+2026-04-22 16:42:09 - egg-detector - INFO -   [8/20] Saved results\xai\gradcam\IMG_8257_bottleneck_fertile.png
+2026-04-22 16:42:10 - egg-detector - INFO -   [9/20] Saved results\xai\gradcam\IMG_8269_bottleneck_fertile.png
+2026-04-22 16:42:10 - egg-detector - INFO -   [10/20] Saved results\xai\gradcam\IMG_8274_bottleneck_fertile.png
+2026-04-22 16:42:11 - egg-detector - INFO -   [11/20] Saved results\xai\gradcam\IMG_8283_bottleneck_fertile.png
+2026-04-22 16:42:12 - egg-detector - INFO -   [12/20] Saved results\xai\gradcam\IMG_8289_bottleneck_fertile.png
+2026-04-22 16:42:13 - egg-detector - INFO -   [13/20] Saved results\xai\gradcam\IMG_8320_bottleneck_fertile.png
+2026-04-22 16:42:14 - egg-detector - INFO -   [14/20] Saved results\xai\gradcam\IMG_8333_bottleneck_fertile.png
+2026-04-22 16:42:14 - egg-detector - INFO -   [15/20] Saved results\xai\gradcam\IMG_8343_bottleneck_fertile.png
+2026-04-22 16:42:15 - egg-detector - INFO -   [16/20] Saved results\xai\gradcam\IMG_8351_bottleneck_fertile.png
+2026-04-22 16:42:16 - egg-detector - INFO -   [17/20] Saved results\xai\gradcam\IMG_8356_bottleneck_fertile.png
+2026-04-22 16:42:17 - egg-detector - INFO -   [18/20] Saved results\xai\gradcam\IMG_8365_bottleneck_fertile.png
+2026-04-22 16:42:18 - egg-detector - INFO -   [19/20] Saved results\xai\gradcam\IMG_8375_bottleneck_fertile.png
+2026-04-22 16:42:19 - egg-detector - INFO -   [20/20] Saved results\xai\gradcam\IMG_8376_bottleneck_fertile.png
+2026-04-22 16:42:19 - egg-detector - INFO - Grad-CAM done. Results in results\xai\gradcam
+2026-04-22 16:42:19 - egg-detector - INFO - AWC loaded from models\awc\awc_model.pkl
+2026-04-22 16:42:19 - egg-detector - INFO - SHAP: background=156 samples, explaining 24 test samples
+2026-04-22 16:42:19 - egg-detector - INFO - Fitting KernelSHAP background ...
+2026-04-22 16:42:20 - egg-detector - INFO - Computing SHAP values (this may take a few minutes) ...
+2026-04-22 16:42:24 - egg-detector - INFO - Saving summary bar chart ...
+2026-04-22 16:42:27 - egg-detector - INFO - Top-10 most influential features (fertile prediction):
+2026-04-22 16:42:27 - egg-detector - INFO -    1. feature_46                               0.02733
+2026-04-22 16:42:27 - egg-detector - INFO -    2. feature_44                               0.02345
+2026-04-22 16:42:27 - egg-detector - INFO -    3. feature_39                               0.02339
+2026-04-22 16:42:27 - egg-detector - INFO -    4. feature_38                               0.02180
+2026-04-22 16:42:27 - egg-detector - INFO -    5. feature_43                               0.02163
+2026-04-22 16:42:27 - egg-detector - INFO -    6. feature_1                                0.01962
+2026-04-22 16:42:27 - egg-detector - INFO -    7. feature_16                               0.01880
+2026-04-22 16:42:27 - egg-detector - INFO -    8. feature_48                               0.01824
+2026-04-22 16:42:27 - egg-detector - INFO -    9. feature_45                               0.01816
+2026-04-22 16:42:27 - egg-detector - INFO -   10. feature_6                                0.01802
+2026-04-22 16:42:27 - egg-detector - INFO - SHAP done. Results in results\xai\shap
+2026-04-22 16:43:09 - egg-detector - INFO - Device: cpu
+2026-04-22 16:43:13 - egg-detector - INFO - U-Net loaded from results\unet_training\checkpoints\final_epoch_1_20260417_133215.pth
+2026-04-22 16:43:13 - egg-detector - INFO - Grad-CAM: processing 20 images (layer=bottleneck, mode=fertile)
+2026-04-22 16:43:14 - egg-detector - INFO -   [1/20] Saved results\xai\gradcam\IMG_8188_bottleneck_fertile.png
+2026-04-22 16:43:15 - egg-detector - INFO -   [2/20] Saved results\xai\gradcam\IMG_8198_bottleneck_fertile.png
+2026-04-22 16:43:16 - egg-detector - INFO -   [3/20] Saved results\xai\gradcam\IMG_8199_bottleneck_fertile.png
+2026-04-22 16:43:17 - egg-detector - INFO -   [4/20] Saved results\xai\gradcam\IMG_8202_bottleneck_fertile.png
+2026-04-22 16:43:18 - egg-detector - INFO -   [5/20] Saved results\xai\gradcam\IMG_8213_bottleneck_fertile.png
+2026-04-22 16:43:19 - egg-detector - INFO -   [6/20] Saved results\xai\gradcam\IMG_8216_bottleneck_fertile.png
+2026-04-22 16:43:20 - egg-detector - INFO -   [7/20] Saved results\xai\gradcam\IMG_8220_bottleneck_fertile.png
+2026-04-22 16:43:21 - egg-detector - INFO -   [8/20] Saved results\xai\gradcam\IMG_8257_bottleneck_fertile.png
+2026-04-22 16:43:22 - egg-detector - INFO -   [9/20] Saved results\xai\gradcam\IMG_8269_bottleneck_fertile.png
+2026-04-22 16:43:23 - egg-detector - INFO -   [10/20] Saved results\xai\gradcam\IMG_8274_bottleneck_fertile.png
+2026-04-22 16:43:24 - egg-detector - INFO -   [11/20] Saved results\xai\gradcam\IMG_8283_bottleneck_fertile.png
+2026-04-22 16:43:25 - egg-detector - INFO -   [12/20] Saved results\xai\gradcam\IMG_8289_bottleneck_fertile.png
+2026-04-22 16:43:26 - egg-detector - INFO -   [13/20] Saved results\xai\gradcam\IMG_8320_bottleneck_fertile.png
+2026-04-22 16:43:27 - egg-detector - INFO -   [14/20] Saved results\xai\gradcam\IMG_8333_bottleneck_fertile.png
+2026-04-22 16:43:28 - egg-detector - INFO -   [15/20] Saved results\xai\gradcam\IMG_8343_bottleneck_fertile.png
+2026-04-22 16:43:29 - egg-detector - INFO -   [16/20] Saved results\xai\gradcam\IMG_8351_bottleneck_fertile.png
+2026-04-22 16:43:29 - egg-detector - INFO -   [17/20] Saved results\xai\gradcam\IMG_8356_bottleneck_fertile.png
+2026-04-22 16:43:30 - egg-detector - INFO -   [18/20] Saved results\xai\gradcam\IMG_8365_bottleneck_fertile.png
+2026-04-22 16:43:31 - egg-detector - INFO -   [19/20] Saved results\xai\gradcam\IMG_8375_bottleneck_fertile.png
+2026-04-22 16:43:32 - egg-detector - INFO -   [20/20] Saved results\xai\gradcam\IMG_8376_bottleneck_fertile.png
+2026-04-22 16:43:32 - egg-detector - INFO - Grad-CAM done. Results in results\xai\gradcam
+2026-04-22 18:00:22 - egg-detector - INFO - Device: cpu
+2026-04-22 18:00:24 - egg-detector - INFO - U-Net loaded from results\unet_training\checkpoints\final_epoch_1_20260417_133215.pth
+2026-04-22 18:00:24 - egg-detector - INFO - Grad-CAM: processing 20 images (layer=bottleneck, mode=fertile)
+2026-04-22 18:00:25 - egg-detector - INFO -   [1/20] Saved results\xai\gradcam\IMG_8188_bottleneck_fertile.png
+2026-04-22 18:00:27 - egg-detector - INFO -   [2/20] Saved results\xai\gradcam\IMG_8198_bottleneck_fertile.png
+2026-04-22 18:00:28 - egg-detector - INFO -   [3/20] Saved results\xai\gradcam\IMG_8199_bottleneck_fertile.png
+2026-04-22 18:00:29 - egg-detector - INFO -   [4/20] Saved results\xai\gradcam\IMG_8202_bottleneck_fertile.png
+2026-04-22 18:00:31 - egg-detector - INFO -   [5/20] Saved results\xai\gradcam\IMG_8213_bottleneck_fertile.png
+2026-04-22 18:00:32 - egg-detector - INFO -   [6/20] Saved results\xai\gradcam\IMG_8216_bottleneck_fertile.png
+2026-04-22 18:00:33 - egg-detector - INFO -   [7/20] Saved results\xai\gradcam\IMG_8220_bottleneck_fertile.png
+2026-04-22 18:00:35 - egg-detector - INFO -   [8/20] Saved results\xai\gradcam\IMG_8257_bottleneck_fertile.png
+2026-04-22 18:00:36 - egg-detector - INFO -   [9/20] Saved results\xai\gradcam\IMG_8269_bottleneck_fertile.png
+2026-04-22 18:00:37 - egg-detector - INFO -   [10/20] Saved results\xai\gradcam\IMG_8274_bottleneck_fertile.png
+2026-04-22 18:00:38 - egg-detector - INFO -   [11/20] Saved results\xai\gradcam\IMG_8283_bottleneck_fertile.png
+2026-04-22 18:00:39 - egg-detector - INFO -   [12/20] Saved results\xai\gradcam\IMG_8289_bottleneck_fertile.png
+2026-04-22 18:00:40 - egg-detector - INFO -   [13/20] Saved results\xai\gradcam\IMG_8320_bottleneck_fertile.png
+2026-04-22 18:00:41 - egg-detector - INFO -   [14/20] Saved results\xai\gradcam\IMG_8333_bottleneck_fertile.png
+2026-04-22 18:00:41 - egg-detector - INFO -   [15/20] Saved results\xai\gradcam\IMG_8343_bottleneck_fertile.png
+2026-04-22 18:00:42 - egg-detector - INFO -   [16/20] Saved results\xai\gradcam\IMG_8351_bottleneck_fertile.png
+2026-04-22 18:00:43 - egg-detector - INFO -   [17/20] Saved results\xai\gradcam\IMG_8356_bottleneck_fertile.png
+2026-04-22 18:00:44 - egg-detector - INFO -   [18/20] Saved results\xai\gradcam\IMG_8365_bottleneck_fertile.png
+2026-04-22 18:00:45 - egg-detector - INFO -   [19/20] Saved results\xai\gradcam\IMG_8375_bottleneck_fertile.png
+2026-04-22 18:00:46 - egg-detector - INFO -   [20/20] Saved results\xai\gradcam\IMG_8376_bottleneck_fertile.png
+2026-04-22 18:00:46 - egg-detector - INFO - Grad-CAM done. Results in results\xai\gradcam
+2026-04-22 18:00:47 - egg-detector - INFO - AWC loaded from models\awc\awc_model.pkl
+2026-04-22 18:00:47 - egg-detector - INFO - SHAP: background=156 samples, explaining 24 test samples
+2026-04-22 18:00:47 - egg-detector - INFO - Fitting KernelSHAP background ...
+2026-04-22 18:00:48 - egg-detector - INFO - Computing SHAP values (this may take a few minutes) ...
+2026-04-22 18:00:51 - egg-detector - INFO - Saving summary bar chart ...
+2026-04-22 18:00:54 - egg-detector - INFO - Top-10 most influential features (fertile prediction):
+2026-04-22 18:00:54 - egg-detector - INFO -    1. feature_1                                0.02743
+2026-04-22 18:00:54 - egg-detector - INFO -    2. feature_0                                0.02606
+2026-04-22 18:00:54 - egg-detector - INFO -    3. feature_37                               0.02377
+2026-04-22 18:00:54 - egg-detector - INFO -    4. feature_39                               0.02361
+2026-04-22 18:00:54 - egg-detector - INFO -    5. feature_47                               0.02341
+2026-04-22 18:00:54 - egg-detector - INFO -    6. feature_44                               0.02155
+2026-04-22 18:00:54 - egg-detector - INFO -    7. feature_9                                0.02076
+2026-04-22 18:00:54 - egg-detector - INFO -    8. feature_38                               0.02073
+2026-04-22 18:00:54 - egg-detector - INFO -    9. feature_16                               0.02048
+2026-04-22 18:00:54 - egg-detector - INFO -   10. feature_48                               0.01961
+2026-04-22 18:00:54 - egg-detector - INFO - SHAP done. Results in results\xai\shap
+2026-04-22 18:03:30 - egg-detector - INFO - Device: cpu
+2026-04-22 18:03:31 - egg-detector - INFO - AWC loaded from models\awc\awc_model.pkl
+2026-04-22 18:03:31 - egg-detector - INFO - SHAP: background=156 samples, explaining 24 test samples
+2026-04-22 18:03:31 - egg-detector - INFO - Fitting KernelSHAP background ...
+2026-04-22 18:03:32 - egg-detector - INFO - Computing SHAP values (this may take a few minutes) ...
+2026-04-22 18:03:33 - egg-detector - INFO - Saving summary bar chart ...
+2026-04-22 18:03:35 - egg-detector - INFO - Top-10 most influential features (fertile prediction):
+2026-04-22 18:03:35 - egg-detector - INFO -    1. feature_1                                0.03315
+2026-04-22 18:03:35 - egg-detector - INFO -    2. feature_38                               0.02544
+2026-04-22 18:03:35 - egg-detector - INFO -    3. feature_9                                0.02473
+2026-04-22 18:03:35 - egg-detector - INFO -    4. feature_46                               0.02449
+2026-04-22 18:03:35 - egg-detector - INFO -    5. feature_43                               0.02152
+2026-04-22 18:03:35 - egg-detector - INFO -    6. feature_16                               0.02087
+2026-04-22 18:03:35 - egg-detector - INFO -    7. feature_39                               0.01933
+2026-04-22 18:03:35 - egg-detector - INFO -    8. feature_42                               0.01803
+2026-04-22 18:03:35 - egg-detector - INFO -    9. feature_41                               0.01702
+2026-04-22 18:03:35 - egg-detector - INFO -   10. feature_19                               0.01678
+2026-04-22 18:03:35 - egg-detector - INFO - SHAP done. Results in results\xai\shap
+2026-04-22 18:03:49 - egg-detector - INFO - Device: cpu
+2026-04-22 18:05:30 - egg-detector - INFO - Device: cpu
+2026-04-22 18:05:32 - egg-detector - INFO - U-Net loaded from results\unet_training\checkpoints\final_epoch_1_20260417_133215.pth
+2026-04-22 18:05:32 - egg-detector - INFO - Grad-CAM: processing 20 images (layer=bottleneck, mode=fertile)
+2026-04-22 18:05:33 - egg-detector - INFO -   [1/20] Saved results\xai\gradcam\IMG_8188_bottleneck_fertile.png
+2026-04-22 18:05:34 - egg-detector - INFO -   [2/20] Saved results\xai\gradcam\IMG_8198_bottleneck_fertile.png
+2026-04-22 18:05:35 - egg-detector - INFO -   [3/20] Saved results\xai\gradcam\IMG_8199_bottleneck_fertile.png
+2026-04-22 18:05:35 - egg-detector - INFO -   [4/20] Saved results\xai\gradcam\IMG_8202_bottleneck_fertile.png
+2026-04-22 18:05:36 - egg-detector - INFO -   [5/20] Saved results\xai\gradcam\IMG_8213_bottleneck_fertile.png
+2026-04-22 18:05:37 - egg-detector - INFO -   [6/20] Saved results\xai\gradcam\IMG_8216_bottleneck_fertile.png
+2026-04-22 18:05:38 - egg-detector - INFO -   [7/20] Saved results\xai\gradcam\IMG_8220_bottleneck_fertile.png
+2026-04-22 18:05:38 - egg-detector - INFO -   [8/20] Saved results\xai\gradcam\IMG_8257_bottleneck_fertile.png
+2026-04-22 18:05:39 - egg-detector - INFO -   [9/20] Saved results\xai\gradcam\IMG_8269_bottleneck_fertile.png
+2026-04-22 18:05:40 - egg-detector - INFO -   [10/20] Saved results\xai\gradcam\IMG_8274_bottleneck_fertile.png
+2026-04-22 18:05:41 - egg-detector - INFO -   [11/20] Saved results\xai\gradcam\IMG_8283_bottleneck_fertile.png
+2026-04-22 18:05:42 - egg-detector - INFO -   [12/20] Saved results\xai\gradcam\IMG_8289_bottleneck_fertile.png
+2026-04-22 18:05:42 - egg-detector - INFO -   [13/20] Saved results\xai\gradcam\IMG_8320_bottleneck_fertile.png
+2026-04-22 18:05:43 - egg-detector - INFO -   [14/20] Saved results\xai\gradcam\IMG_8333_bottleneck_fertile.png
+2026-04-22 18:05:44 - egg-detector - INFO -   [15/20] Saved results\xai\gradcam\IMG_8343_bottleneck_fertile.png
+2026-04-22 18:05:45 - egg-detector - INFO -   [16/20] Saved results\xai\gradcam\IMG_8351_bottleneck_fertile.png
+2026-04-22 18:05:46 - egg-detector - INFO -   [17/20] Saved results\xai\gradcam\IMG_8356_bottleneck_fertile.png
+2026-04-22 18:05:47 - egg-detector - INFO -   [18/20] Saved results\xai\gradcam\IMG_8365_bottleneck_fertile.png
+2026-04-22 18:05:47 - egg-detector - INFO -   [19/20] Saved results\xai\gradcam\IMG_8375_bottleneck_fertile.png
+2026-04-22 18:05:48 - egg-detector - INFO -   [20/20] Saved results\xai\gradcam\IMG_8376_bottleneck_fertile.png
+2026-04-22 18:05:48 - egg-detector - INFO - Grad-CAM done. Results in results\xai\gradcam
+2026-04-22 18:06:02 - egg-detector - INFO - Device: cpu
+2026-04-22 18:06:08 - egg-detector - INFO - U-Net loaded from results\unet_training\checkpoints\final_epoch_1_20260417_133215.pth
+2026-04-22 18:06:08 - egg-detector - INFO - Grad-CAM: processing 20 images (layer=bottleneck, mode=infertile)
+2026-04-22 18:06:10 - egg-detector - INFO -   [1/20] Saved results\xai\gradcam\IMG_8188_bottleneck_infertile.png
+2026-04-22 18:06:13 - egg-detector - INFO -   [2/20] Saved results\xai\gradcam\IMG_8198_bottleneck_infertile.png
+2026-04-22 18:06:16 - egg-detector - INFO -   [3/20] Saved results\xai\gradcam\IMG_8199_bottleneck_infertile.png
+2026-04-22 18:06:19 - egg-detector - INFO -   [4/20] Saved results\xai\gradcam\IMG_8202_bottleneck_infertile.png
+2026-04-22 18:06:21 - egg-detector - INFO -   [5/20] Saved results\xai\gradcam\IMG_8213_bottleneck_infertile.png
+2026-04-22 18:06:23 - egg-detector - INFO -   [6/20] Saved results\xai\gradcam\IMG_8216_bottleneck_infertile.png
+2026-04-22 18:06:25 - egg-detector - INFO -   [7/20] Saved results\xai\gradcam\IMG_8220_bottleneck_infertile.png
+2026-04-22 18:06:27 - egg-detector - INFO -   [8/20] Saved results\xai\gradcam\IMG_8257_bottleneck_infertile.png
+2026-04-22 18:06:29 - egg-detector - INFO -   [9/20] Saved results\xai\gradcam\IMG_8269_bottleneck_infertile.png
+2026-04-22 18:06:30 - egg-detector - INFO -   [10/20] Saved results\xai\gradcam\IMG_8274_bottleneck_infertile.png
+2026-04-22 18:06:32 - egg-detector - INFO -   [11/20] Saved results\xai\gradcam\IMG_8283_bottleneck_infertile.png
+2026-04-22 18:06:33 - egg-detector - INFO -   [12/20] Saved results\xai\gradcam\IMG_8289_bottleneck_infertile.png
+2026-04-22 18:06:35 - egg-detector - INFO -   [13/20] Saved results\xai\gradcam\IMG_8320_bottleneck_infertile.png
+2026-04-22 18:06:36 - egg-detector - INFO -   [14/20] Saved results\xai\gradcam\IMG_8333_bottleneck_infertile.png
+2026-04-22 18:06:37 - egg-detector - INFO -   [15/20] Saved results\xai\gradcam\IMG_8343_bottleneck_infertile.png
+2026-04-22 18:06:39 - egg-detector - INFO -   [16/20] Saved results\xai\gradcam\IMG_8351_bottleneck_infertile.png
+2026-04-22 18:06:40 - egg-detector - INFO -   [17/20] Saved results\xai\gradcam\IMG_8356_bottleneck_infertile.png
+2026-04-22 18:06:42 - egg-detector - INFO -   [18/20] Saved results\xai\gradcam\IMG_8365_bottleneck_infertile.png
+2026-04-22 18:06:44 - egg-detector - INFO -   [19/20] Saved results\xai\gradcam\IMG_8375_bottleneck_infertile.png
+2026-04-22 18:06:45 - egg-detector - INFO -   [20/20] Saved results\xai\gradcam\IMG_8376_bottleneck_infertile.png
+2026-04-22 18:06:45 - egg-detector - INFO - Grad-CAM done. Results in results\xai\gradcam
+2026-04-23 09:11:28 - egg-detector - INFO - Device: cpu
+2026-04-23 09:11:34 - egg-detector - INFO - U-Net loaded from results\unet_training\checkpoints\best_epoch_39_20260423_084746.pth
+2026-04-23 09:11:34 - egg-detector - INFO - Grad-CAM: processing 20 images (layer=bottleneck, mode=fertile)
+2026-04-23 09:11:35 - egg-detector - INFO -   [1/20] Saved results\xai\gradcam\IMG_8188_bottleneck_fertile.png
+2026-04-23 09:11:36 - egg-detector - INFO -   [2/20] Saved results\xai\gradcam\IMG_8198_bottleneck_fertile.png
+2026-04-23 09:11:37 - egg-detector - INFO -   [3/20] Saved results\xai\gradcam\IMG_8199_bottleneck_fertile.png
+2026-04-23 09:11:38 - egg-detector - INFO -   [4/20] Saved results\xai\gradcam\IMG_8202_bottleneck_fertile.png
+2026-04-23 09:11:39 - egg-detector - INFO -   [5/20] Saved results\xai\gradcam\IMG_8213_bottleneck_fertile.png
+2026-04-23 09:11:40 - egg-detector - INFO -   [6/20] Saved results\xai\gradcam\IMG_8216_bottleneck_fertile.png
+2026-04-23 09:11:41 - egg-detector - INFO -   [7/20] Saved results\xai\gradcam\IMG_8220_bottleneck_fertile.png
+2026-04-23 09:11:42 - egg-detector - INFO -   [8/20] Saved results\xai\gradcam\IMG_8257_bottleneck_fertile.png
+2026-04-23 09:11:43 - egg-detector - INFO -   [9/20] Saved results\xai\gradcam\IMG_8269_bottleneck_fertile.png
+2026-04-23 09:11:45 - egg-detector - INFO -   [10/20] Saved results\xai\gradcam\IMG_8274_bottleneck_fertile.png
+2026-04-23 09:11:45 - egg-detector - INFO -   [11/20] Saved results\xai\gradcam\IMG_8283_bottleneck_fertile.png
+2026-04-23 09:11:46 - egg-detector - INFO -   [12/20] Saved results\xai\gradcam\IMG_8289_bottleneck_fertile.png
+2026-04-23 09:11:47 - egg-detector - INFO -   [13/20] Saved results\xai\gradcam\IMG_8320_bottleneck_fertile.png
+2026-04-23 09:11:48 - egg-detector - INFO -   [14/20] Saved results\xai\gradcam\IMG_8333_bottleneck_fertile.png
+2026-04-23 09:11:49 - egg-detector - INFO -   [15/20] Saved results\xai\gradcam\IMG_8343_bottleneck_fertile.png
+2026-04-23 09:11:50 - egg-detector - INFO -   [16/20] Saved results\xai\gradcam\IMG_8351_bottleneck_fertile.png
+2026-04-23 09:11:51 - egg-detector - INFO -   [17/20] Saved results\xai\gradcam\IMG_8356_bottleneck_fertile.png
+2026-04-23 09:11:52 - egg-detector - INFO -   [18/20] Saved results\xai\gradcam\IMG_8365_bottleneck_fertile.png
+2026-04-23 09:11:53 - egg-detector - INFO -   [19/20] Saved results\xai\gradcam\IMG_8375_bottleneck_fertile.png
+2026-04-23 09:11:54 - egg-detector - INFO -   [20/20] Saved results\xai\gradcam\IMG_8376_bottleneck_fertile.png
+2026-04-23 09:11:54 - egg-detector - INFO - Grad-CAM done. Results in results\xai\gradcam

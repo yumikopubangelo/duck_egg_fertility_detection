@@ -1,0 +1,207 @@
+{
+  "method": "KernelSHAP",
+  "target_class": "fertile",
+  "n_samples_explained": 24,
+  "feature_importances": [
+    {
+      "feature": "feature_1",
+      "mean_abs_shap": 0.03315339306334087
+    },
+    {
+      "feature": "feature_38",
+      "mean_abs_shap": 0.02543852470534685
+    },
+    {
+      "feature": "feature_9",
+      "mean_abs_shap": 0.02472616803515941
+    },
+    {
+      "feature": "feature_46",
+      "mean_abs_shap": 0.024487455654405688
+    },
+    {
+      "feature": "feature_43",
+      "mean_abs_shap": 0.021520929431744083
+    },
+    {
+      "feature": "feature_16",
+      "mean_abs_shap": 0.02087200226476084
+    },
+    {
+      "feature": "feature_39",
+      "mean_abs_shap": 0.0193319451643237
+    },
+    {
+      "feature": "feature_42",
+      "mean_abs_shap": 0.018033322231631156
+    },
+    {
+      "feature": "feature_41",
+      "mean_abs_shap": 0.017022240405994347
+    },
+    {
+      "feature": "feature_19",
+      "mean_abs_shap": 0.016777959165671884
+    },
+    {
+      "feature": "feature_6",
+      "mean_abs_shap": 0.016510429461291606
+    },
+    {
+      "feature": "feature_44",
+      "mean_abs_shap": 0.014789659578240995
+    },
+    {
+      "feature": "feature_4",
+      "mean_abs_shap": 0.014556384374371865
+    },
+    {
+      "feature": "feature_0",
+      "mean_abs_shap": 0.014439163721599646
+    },
+    {
+      "feature": "feature_18",
+      "mean_abs_shap": 0.014352203450032026
+    },
+    {
+      "feature": "feature_45",
+      "mean_abs_shap": 0.014283449092493329
+    },
+    {
+      "feature": "feature_40",
+      "mean_abs_shap": 0.014269236500892351
+    },
+    {
+      "feature": "feature_2",
+      "mean_abs_shap": 0.01388073325002945
+    },
+    {
+      "feature": "feature_10",
+      "mean_abs_shap": 0.013641179284870334
+    },
+    {
+      "feature": "feature_37",
+      "mean_abs_shap": 0.012926848613200719
+    },
+    {
+      "feature": "feature_21",
+      "mean_abs_shap": 0.011238565158869332
+    },
+    {
+      "feature": "feature_49",
+      "mean_abs_shap": 0.010842316734996296
+    },
+    {
+      "feature": "feature_17",
+      "mean_abs_shap": 0.009914856072466808
+    },
+    {
+      "feature": "feature_20",
+      "mean_abs_shap": 0.008886599161330938
+    },
+    {
+      "feature": "feature_15",
+      "mean_abs_shap": 0.008281080699537747
+    },
+    {
+      "feature": "feature_22",
+      "mean_abs_shap": 0.008114047197568378
+    },
+    {
+      "feature": "feature_47",
+      "mean_abs_shap": 0.008049648987160382
+    },
+    {
+      "feature": "feature_48",
+      "mean_abs_shap": 0.007751382835753308
+    },
+    {
+      "feature": "feature_13",
+      "mean_abs_shap": 0.006031943296538331
+    },
+    {
+      "feature": "feature_26",
+      "mean_abs_shap": 0.004940926580916252
+    },
+    {
+      "feature": "feature_3",
+      "mean_abs_shap": 0.00486365973713356
+    },
+    {
+      "feature": "feature_8",
+      "mean_abs_shap": 0.004646176392697405
+    },
+    {
+      "feature": "feature_31",
+      "mean_abs_shap": 0.004646051972431806
+    },
+    {
+      "feature": "feature_14",
+      "mean_abs_shap": 0.004254269919122117
+    },
+    {
+      "feature": "feature_28",
+      "mean_abs_shap": 0.0040707820704108675
+    },
+    {
+      "feature": "feature_29",
+      "mean_abs_shap": 0.0036770882973476923
+    },
+    {
+      "feature": "feature_27",
+      "mean_abs_shap": 0.00349290477356076
+    },
+    {
+      "feature": "feature_5",
+      "mean_abs_shap": 0.003369697777109318
+    },
+    {
+      "feature": "feature_24",
+      "mean_abs_shap": 0.0032634990043201085
+    },
+    {
+      "feature": "feature_11",
+      "mean_abs_shap": 0.0027209143412424554
+    },
+    {
+      "feature": "feature_25",
+      "mean_abs_shap": 0.0021064223786238447
+    },
+    {
+      "feature": "feature_23",
+      "mean_abs_shap": 0.0012812067904587614
+    },
+    {
+      "feature": "feature_7",
+      "mean_abs_shap": 0.001042732371002323
+    },
+    {
+      "feature": "feature_12",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "feature_32",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "feature_33",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "feature_30",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "feature_34",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "feature_35",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "feature_36",
+      "mean_abs_shap": 0.0
+    }
+  ]
+}

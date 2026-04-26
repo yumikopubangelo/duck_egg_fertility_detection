@@ -1,0 +1,18 @@
+\begin{table}[ht]
+\centering
+\caption{Wilcoxon Signed-Rank Test Results}
+\label{tab:wilcoxon}
+\begin{tabular}{llccccc}
+\hline
+Comparison & Metric & Mean A & Mean B & $\Delta$ & p-value & Effect \\
+\hline
+  AWC vs KMeans & silhouette & 0.2401 & 0.1703 & +0.0697 & 0.0000** & large \\
+  AWC vs KMeans & davies_bouldin & 1.0000 & 0.9110 & +0.0890 & 0.0000** & large \\
+  AWC vs KMeans & calinski_harabasz & 1.0000 & 0.9226 & +0.0774 & 0.0000** & large \\
+  AWC vs FCM & silhouette & 0.2401 & 0.1841 & +0.0560 & 0.0000** & large \\
+  AWC vs FCM & davies_bouldin & 1.0000 & 0.9482 & +0.0518 & 0.0000** & large \\
+  AWC vs FCM & calinski_harabasz & 1.0000 & 0.9485 & +0.0515 & 0.0000** & large \\
+\hline
+\multicolumn{7}{l}{$^{*}p<0.05$; $^{**}p<0.01$} \\
+\end{tabular}
+\end{table}

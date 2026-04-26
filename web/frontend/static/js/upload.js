@@ -1,4 +1,4 @@
-﻿const dropZone    = document.getElementById('drop-zone');
+﻿HIconst dropZone    = document.getElementById('drop-zone');
 const fileInput   = document.getElementById('file-input');
 const previewBox  = document.getElementById('preview-box');
 const previewImg  = document.getElementById('preview-img');

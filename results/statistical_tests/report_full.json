@@ -1,0 +1,162 @@
+{
+  "alpha": 0.05,
+  "wilcoxon": [
+    {
+      "test": "Wilcoxon signed-rank",
+      "metric": "accuracy",
+      "model_a": "AWC",
+      "model_b": "KMeans",
+      "n_samples": 68,
+      "mean_a": 0.8676470588235294,
+      "mean_b": 0.8676470588235294,
+      "mean_diff": 0.0,
+      "ci_95_diff": [
+        0.0,
+        0.0
+      ],
+      "statistic_W": 0.0,
+      "p_value": NaN,
+      "interpretation": "not significant (p = nan >= 0.05)",
+      "significant": false,
+      "effect_size_r": 1.0,
+      "effect_size_d": 0.0,
+      "effect_magnitude": "negligible"
+    },
+    {
+      "test": "Wilcoxon signed-rank",
+      "metric": "correct",
+      "model_a": "AWC",
+      "model_b": "KMeans",
+      "n_samples": 68,
+      "mean_a": 0.8676470588235294,
+      "mean_b": 0.8676470588235294,
+      "mean_diff": 0.0,
+      "ci_95_diff": [
+        0.0,
+        0.0
+      ],
+      "statistic_W": 0.0,
+      "p_value": NaN,
+      "interpretation": "not significant (p = nan >= 0.05)",
+      "significant": false,
+      "effect_size_r": 1.0,
+      "effect_size_d": 0.0,
+      "effect_magnitude": "negligible"
+    },
+    {
+      "test": "Wilcoxon signed-rank",
+      "metric": "accuracy",
+      "model_a": "AWC",
+      "model_b": "FCM",
+      "n_samples": 68,
+      "mean_a": 0.8676470588235294,
+      "mean_b": 0.8970588235294118,
+      "mean_diff": -0.02941176470588236,
+      "ci_95_diff": [
+        -0.07352941176470595,
+        0.0
+      ],
+      "statistic_W": 0.0,
+      "p_value": 0.15729920705028502,
+      "interpretation": "not significant (p = 0.1573 >= 0.05)",
+      "significant": false,
+      "effect_size_r": 1.0,
+      "effect_size_d": -0.17279293234786583,
+      "effect_magnitude": "negligible"
+    },
+    {
+      "test": "Wilcoxon signed-rank",
+      "metric": "correct",
+      "model_a": "AWC",
+      "model_b": "FCM",
+      "n_samples": 68,
+      "mean_a": 0.8676470588235294,
+      "mean_b": 0.8970588235294118,
+      "mean_diff": -0.02941176470588236,
+      "ci_95_diff": [
+        -0.07352941176470595,
+        0.0
+      ],
+      "statistic_W": 0.0,
+      "p_value": 0.15729920705028502,
+      "interpretation": "not significant (p = 0.1573 >= 0.05)",
+      "significant": false,
+      "effect_size_r": 1.0,
+      "effect_size_d": -0.17279293234786583,
+      "effect_magnitude": "negligible"
+    }
+  ],
+  "mcnemar": [
+    {
+      "test": "McNemar",
+      "model_a": "AWC",
+      "model_b": "KMeans",
+      "b": 0,
+      "c": 0,
+      "n_discordant": 0,
+      "statistic": null,
+      "p_value": 1.0,
+      "interpretation": "not significant (no discordant pairs)",
+      "significant": false,
+      "accuracy_a": 0.8676470588235294,
+      "accuracy_b": 0.8676470588235294
+    },
+    {
+      "test": "McNemar (exact binomial)",
+      "model_a": "AWC",
+      "model_b": "FCM",
+      "n_samples": 68,
+      "contingency_b": 2,
+      "contingency_c": 0,
+      "n_discordant": 2,
+      "statistic": 0.0,
+      "p_value": 0.5,
+      "interpretation": "not significant (p = 0.5000 >= 0.05)",
+      "significant": false,
+      "accuracy_a": 0.8676470588235294,
+      "accuracy_b": 0.8970588235294118,
+      "accuracy_diff": -0.02941176470588236
+    },
+    {
+      "test": "McNemar (exact binomial)",
+      "model_a": "KMeans",
+      "model_b": "FCM",
+      "n_samples": 68,
+      "contingency_b": 2,
+      "contingency_c": 0,
+      "n_discordant": 2,
+      "statistic": 0.0,
+      "p_value": 0.5,
+      "interpretation": "not significant (p = 0.5000 >= 0.05)",
+      "significant": false,
+      "accuracy_a": 0.8676470588235294,
+      "accuracy_b": 0.8970588235294118,
+      "accuracy_diff": -0.02941176470588236
+    }
+  ],
+  "friedman": [
+    {
+      "test": "Friedman",
+      "metric": "accuracy",
+      "higher_is_better": true,
+      "models": [
+        "AWC",
+        "KMeans",
+        "FCM"
+      ],
+      "n_samples": 68,
+      "statistic_chi2": 4.00000000000151,
+      "p_value": 0.1353352832365105,
+      "interpretation": "not significant (p = 0.1353 >= 0.05)",
+      "significant": false,
+      "average_ranks": {
+        "AWC": 1.9852941176470589,
+        "KMeans": 1.9852941176470589,
+        "FCM": 2.0294117647058822
+      },
+      "best_model": "FCM",
+      "nemenyi_critical_difference_0.05": 0.4019926835740407,
+      "note": "Pairwise significance: |rank_i - rank_j| > CD implies p < 0.05 between those two models. Higher rank = better."
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+2026-04-22 17:50:50 - egg-detector - INFO - === Loading training data ===
+2026-04-22 17:50:50 - egg-detector - INFO -   train/fertile: 72 images
+2026-04-22 17:50:51 - egg-detector - INFO -   train/infertile: 84 images
+2026-04-22 17:50:53 - egg-detector - INFO - Train: 156 images  (fertile=72, infertile=84)
+2026-04-22 17:50:53 - egg-detector - INFO - === Loading evaluation data ===
+2026-04-22 17:50:53 - egg-detector - INFO -   test/fertile: 12 images
+2026-04-22 17:50:53 - egg-detector - INFO -   test/infertile: 12 images
+2026-04-22 17:50:53 - egg-detector - INFO -   val/fertile: 20 images
+2026-04-22 17:50:53 - egg-detector - INFO -   val/infertile: 24 images
+2026-04-22 17:50:54 - egg-detector - INFO - Eval:  68 images  (fertile=32, infertile=36)
+2026-04-22 17:50:54 - egg-detector - INFO - === Fitting models ===
+2026-04-22 17:50:54 - egg-detector - INFO - AWC loaded from models\awc\awc_model.pkl
+2026-04-22 17:50:54 - egg-detector - INFO - Fitting K-Means on train split ...
+2026-04-22 17:50:54 - egg-detector - INFO - Fitting Fuzzy C-Means on train split ...
+2026-04-22 17:50:54 - egg-detector - INFO - === Running predictions ===
+2026-04-22 17:50:54 - egg-detector - INFO -   AWC       accuracy=0.132  (0.0s)
+2026-04-22 17:50:54 - egg-detector - INFO -   KMeans    accuracy=0.868  (0.0s)
+2026-04-22 17:50:54 - egg-detector - INFO -   FCM       accuracy=0.897  (0.0s)
+2026-04-22 17:50:54 - egg-detector - INFO - Predictions saved to results\evaluation\full_evaluation_predictions.csv
+2026-04-22 17:50:54 - egg-detector - INFO - === Running statistical tests ===
+2026-04-22 17:50:55 - egg-detector - INFO - Full report saved to results\statistical_tests/report_full.json
+2026-04-22 17:50:55 - egg-detector - INFO - LaTeX table saved  to results\statistical_tests/wilcoxon_table_full.tex
+2026-04-22 17:50:55 - egg-detector - INFO - Done.
+2026-04-22 17:57:22 - egg-detector - INFO - === Loading training data ===
+2026-04-22 17:57:22 - egg-detector - INFO -   train/fertile: 72 images
+2026-04-22 17:57:23 - egg-detector - INFO -   train/infertile: 84 images
+2026-04-22 17:57:24 - egg-detector - INFO - Train: 156 images  (fertile=72, infertile=84)
+2026-04-22 17:57:24 - egg-detector - INFO - === Loading evaluation data ===
+2026-04-22 17:57:24 - egg-detector - INFO -   test/fertile: 12 images
+2026-04-22 17:57:24 - egg-detector - INFO -   test/infertile: 12 images
+2026-04-22 17:57:24 - egg-detector - INFO -   val/fertile: 20 images
+2026-04-22 17:57:24 - egg-detector - INFO -   val/infertile: 24 images
+2026-04-22 17:57:25 - egg-detector - INFO - Eval:  68 images  (fertile=32, infertile=36)
+2026-04-22 17:57:25 - egg-detector - INFO - === Fitting models ===
+2026-04-22 17:57:25 - egg-detector - INFO - AWC loaded from models\awc\awc_model.pkl
+2026-04-22 17:57:25 - egg-detector - INFO - Building AWC cluster->label mapping from training data ...
+2026-04-22 17:57:25 - egg-detector - INFO -   AWC cluster map: {0: 0, 1: 1}
+2026-04-22 17:57:25 - egg-detector - INFO - Fitting K-Means on train split ...
+2026-04-22 17:57:25 - egg-detector - INFO - Fitting Fuzzy C-Means on train split ...
+2026-04-22 17:57:25 - egg-detector - INFO - === Running predictions ===
+2026-04-22 17:57:25 - egg-detector - INFO -   AWC       accuracy=0.868  (0.0s)
+2026-04-22 17:57:25 - egg-detector - INFO -   KMeans    accuracy=0.868  (0.0s)
+2026-04-22 17:57:25 - egg-detector - INFO -   FCM       accuracy=0.897  (0.0s)
+2026-04-22 17:57:25 - egg-detector - INFO - Predictions saved to results\evaluation\full_evaluation_predictions.csv
+2026-04-22 17:57:25 - egg-detector - INFO - === Running statistical tests ===
+2026-04-22 17:57:26 - egg-detector - INFO - Full report saved to results\statistical_tests/report_full.json
+2026-04-22 17:57:26 - egg-detector - INFO - LaTeX table saved  to results\statistical_tests/wilcoxon_table_full.tex
+2026-04-22 17:57:26 - egg-detector - INFO - Done.

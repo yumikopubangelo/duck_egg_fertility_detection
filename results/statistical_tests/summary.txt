@@ -1,0 +1,31 @@
+
+=================================================================
+  STATISTICAL SIGNIFICANCE TESTING — SUMMARY
+=================================================================
+
+─────────────────────────────────────────────────────────────────
+  WILCOXON SIGNED-RANK TESTS
+─────────────────────────────────────────────────────────────────
+  [✓ SIG] AWC vs KMeans | silhouette | Δmean=+0.0697 | p=0.0000 | effect=large
+  [✓ SIG] AWC vs KMeans | davies_bouldin | Δmean=+0.0890 | p=0.0000 | effect=large
+  [✓ SIG] AWC vs KMeans | calinski_harabasz | Δmean=+0.0774 | p=0.0000 | effect=large
+  [✓ SIG] AWC vs FCM | silhouette | Δmean=+0.0560 | p=0.0000 | effect=large
+  [✓ SIG] AWC vs FCM | davies_bouldin | Δmean=+0.0518 | p=0.0000 | effect=large
+  [✓ SIG] AWC vs FCM | calinski_harabasz | Δmean=+0.0515 | p=0.0000 | effect=large
+
+─────────────────────────────────────────────────────────────────
+  McNEMAR TESTS
+─────────────────────────────────────────────────────────────────
+  [✗ n.s.] AWC vs KMeans | acc_a=0.458 acc_b=0.417 | p=1.0000
+  [✗ n.s.] AWC vs FCM | acc_a=0.458 acc_b=0.458 | p=1.0000
+  [✗ n.s.] KMeans vs FCM | acc_a=0.417 acc_b=0.458 | p=1.0000
+
+─────────────────────────────────────────────────────────────────
+  FRIEDMAN TESTS
+─────────────────────────────────────────────────────────────────
+
+=================================================================
+
+
+NOTE: Some or all tests used SYNTHETIC data expansion because fewer than 6 real per-sample observations were available.
+For publication-quality results, collect a larger test set and re-run this script.
