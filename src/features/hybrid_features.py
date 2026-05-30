@@ -21,6 +21,7 @@ class HybridFeatureConfig:
 
     include_classical: bool = True
     include_glcm: bool = True
+    include_vascular_morphology: bool = True
     include_morphology: bool = True
     include_deep: bool = True
     preprocess_input: bool = False
@@ -56,7 +57,10 @@ class HybridFeatureExtractor:
     def __init__(self, config: HybridFeatureConfig | None = None):
         self.config = config or HybridFeatureConfig()
         self.classical_extractor = ClassicalFeatureExtractor(
-            ClassicalFeatureConfig(include_glcm=False)
+            ClassicalFeatureConfig(
+                include_glcm=False,
+                include_vascular_morphology=self.config.include_vascular_morphology,
+            )
         )
         self.preprocessor = DuckEggPreprocessor() if self.config.preprocess_input else None
         self.deep_extractor = None
@@ -308,12 +312,22 @@ def build_extractor_from_metadata(
     mode = str(metadata.get("mode", "classical")).lower()
     if mode == "hybrid":
         raw_config = dict(metadata.get("config", {}))
+        feature_names = [str(name) for name in metadata.get("feature_names", [])]
+        if "include_vascular_morphology" not in raw_config:
+            raw_config["include_vascular_morphology"] = any(
+                name.startswith("vascular_") for name in feature_names
+            )
         if preprocess_override is not None:
             raw_config["preprocess_input"] = preprocess_override
         config = HybridFeatureConfig(**raw_config)
         return HybridFeatureExtractor(config)
 
     raw_config = dict(metadata.get("config", {}))
+    feature_names = [str(name) for name in metadata.get("feature_names", [])]
+    if "include_vascular_morphology" not in raw_config:
+        raw_config["include_vascular_morphology"] = any(
+            name.startswith("vascular_") for name in feature_names
+        )
     return ClassicalFeatureExtractor(ClassicalFeatureConfig(**raw_config))
 
 
@@ -338,6 +352,7 @@ def build_classical_metadata() -> Dict[str, object]:
             "lbp_points": extractor.config.lbp_points,
             "include_glcm": extractor.config.include_glcm,
             "glcm_levels": extractor.config.glcm_levels,
+            "include_vascular_morphology": extractor.config.include_vascular_morphology,
             "include_edge_stats": extractor.config.include_edge_stats,
         },
     }

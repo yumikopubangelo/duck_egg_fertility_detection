@@ -21,6 +21,7 @@ class ClassicalFeatureConfig:
     lbp_points: int = 8
     include_glcm: bool = True
     glcm_levels: int = 16
+    include_vascular_morphology: bool = True
     include_edge_stats: bool = True
 
 
@@ -33,6 +34,7 @@ class ClassicalFeatureExtractor:
     - Normalized histogram
     - LBP histogram
     - GLCM spatial texture descriptors
+    - Vascular morphology from skeleton analysis
     - Edge statistics (optional)
     """
 
@@ -48,6 +50,14 @@ class ClassicalFeatureExtractor:
             for direction_idx, _ in enumerate(GLCM_OFFSETS):
                 for prop in GLCM_PROPS:
                     names.append(f"glcm_{prop}_dir{direction_idx}")
+        if self.config.include_vascular_morphology:
+            names.extend(
+                [
+                    "vascular_skeleton_total_length",
+                    "vascular_node_count",
+                    "vascular_branch_density",
+                ]
+            )
         if self.config.include_edge_stats:
             names.extend(["edge_density", "edge_mean", "edge_std"])
         return names
@@ -76,6 +86,10 @@ class ClassicalFeatureExtractor:
             glcm_len = len(GLCM_OFFSETS) * len(GLCM_PROPS)
             groups["Tekstur GLCM"] = list(range(start, start + glcm_len))
             start += glcm_len
+
+        if self.config.include_vascular_morphology:
+            groups["Morfologi Vaskular"] = list(range(start, start + 3))
+            start += 3
 
         if self.config.include_edge_stats:
             groups["Tepi (Edge)"] = list(range(start, start + 3))
@@ -165,6 +179,115 @@ class ClassicalFeatureExtractor:
 
         return np.asarray(outputs, dtype=np.float32)
 
+    @staticmethod
+    def _largest_component(mask: np.ndarray) -> np.ndarray:
+        num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(
+            mask.astype(np.uint8), connectivity=8
+        )
+        if num_labels <= 1:
+            return mask.astype(np.uint8)
+        largest_label = 1 + int(np.argmax(stats[1:, cv2.CC_STAT_AREA]))
+        return (labels == largest_label).astype(np.uint8)
+
+    def _estimate_roi_mask(self, gray: np.ndarray) -> np.ndarray:
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        _, otsu = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        binary = (otsu > 0).astype(np.uint8)
+        area_ratio = float(binary.mean())
+        if area_ratio < 0.05 or area_ratio > 0.90:
+            binary = 1 - binary
+        return self._largest_component(binary)
+
+    @staticmethod
+    def _remove_small_components(mask: np.ndarray, min_area: int = 8) -> np.ndarray:
+        num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(
+            mask.astype(np.uint8), connectivity=8
+        )
+        cleaned = np.zeros_like(mask, dtype=np.uint8)
+        for label in range(1, num_labels):
+            if stats[label, cv2.CC_STAT_AREA] >= min_area:
+                cleaned[labels == label] = 1
+        return cleaned
+
+    @staticmethod
+    def _skeletonize(binary_mask: np.ndarray) -> np.ndarray:
+        work = (binary_mask > 0).astype(np.uint8) * 255
+        skeleton = np.zeros_like(work, dtype=np.uint8)
+        kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+
+        while cv2.countNonZero(work) > 0:
+            eroded = cv2.erode(work, kernel)
+            temp = cv2.dilate(eroded, kernel)
+            temp = cv2.subtract(work, temp)
+            skeleton = cv2.bitwise_or(skeleton, temp)
+            work = eroded
+
+        return (skeleton > 0).astype(np.uint8)
+
+    @staticmethod
+    def _neighbor_count(skeleton: np.ndarray) -> np.ndarray:
+        neighbor_map = np.zeros_like(skeleton, dtype=np.uint8)
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                if dy == 0 and dx == 0:
+                    continue
+                shifted = np.roll(np.roll(skeleton, dy, axis=0), dx, axis=1)
+                if dy == -1:
+                    shifted[-1, :] = 0
+                elif dy == 1:
+                    shifted[0, :] = 0
+                if dx == -1:
+                    shifted[:, -1] = 0
+                elif dx == 1:
+                    shifted[:, 0] = 0
+                neighbor_map = neighbor_map + shifted.astype(np.uint8)
+        return neighbor_map
+
+    def _extract_vascular_morphology(self, gray: np.ndarray) -> np.ndarray:
+        roi_mask = self._estimate_roi_mask(gray)
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+        bright_response = cv2.morphologyEx(gray, cv2.MORPH_TOPHAT, kernel)
+        dark_response = cv2.morphologyEx(gray, cv2.MORPH_BLACKHAT, kernel)
+        vessel_response = np.maximum(bright_response, dark_response)
+        vessel_response = cv2.bitwise_and(vessel_response, vessel_response, mask=(roi_mask * 255))
+
+        nonzero = vessel_response[roi_mask > 0]
+        if nonzero.size == 0 or float(nonzero.max()) <= 0.0:
+            return np.zeros(3, dtype=np.float32)
+
+        threshold = max(float(nonzero.mean() + nonzero.std()), 1.0)
+        vascular_mask = (vessel_response >= threshold).astype(np.uint8)
+        vascular_mask = cv2.morphologyEx(
+            vascular_mask, cv2.MORPH_OPEN, np.ones((3, 3), dtype=np.uint8)
+        )
+        vascular_mask = self._remove_small_components(vascular_mask, min_area=8)
+
+        if not np.any(vascular_mask):
+            return np.zeros(3, dtype=np.float32)
+
+        skeleton = self._skeletonize(vascular_mask)
+        length = float(skeleton.sum())
+        if length <= 0:
+            return np.zeros(3, dtype=np.float32)
+
+        neighbor_map = self._neighbor_count(skeleton)
+        branch_nodes = np.logical_and(skeleton > 0, neighbor_map >= 3)
+        node_count = float(branch_nodes.sum())
+        branch_density = node_count / (length + 1e-8)
+
+        height, width = gray.shape[:2]
+        diagonal = float(np.hypot(height, width))
+        normalized_length = length / max(diagonal, 1.0)
+
+        return np.asarray(
+            [
+                normalized_length,
+                node_count,
+                branch_density,
+            ],
+            dtype=np.float32,
+        )
+
     def extract(self, image: np.ndarray) -> np.ndarray:
         """Extract 1D feature vector from a single image."""
         gray = self._to_gray(image)
@@ -190,6 +313,9 @@ class ClassicalFeatureExtractor:
 
         if self.config.include_glcm:
             features.append(self._extract_glcm(gray))
+
+        if self.config.include_vascular_morphology:
+            features.append(self._extract_vascular_morphology(gray))
 
         if self.config.include_edge_stats:
             edges = cv2.Canny(gray, 50, 150)
