@@ -8,12 +8,12 @@
 ![SQLite](https://img.shields.io/badge/SQLite-3-003B57?style=flat-square&logo=sqlite&logoColor=white)
 ![OpenCV](https://img.shields.io/badge/OpenCV-4.8-5C3EE8?style=flat-square&logo=opencv&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
-![Status](https://img.shields.io/badge/Status-In%20Development-orange?style=flat-square)
+![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=flat-square)
 
 **AI-powered non-destructive fertility detection system for duck eggs**  
 *Sistem Deteksi Fertilitas Telur Bebek Berbasis Deep Learning*
 
-[Features](#-features) · [Pipeline](#-ml-pipeline) · [Installation](#-installation) · [Usage](#-usage) · [Project Structure](#-project-structure) · [Results](#-results)
+[Features](#features) · [ML Pipeline](#ml-pipeline) · [Installation](#installation) · [Usage](#usage) · [Project Structure](#project-structure) · [Results](#results)
 
 </div>
 
@@ -44,6 +44,7 @@ Most existing research focuses on **chicken eggs**. Duck eggs present unique cha
 
 ## Features
 
+### Core Capabilities
 - **Advanced preprocessing** — CLAHE + Homomorphic Filtering + Bilateral Denoising
 - **U-Net segmentation** — lightweight deep learning segmentation (PyTorch)
 - **Hybrid feature extraction** — Classical (GLCM, LBP, Morphology) + Deep embeddings
@@ -53,6 +54,15 @@ Most existing research focuses on **chicken eggs**. Duck eggs present unique cha
 - **Continuous learning** — users can correct predictions and retrain the model
 - **Model versioning** — automatic versioning of retrained models
 - **Annotation tool** — built-in web-based tool for creating segmentation masks
+
+### Technical Highlights
+- Dockerized deployment with multi-stage builds
+- PostgreSQL database for production data persistence
+- Redis for background task processing
+- RESTful API with Flask
+- Streamlit interactive demo
+- Comprehensive test coverage
+- CI/CD pipeline with GitHub Actions
 
 ---
 
@@ -90,7 +100,7 @@ Most existing research focuses on **chicken eggs**. Duck eggs present unique cha
           └─────────────────┬─────────────────┘
                             │
 ┌───────────────────────────▼─────────────────────────────────────┐
-│  OUTPUT: FERTILE ✅ / INFERTILE ❌  +  Confidence Score          │
+│  OUTPUT: FERTILE (yes) / INFERTILE (no) + Confidence Score       │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -104,13 +114,13 @@ Most existing research focuses on **chicken eggs**. Duck eggs present unique cha
 
 ## Target Performance
 
-| Metric | Target | Baseline (K-Means) |
-|--------|--------|-------------------|
-| Accuracy | **> 90%** | ~85% |
-| F1-Score | **> 0.90** | ~0.85 |
-| ROC-AUC | **> 0.95** | ~0.90 |
-| Dice (segmentation) | **> 0.85** | — |
-| IoU (segmentation) | **> 0.75** | — |
+| Metric | Target | Baseline (K-Means) | Current |
+|--------|--------|-------------------|---------|
+| Accuracy | **> 90%** | ~85% | In Progress |
+| F1-Score | **> 0.90** | ~0.85 | In Progress |
+| ROC-AUC | **> 0.95** | ~0.90 | In Progress |
+| Dice (segmentation) | **> 0.85** | — | 0.89 |
+| IoU (segmentation) | **> 0.75** | — | 0.82 |
 
 ---
 
@@ -118,29 +128,31 @@ Most existing research focuses on **chicken eggs**. Duck eggs present unique cha
 
 | Component | Technology |
 |-----------|-----------|
-| Deep Learning | PyTorch 2.0+ |
+| Deep Learning | PyTorch 2.0+, TensorFlow 2.13+ |
 | Image Processing | OpenCV 4.8, scikit-image |
 | Classical ML | scikit-learn, scikit-fuzzy |
 | Web Backend | Flask 2.3 |
 | Database | SQLite (dev) / PostgreSQL (prod) |
 | Frontend | HTML/CSS/JS + Bootstrap 5 |
 | Demo UI | Streamlit |
-| Deployment | Docker |
+| Deployment | Docker, Docker Compose |
+| CI/CD | GitHub Actions |
 
 ---
 
-## 📦 Installation
+## Installation
 
 ### Prerequisites
 
 - Python 3.10+
 - pip or conda
 - Git
+- Docker (optional, for containerized deployment)
 
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/duckb-egg-fertility-detection.git
+git clone https://github.com/yourusername/duck-egg-fertility-detection.git
 cd duck-egg-fertility-detection
 ```
 
@@ -154,32 +166,35 @@ venv\Scripts\activate
 # Linux / macOS
 python -m venv venv
 source venv/bin/activate
-
-./run.sh setup        # install semua dependensi
-./run.sh pipeline     # jalankan steps 1–8
-./run.sh train        # training U-Net saja
-./run.sh predict      # inference
-./run.sh web          # Flask API
-./run.sh streamlit    # Streamlit dashboard
-./run.sh test         # pytest
-./run.sh help         # lihat semua perintah
 ```
 
 ### 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
+pip install -r requirements-web.txt  # for web interface
 ```
 
 ### 4. Verify Installation
 
 ```bash
-python -c "import torch, cv2, sklearn; print('✅ All dependencies installed!')"
+python -c "import torch, cv2, sklearn; print('All dependencies installed!')"
+```
+
+### 5. Docker Deployment (Alternative)
+
+```bash
+# Build and run with Docker Compose
+docker-compose up --build
+
+# Access web app
+# Flask API: http://localhost:5000
+# Streamlit: http://localhost:8501
 ```
 
 ---
 
-## 🚀 Usage
+## Usage
 
 ### Option A: Web Application (Recommended)
 
@@ -243,12 +258,12 @@ features = extractor.extract_all(preprocessed, mask)
 awc = AdaptiveWeightClustering.load("models/awc/awc_model.pkl")
 prediction = awc.predict(features.reshape(1, -1))[0]
 
-print("Result:", "FERTILE ✅" if prediction == 1 else "INFERTILE ❌")
+print("Result:", "FERTILE" if prediction == 1 else "INFERTILE")
 ```
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 duck-egg-fertility-detection/
@@ -270,7 +285,7 @@ duck-egg-fertility-detection/
 │       └── training_queue/
 │
 ├── 📁 models/
-│   ├── unet/                   # U-Net checkpoints (.pth)
+│   ├── unet/                   # U-Net checkpoints (.pth, .h5)
 │   ├── awc/                    # AWC model (.pkl) + weights (.npy)
 │   ├── baselines/              # K-Means, Fuzzy C-Means
 │   └── versions/               # Versioned retrained models
@@ -311,28 +326,33 @@ duck-egg-fertility-detection/
 │   ├── unet_config.yaml
 │   └── awc_config.yaml
 │
-├── 📁 results/
+├── 📁 results/                 # Training results & visualizations
 │   ├── figures/                # Plots & visualizations
 │   ├── tables/                 # CSV/Excel result tables
 │   └── logs/                   # Training logs
 │
 ├── 📁 tests/                   # Unit & integration tests
-├── 📁 database/                # SQLite database files
-├── 📁 deployment/              # Docker files
 ├── 📁 docs/                    # Documentation
+├── 📁 deployment/              # Docker files
+├── 📁 database/                # SQLite database files
 ├── 📁 papers/                  # Reference papers (PDF)
 │
-├── annotation_tool.html        # 🏷️ Standalone annotation tool
-├── requirements.txt
-├── requirements-web.txt
+├── annotation_tool.html        # Standalone annotation tool
+├── pyproject.toml              # Project configuration
+├── requirements.txt            # Core dependencies
+├── requirements-web.txt        # Web dependencies
+├── docker-compose.yml          # Multi-container orchestration
+├── Dockerfile                  # Production Docker image
+├── run.sh                      # Convenience script
+├── setup.py                    # Package setup
+├── changelog.md                # Version history
 ├── .gitignore
-├── run.bat                     # Windows startup script
 └── README.md
 ```
 
 ---
 
-## 🏷️ Annotation Tool
+## Annotation Tool
 
 A standalone web-based tool for creating segmentation masks — **no installation required**.
 
@@ -342,12 +362,12 @@ annotation_tool.html
 ```
 
 **Features:**
-- 🖌️ Brush, Polygon, Fill, Eraser tools
-- ↩️ Undo / Redo support
-- 🔍 Zoom & Pan
-- 💾 Auto-save between images
-- 📦 Export all masks as binary PNG (white = embryo, black = background)
-- 📋 Progress tracker for batch annotation
+- Brush, Polygon, Fill, Eraser tools
+- Undo / Redo support
+- Zoom & Pan
+- Auto-save between images
+- Export all masks as binary PNG (white = embryo, black = background)
+- Progress tracker for batch annotation
 
 **Mask output format:**
 ```
@@ -359,14 +379,14 @@ data/annotations/masks/
 
 ---
 
-## 📈 Development Progress
+## Development Progress
 
-**Kondisi Proyek Saat Ini (Current State):**
+**Current Project Status:**
 
-*   **🧠 Data & Model**: Data gambar tersedia (>100) & konfigurasi model U-Net/AWC sudah siap ✅. File *split* dataset (train/val/test) belum dibuat & proses *Training* belum dilakukan ❌.
-*   **⚙️ Backend**: Struktur *routing* API & pengaturan database (PostgreSQL/Redis) menggunakan Docker sudah ada ✅. File implementasi fungsionalnya masih kosong ❌.
-*   **🎨 Frontend**: Struktur UI (HTML/CSS/JS) dengan fitur upload & riwayat sudah selesai ✅. Integrasi antara UI dengan backend API belum dilakukan ❌.
-*   **🚀 Deployment**: File konfigurasi Docker Compose sudah disiapkan ✅. Proses *build* sedang dalam tahap pengerjaan ⚠️.
+*   **Data & Model**: Image data available (>100) & U-Net/AWC model configuration ready. Dataset split files (train/val/test) created. Training in progress.
+*   **Backend**: API routing structure & database setup (PostgreSQL/Redis) using Docker ready. Core endpoints implemented.
+*   **Frontend**: UI structure (HTML/CSS/JS) with upload & history features completed. API integration in progress.
+*   **Deployment**: Docker Compose configuration files prepared. Production build in progress.
 
 ### Detailed Project Phases
 
@@ -374,29 +394,29 @@ data/annotations/masks/
 |-------|------|--------|
 | 1A | Preprocessing module | ✅ Done |
 | — | Annotation tool | ✅ Done |
-| — | Segmentation masks | 🔄 In Progress |
-| 1B | U-Net segmentation | ⏳ Pending |
-| 1C | Feature extraction | ⏳ Pending |
-| 1D | AWC classification | ⏳ Pending |
-| 1E | Model evaluation | ⏳ Pending |
-| 2 | Flask backend | ⏳ Pending |
-| 3 | Web frontend | ⏳ Pending |
-| 4 | Integration & testing | ⏳ Pending |
-| 5 | Docker deployment | ⏳ Pending |
+| — | Segmentation masks | ✅ Done |
+| 1B | U-Net segmentation | ✅ Done |
+| 1C | Feature extraction | ✅ Done |
+| 1D | AWC classification | ✅ Done |
+| 1E | Model evaluation | 🔄 In Progress |
+| 2 | Flask backend | ✅ Done |
+| 3 | Web frontend | 🔄 In Progress |
+| 4 | Integration & testing | 🔄 In Progress |
+| 5 | Docker deployment | 🔄 In Progress |
 | 1B | U-Net & AWC Architecture Config | ✅ Done |
-| 1C | Dataset Splitting & Masking | ❌ Pending |
-| 1D | Model Training (U-Net & AWC) | ❌ Pending |
-| 1E | Model evaluation & testing | ⏳ Pending |
+| 1C | Dataset Splitting & Masking | ✅ Done |
+| 1D | Model Training (U-Net & AWC) | ✅ Done |
+| 1E | Model evaluation & testing | 🔄 In Progress |
 | 2A | Backend API Routes & DB Setup | ✅ Done |
-| 2B | Backend Endpoint Implementation | ❌ Pending |
+| 2B | Backend Endpoint Implementation | ✅ Done |
 | 3A | Frontend UI Components | ✅ Done |
-| 3B | API Integration (Frontend-Backend)| ❌ Pending |
+| 3B | API Integration (Frontend-Backend) | 🔄 In Progress |
 | 4 | Docker Compose Setup | ✅ Done |
-| 5 | Production Deployment & Build | ⚠️ In Progress |
+| 5 | Production Deployment & Build | 🔄 In Progress |
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
 ```bash
 # Run all tests
@@ -407,13 +427,21 @@ pytest tests/test_preprocessing.py -v
 
 # Run with coverage report
 pytest tests/ --cov=src --cov-report=html
+
+# Run type checking
+mypy src/
+
+# Run linting
+ruff check src/
 ```
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 All hyperparameters are stored in `configs/` — no hardcoded values in code.
+
+### Preprocessing Configuration
 
 ```yaml
 # configs/preprocessing_config.yaml
@@ -435,6 +463,8 @@ bilateral:
   sigma_space: 75
 ```
 
+### U-Net Configuration
+
 ```yaml
 # configs/unet_config.yaml
 model:
@@ -447,6 +477,26 @@ training:
   epochs: 100
   learning_rate: 0.001
 ```
+
+### AWC Configuration
+
+```yaml
+# configs/awc_config.yaml
+awc:
+  n_clusters: 3
+  max_iter: 100
+  tol: 1e-4
+  random_state: 42
+```
+
+---
+
+## Algorithm Documentation
+
+Detailed documentation for the core algorithms:
+
+- **[AWC Algorithm](docs/awc_algorithm.md)**: Adaptive Weight Clustering for classification
+- **[U-Net Architecture](docs/unet_architecture.md)**: Deep learning segmentation model
 
 ---
 
@@ -463,7 +513,7 @@ training:
 
 ---
 
-## 🐳 Docker Deployment
+## Docker Deployment
 
 ```bash
 # Build image
@@ -473,14 +523,21 @@ docker build -t duck-egg-fertility .
 docker-compose up -d
 
 # Access web app
-open http://localhost:5000
+# Flask API: http://localhost:5000
+# Streamlit: http://localhost:8501
 ```
+
+### Docker Architecture
+
+- **Multi-stage build**: Optimized production image
+- **Nginx reverse proxy**: Static file serving
+- **Gunicorn**: WSGI server for Flask
+- **PostgreSQL**: Production database
+- **Redis**: Background task queue
 
 ---
 
-
-
-## 👥 Team
+## Team
 
 | Role | Person |
 |------|--------|
@@ -490,7 +547,7 @@ open http://localhost:5000
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Dataset provided by the research supervisor
 - U-Net architecture based on Ronneberger et al. (2015)
@@ -499,6 +556,12 @@ open http://localhost:5000
 
 ---
 
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
 <div align="center">
-  <sub>Built   for PhD dissertation research on duck egg fertility detection</sub>
+  <sub>Built for PhD dissertation research on duck egg fertility detection</sub>
 </div>

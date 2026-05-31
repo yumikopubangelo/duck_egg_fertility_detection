@@ -1,0 +1,38 @@
+=================================================================
+  LAPORAN EVALUASI MODEL — DETEKSI FERTILITAS TELUR BEBEK
+=================================================================
+  Tanggal  : 20260427_004032
+  Dataset  : 24 sampel uji (fertil=12, infertil=12)
+  Fitur    : 73 dimensi
+  AWC      : 20 fitur terpilih
+  CNN      : MobileNetV3-small (224x224)
+
+-----------------------------------------------------------------
+  METRIK PERBANDINGAN
+-----------------------------------------------------------------
+  Metrik                  AWC      KMeans         FCM MobileNetV3
+  --------------- ----------- ----------- ----------- -----------
+  Accuracy             0.9167      0.7917      0.8333      0.5000
+  Precision            0.8571      0.8182      0.8333      0.5000
+  Recall               1.0000      0.7500      0.8333      1.0000
+  Specificity          0.8333      0.8333      0.8333      0.0000
+  F1                   0.9231      0.7826      0.8333      0.6667
+  Roc Auc              0.9514      0.9167      0.8750      0.5000
+  Brier Score          0.1038      0.1786      0.1409      0.2510
+
+-----------------------------------------------------------------
+  UJI STATISTIK WILCOXON (α = 0.05)
+-----------------------------------------------------------------
+  AWC_vs_KMeans             p=0.0833     ✗ Tidak signifikan
+  AWC_vs_FCM                p=0.1573     ✗ Tidak signifikan
+  AWC_vs_MobileNetV3        p=0.0016     ✓ Signifikan
+  KMeans_vs_FCM             p=0.3173     ✗ Tidak signifikan
+  KMeans_vs_MobileNetV3     p=0.0522     ✗ Tidak signifikan
+  FCM_vs_MobileNetV3        p=0.0209     ✓ Signifikan
+
+-----------------------------------------------------------------
+  Model terbaik (F1-Score): AWC
+  F1 = 0.9231
+  Accuracy = 0.9167
+  ROC-AUC  = 0.9514
+=================================================================

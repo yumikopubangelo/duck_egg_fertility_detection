@@ -68,9 +68,6 @@
     "glcm_homogeneity_dir3",
     "glcm_energy_dir3",
     "glcm_correlation_dir3",
-    "vascular_skeleton_total_length",
-    "vascular_node_count",
-    "vascular_branch_density",
     "edge_density",
     "edge_mean",
     "edge_std"
@@ -151,25 +148,19 @@
       65,
       66
     ],
-    "Morfologi Vaskular": [
+    "Tepi (Edge)": [
       67,
       68,
       69
-    ],
-    "Tepi (Edge)": [
-      70,
-      71,
-      72
     ]
   },
-  "feature_count": 73,
+  "feature_count": 70,
   "config": {
     "histogram_bins": 32,
     "lbp_radius": 1,
     "lbp_points": 8,
     "include_glcm": true,
     "glcm_levels": 16,
-    "include_vascular_morphology": true,
     "include_edge_stats": true
   }
 }

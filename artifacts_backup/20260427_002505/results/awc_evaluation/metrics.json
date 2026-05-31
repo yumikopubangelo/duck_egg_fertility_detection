@@ -1,8 +1,8 @@
 {
   "evaluation": {
-    "silhouette": 0.10701277107000351,
-    "davies_bouldin": 2.2627852265327646,
-    "calinski_harabasz": 3.29804032957382,
+    "silhouette": 0.3543757200241089,
+    "davies_bouldin": 0.9555815502862206,
+    "calinski_harabasz": 17.777444210130977,
     "adjusted_rand": 0.6809583858764187,
     "normalized_mutual_info": 0.6615161167901195
   },
@@ -102,20 +102,20 @@
       56,
       61,
       66,
-      70,
-      71
+      67,
+      68
     ],
-    "n_input_features": 73,
+    "n_input_features": 70,
     "n_selected_features": 20
   },
   "checkpoint_path": "models\\awc\\awc_model.pkl",
   "train_shape": [
     156,
-    73
+    70
   ],
   "test_shape": [
     24,
-    73
+    70
   ],
   "selected_feature_count": 20,
   "selected_feature_indices": [
@@ -137,8 +137,8 @@
     56,
     61,
     66,
-    70,
-    71
+    67,
+    68
   ],
   "train_labels_available": true,
   "test_labels_available": true

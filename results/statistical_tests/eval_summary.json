@@ -9,9 +9,9 @@
     "infertile": 36
   },
   "model_accuracy": {
-    "AWC": 0.8676470588235294,
-    "KMeans": 0.8676470588235294,
-    "FCM": 0.8970588235294118
+    "AWC": 0.8823529411764706,
+    "KMeans": 0.8088235294117647,
+    "FCM": 0.8088235294117647
   },
   "feature_names": [
     "mean",
@@ -61,9 +61,32 @@
     "lbp_7",
     "lbp_8",
     "lbp_9",
+    "glcm_contrast_dir0",
+    "glcm_dissimilarity_dir0",
+    "glcm_homogeneity_dir0",
+    "glcm_energy_dir0",
+    "glcm_correlation_dir0",
+    "glcm_contrast_dir1",
+    "glcm_dissimilarity_dir1",
+    "glcm_homogeneity_dir1",
+    "glcm_energy_dir1",
+    "glcm_correlation_dir1",
+    "glcm_contrast_dir2",
+    "glcm_dissimilarity_dir2",
+    "glcm_homogeneity_dir2",
+    "glcm_energy_dir2",
+    "glcm_correlation_dir2",
+    "glcm_contrast_dir3",
+    "glcm_dissimilarity_dir3",
+    "glcm_homogeneity_dir3",
+    "glcm_energy_dir3",
+    "glcm_correlation_dir3",
+    "vascular_skeleton_total_length",
+    "vascular_node_count",
+    "vascular_branch_density",
     "edge_density",
     "edge_mean",
     "edge_std"
   ],
-  "n_features": 50
+  "n_features": 73
 }

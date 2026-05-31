@@ -8,6 +8,7 @@ from typing import Dict, Iterable, Tuple
 
 import cv2
 import numpy as np
+from PIL import Image
 
 try:
     import torch
@@ -251,7 +252,8 @@ class MobileNetV3Baseline:
 
         _, eval_transform = self._build_transforms()
         rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        tensor = eval_transform(rgb).unsqueeze(0).to(self.device)
+        pil_image = Image.fromarray(rgb)
+        tensor = eval_transform(pil_image).unsqueeze(0).to(self.device)
 
         self.model.eval()
         with torch.no_grad():

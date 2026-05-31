@@ -181,34 +181,31 @@ class AdaptiveWeightedClustering:
         return new_centroids
     
     def _calculate_feature_importance(self, X: np.ndarray, labels: np.ndarray) -> np.ndarray:
-        """Calculate feature importance based on cluster separation"""
-        importance = np.ones(X.shape[1])
-        
+        """Per-feature importance via Fisher (between/within) variance ratio.
+
+        A feature that separates the clusters well has high between-cluster
+        variance and low within-cluster variance, so it receives a higher
+        weight. The result is normalised to sum to 1 and is used directly to
+        weight the distance metric in assignment (the adaptive mechanism).
+        """
+        d = X.shape[1]
+        global_mean = X.mean(axis=0)
+        between = np.zeros(d)
+        within = np.zeros(d)
+
         for cluster_idx in range(self.n_clusters):
-            # Get points in current cluster
             cluster_points = X[labels == cluster_idx]
-            
-            if len(cluster_points) == 0:
+            n_k = len(cluster_points)
+            if n_k == 0:
                 continue
-            
-            # Calculate feature variance within cluster
-            feature_variance = np.var(cluster_points, axis=0)
-            
-            # Calculate feature separation between clusters
-            for other_idx in range(self.n_clusters):
-                if other_idx != cluster_idx:
-                    other_points = X[labels == other_idx]
-                    if len(other_points) > 0:
-                        feature_separation = np.abs(
-                            np.mean(cluster_points, axis=0) - np.mean(other_points, axis=0)
-                        )
-                        importance *= feature_separation / (feature_variance + 1e-6)
-        
-        # Normalize importance
-        importance = np.clip(importance, 0.1, 10.0)
-        importance /= np.sum(importance)
-        
-        return importance
+            between += n_k * (cluster_points.mean(axis=0) - global_mean) ** 2
+            within += n_k * cluster_points.var(axis=0)
+
+        ratio = between / (within + 1e-6)          # Fisher discriminant ratio per feature
+        total = float(ratio.sum())
+        if total <= 0 or not np.isfinite(total):
+            return np.ones(d) / d
+        return ratio / total
     
     def _calculate_silhouette_score(self, X: np.ndarray, labels: np.ndarray) -> float:
         """Calculate silhouette score for clustering quality"""
@@ -217,74 +214,92 @@ class AdaptiveWeightedClustering:
         
         return silhouette_score(X, labels)
     
+    def _weighted_distances(self, X_scaled: np.ndarray, centroids: np.ndarray) -> np.ndarray:
+        """Feature-weighted Euclidean distance to each centroid.
+
+        Uses the learned per-feature importance as weights so that
+        discriminative features dominate the cluster assignment. Falls back to
+        uniform weights when the importance vector is missing or malformed
+        (keeps backward compatibility with older pickles).
+        """
+        d = X_scaled.shape[1]
+        w = getattr(self, "feature_importance", None)
+        w = np.asarray(w, dtype=float).ravel() if w is not None else None
+        if w is None or w.shape[0] != d or not np.all(np.isfinite(w)):
+            w = np.ones(d)
+        diff = X_scaled[:, np.newaxis, :] - centroids[np.newaxis, :, :]
+        return np.sqrt(np.sum(w * diff ** 2, axis=2))
+
     def fit(self, X: np.ndarray) -> 'AdaptiveWeightedClustering':
-        """Fit the clustering model to data"""
+        """Fit the clustering model to data.
+
+        Adaptive loop: each iteration assigns points with the *current*
+        feature-weighted distance, updates centroids, then recomputes the
+        per-feature importance (Fisher ratio). Because the next assignment uses
+        the updated weights, discriminative features progressively dominate —
+        the actual adaptive-weighting mechanism. Convergence is declared when
+        the cluster assignment stops changing (after a minimum number of
+        adaptive passes), not merely when inertia stabilises.
+        """
         X = np.array(X)
-        
+
         if X.ndim != 2:
             raise ValueError("X should be 2-dimensional")
 
         self.n_input_features_ = X.shape[1]
         X = self.transform_features(X)
         self.n_selected_features_ = X.shape[1]
-        
+
         n_samples, n_features = X.shape
-        
+
         if n_samples < self.n_clusters:
             raise ValueError("n_samples={} should be >= n_clusters={}".format(n_samples, self.n_clusters))
-        
+
         # Normalize features
         self.scaler_ = StandardScaler()
         X_scaled = self.scaler_.fit_transform(X)
-        
-        # Initialize centroids
+
+        # Initialize centroids and start from uniform per-feature weights
         self.centroids_ = self._initialize_centroids(X_scaled)
-        
-        # Iterative optimization
-        prev_inertia = float('inf')
-        
+        self.feature_importance = np.ones(n_features) / n_features
+
+        prev_labels = None
+        min_iter = min(5, self.max_iter)        # force a few adaptive passes before converging
+
         for iteration in range(self.max_iter):
-            # Assign points to clusters
-            distances = np.linalg.norm(X_scaled[:, np.newaxis] - self.centroids_, axis=2)
+            # Assign with current feature-weighted distance
+            distances = self._weighted_distances(X_scaled, self.centroids_)
             labels = np.argmin(distances, axis=1)
-            
-            # Update centroids
-            new_centroids = self._update_centroids(X_scaled, labels)
-            
-            # Calculate inertia
-            inertia = np.sum(np.min(distances, axis=1) ** 2)
-            
-            # Check convergence
-            if abs(prev_inertia - inertia) < self.tol:
+
+            # Update centroids, cluster weights, and per-feature importance
+            self.centroids_ = self._update_centroids(X_scaled, labels)
+            self.iterations_ = iteration + 1
+            self.weights = self._calculate_weights(X_scaled, labels)
+            self.feature_importance = self._calculate_feature_importance(X_scaled, labels)
+
+            # Convergence: labels stable AND past the minimum adaptive passes
+            if (prev_labels is not None
+                    and np.array_equal(labels, prev_labels)
+                    and (iteration + 1) >= min_iter):
                 self.logger.info(f"Converged after {iteration + 1} iterations")
                 break
-            
-            prev_inertia = inertia
-            self.centroids_ = new_centroids
-            self.iterations_ = iteration + 1
-            
-            # Update weights
-            self.weights = self._calculate_weights(X_scaled, labels)
-            
-            # Update feature importance
-            self.feature_importance = self._calculate_feature_importance(X_scaled, labels)
-            
-            # Log progress
+            prev_labels = labels
+
             if iteration % 10 == 0:
                 silhouette = self._calculate_silhouette_score(X_scaled, labels)
                 self.logger.info(f"Iteration {iteration + 1}/{self.max_iter} - "
-                               f"Inertia: {inertia:.2f}, Silhouette: {silhouette:.3f}")
-        
-        # Final assignment
-        distances = np.linalg.norm(X_scaled[:, np.newaxis] - self.centroids_, axis=2)
+                               f"Silhouette: {silhouette:.3f}")
+
+        # Final assignment with the converged weights
+        distances = self._weighted_distances(X_scaled, self.centroids_)
         self.labels_ = np.argmin(distances, axis=1)
-        self.inertia_ = np.sum(np.min(distances, axis=1) ** 2)
+        self.inertia_ = float(np.sum(np.min(distances, axis=1) ** 2))
         self.silhouette_ = self._calculate_silhouette_score(X_scaled, self.labels_)
-        
+
         self.logger.info(f"Final - Inertia: {self.inertia_:.2f}, Silhouette: {self.silhouette_:.3f}")
         self.logger.info(f"Final weights: {self.weights}")
         self.logger.info(f"Final feature importance: {self.feature_importance}")
-        
+
         return self
     
     def predict(self, X: np.ndarray) -> np.ndarray:
@@ -308,8 +323,8 @@ class AdaptiveWeightedClustering:
             scaler = StandardScaler()
             X_scaled = scaler.fit_transform(X)
         
-        # Calculate distances with weights
-        distances = np.linalg.norm(X_scaled[:, np.newaxis] - self.centroids_, axis=2)
+        # Calculate feature-weighted distances (same metric as fit)
+        distances = self._weighted_distances(X_scaled, self.centroids_)
         return np.argmin(distances, axis=1)
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
@@ -329,7 +344,7 @@ class AdaptiveWeightedClustering:
             scaler = StandardScaler()
             X_scaled = scaler.fit_transform(X)
 
-        distances = np.linalg.norm(X_scaled[:, np.newaxis] - self.centroids_, axis=2)
+        distances = self._weighted_distances(X_scaled, self.centroids_)
         scores = -distances
         exp_scores = np.exp(scores - scores.max(axis=1, keepdims=True))
         return exp_scores / (exp_scores.sum(axis=1, keepdims=True) + 1e-12)

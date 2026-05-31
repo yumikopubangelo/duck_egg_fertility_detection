@@ -102,12 +102,54 @@ results/**/*.webp
 results/**/*.bmp
 results/**/*.tif
 results/**/*.tiff
+
+# ===========================================
+# Generated Media & Documents
+# ===========================================
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.webp
+*.avif
+*.bmp
+*.tif
+*.tiff
+*.heic
+*.heif
+*.ico
+*.doc
+*.docx
+*.rtf
+*.ppt
+*.pptx
+*.xls
+*.xlsx
+*.csv
+*.pdf
+*.odt
+*.ods
+*.odp
+~$*.doc
+~$*.docx
+~$*.ppt
+~$*.pptx
+~$*.xls
+~$*.xlsx
+*.dll
+
 *.h5
+*.keras
 *.pth
 *.pkl
+*.joblib
 *.npy
+*.npz
 *.pt
 *.onnx
+*.pb
+*.tflite
 *.model
 *.rar
 *.zip
@@ -120,6 +162,8 @@ results/**/*.tiff
 *.mp4
 *.avi
 *.mov
+*.mkv
+*.wmv
 
 # ===========================================
 # Jupyter Notebooks
