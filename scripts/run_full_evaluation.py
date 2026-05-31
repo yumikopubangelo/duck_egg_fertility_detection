@@ -52,6 +52,10 @@ from sklearn.metrics import (
 from sklearn.feature_selection import SelectKBest, f_classif
 from scipy.stats import wilcoxon
 
+from src.classification.mobilenet_v3_baseline import (
+    MobileNetTrainingConfig,
+    MobileNetV3Baseline,
+)
 from src.clustering.awc import AdaptiveWeightedClustering
 from src.clustering.kmeans_baseline import KMeansBaseline
 from src.clustering.fuzzy_cmeans import FuzzyCMeans
@@ -64,9 +68,10 @@ except AttributeError:
 
 # ── colour palette ──────────────────────────────────────────────────────────
 PALETTE = {
-    "AWC":    "#1A3A6E",
+    "AWC": "#1A3A6E",
     "KMeans": "#E07B39",
-    "FCM":    "#2E9E5B",
+    "FCM": "#2E9E5B",
+    "MobileNetV3": "#9B3BD1",
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -326,6 +331,11 @@ def save_csv(rows, path):
 
 
 def generate_text_report(results_dict, wilcoxon_results, out_path, meta):
+    model_names = list(results_dict.keys())
+    metric_names = ["accuracy", "precision", "recall", "specificity", "f1", "roc_auc", "brier_score"]
+    metric_col_width = 15
+    model_col_width = max(8, max(len(name) for name in model_names))
+
     lines = [
         "=" * 65,
         "  LAPORAN EVALUASI MODEL — DETEKSI FERTILITAS TELUR BEBEK",
@@ -335,17 +345,25 @@ def generate_text_report(results_dict, wilcoxon_results, out_path, meta):
         f"(fertil={meta['n_fertile']}, infertil={meta['n_infertile']})",
         f"  Fitur    : {meta['n_features']} dimensi",
         f"  AWC      : {meta.get('awc_selected_features', meta['n_features'])} fitur terpilih",
+        f"  CNN      : MobileNetV3-{meta.get('mobilenet_variant', 'small')} "
+        f"({meta.get('mobilenet_image_size', 224)}x{meta.get('mobilenet_image_size', 224)})",
         "",
         "-" * 65,
         "  METRIK PERBANDINGAN",
         "-" * 65,
-        f"  {'Metrik':<15} {'AWC':>8} {'K-Means':>8} {'FCM':>8}",
-        f"  {'-'*15} {'-'*8} {'-'*8} {'-'*8}",
+        "  "
+        + f"{'Metrik':<{metric_col_width}} "
+        + " ".join(f"{name:>{model_col_width}}" for name in model_names),
+        "  "
+        + f"{'-'*metric_col_width} "
+        + " ".join(f"{'-'*model_col_width}" for _ in model_names),
     ]
-    for metric in ["accuracy","precision","recall","specificity","f1","roc_auc","brier_score"]:
+    for metric in metric_names:
         label = metric.replace("_", " ").title()
-        vals = [results_dict[m]["metrics"][metric] for m in ["AWC","KMeans","FCM"]]
-        lines.append(f"  {label:<15} {vals[0]:>8.4f} {vals[1]:>8.4f} {vals[2]:>8.4f}")
+        metric_values = " ".join(
+            f"{results_dict[name]['metrics'][metric]:>{model_col_width}.4f}" for name in model_names
+        )
+        lines.append(f"  {label:<{metric_col_width}} {metric_values}")
 
     lines += [
         "",
@@ -476,10 +494,45 @@ def run_evaluation(args):
     print(f"     Accuracy={results_dict['FCM']['metrics']['accuracy']:.4f}  "
           f"F1={results_dict['FCM']['metrics']['f1']:.4f}")
 
+    # -- MobileNetV3 --
+    print("  → MobileNetV3 …")
+    mobilenet = MobileNetV3Baseline(
+        MobileNetTrainingConfig(
+            variant=args.mobilenet_variant,
+            pretrained=args.mobilenet_pretrained,
+            image_size=args.mobilenet_image_size,
+            batch_size=args.mobilenet_batch_size,
+            epochs=args.mobilenet_epochs,
+            learning_rate=args.mobilenet_lr,
+            weight_decay=args.mobilenet_weight_decay,
+            patience=args.mobilenet_patience,
+            num_workers=args.mobilenet_num_workers,
+            seed=42,
+        )
+    )
+    mobilenet.fit(
+        train_fertile_dir=args.train_fertile_dir,
+        train_infertile_dir=args.train_infertile_dir,
+        val_fertile_dir=args.val_fertile_dir,
+        val_infertile_dir=args.val_infertile_dir,
+    )
+    mb_y_true, mb_y_pred, mb_y_proba = mobilenet.predict_dataset(
+        fertile_dir=args.test_fertile_dir,
+        infertile_dir=args.test_infertile_dir,
+    )
+    results_dict["MobileNetV3"] = {
+        "y_true": mb_y_true.tolist(),
+        "y_pred": mb_y_pred.tolist(),
+        "y_proba": mb_y_proba.tolist(),
+        "metrics": compute_all_metrics(mb_y_true, mb_y_pred, mb_y_proba),
+    }
+    print(f"     Accuracy={results_dict['MobileNetV3']['metrics']['accuracy']:.4f}  "
+          f"F1={results_dict['MobileNetV3']['metrics']['f1']:.4f}")
+
     # ── Visualisations ─────────────────────────────────────────────────
     print("\n[3/5] Membuat visualisasi …")
 
-    for name in ["AWC", "KMeans", "FCM"]:
+    for name in results_dict.keys():
         plot_confusion_matrix(
             np.array(results_dict[name]["y_true"]),
             np.array(results_dict[name]["y_pred"]),
@@ -509,6 +562,8 @@ def run_evaluation(args):
         "n_features": n_features,
         "awc_feature_selection": args.awc_feature_selection,
         "awc_selected_features": len(feature_indices) if feature_indices is not None else n_features,
+        "mobilenet_variant": args.mobilenet_variant,
+        "mobilenet_image_size": args.mobilenet_image_size,
     }
 
     # Full JSON results
@@ -538,9 +593,11 @@ def run_evaluation(args):
     awc.save(ROOT / args.awc_model)
     km.save(ROOT / "models" / "baselines" / "kmeans_model.pkl")
     fcm.save(ROOT / "models" / "baselines" / "fcm_model.pkl")
+    mobilenet.save(ROOT / args.mobilenet_model)
     print(f"  [saved] {args.awc_model}")
     print(f"  [saved] models/baselines/kmeans_model.pkl")
     print(f"  [saved] models/baselines/fcm_model.pkl")
+    print(f"  [saved] {args.mobilenet_model}")
 
     print(f"\n✓ Evaluasi selesai. Semua output tersimpan di: {out_dir}")
     return results_dict
@@ -560,6 +617,22 @@ def parse_args():
     p.add_argument("--output-dir",     default="results/evaluation/full")
     p.add_argument("--awc-feature-selection", default="anova", choices=["none", "anova"])
     p.add_argument("--awc-k-best", type=int, default=20)
+    p.add_argument("--train-fertile-dir",   default="data/preprocessed/train/fertile")
+    p.add_argument("--train-infertile-dir", default="data/preprocessed/train/infertile")
+    p.add_argument("--val-fertile-dir",     default="data/preprocessed/val/fertile")
+    p.add_argument("--val-infertile-dir",   default="data/preprocessed/val/infertile")
+    p.add_argument("--test-fertile-dir",    default="data/preprocessed/test/fertile")
+    p.add_argument("--test-infertile-dir",  default="data/preprocessed/test/infertile")
+    p.add_argument("--mobilenet-model", default="models/baselines/mobilenetv3_small.pth")
+    p.add_argument("--mobilenet-variant", choices=["small", "large"], default="small")
+    p.add_argument("--mobilenet-image-size", type=int, default=224)
+    p.add_argument("--mobilenet-batch-size", type=int, default=16)
+    p.add_argument("--mobilenet-epochs", type=int, default=12)
+    p.add_argument("--mobilenet-lr", type=float, default=1e-3)
+    p.add_argument("--mobilenet-weight-decay", type=float, default=1e-4)
+    p.add_argument("--mobilenet-patience", type=int, default=4)
+    p.add_argument("--mobilenet-num-workers", type=int, default=0)
+    p.add_argument("--mobilenet-pretrained", action="store_true")
     return p.parse_args()
 
 

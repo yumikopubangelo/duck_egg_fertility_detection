@@ -26,8 +26,9 @@ def test_classical_group_map_matches_feature_count():
     for idxs in extractor.group_map.values():
         all_indices.extend(idxs)
 
-    assert len(extractor.feature_names) == 70
+    assert len(extractor.feature_names) == 73
     assert "Tekstur GLCM" in extractor.group_map
+    assert "Morfologi Vaskular" in extractor.group_map
     assert sorted(all_indices) == list(range(len(extractor.feature_names)))
 
 
@@ -46,6 +47,17 @@ def test_hybrid_extractor_without_deep_adds_glcm_and_morphology_features():
     assert "Tekstur GLCM" in extractor.group_map
     assert "Morfologi Mask" in extractor.group_map
     assert np.isfinite(vector).all()
+
+
+def test_classical_extractor_adds_vascular_morphology_features():
+    extractor = ClassicalFeatureExtractor()
+
+    vector = extractor.extract(_sample_image())
+
+    assert vector.shape == (len(extractor.feature_names),)
+    vascular = vector[extractor.group_map["Morfologi Vaskular"]]
+    assert vascular.shape == (3,)
+    assert np.isfinite(vascular).all()
 
 
 def test_hybrid_metadata_roundtrip(tmp_path):

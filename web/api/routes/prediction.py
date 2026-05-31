@@ -7,11 +7,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 import uuid
 
+import cv2
 from flask import Blueprint, current_app, jsonify, request
 from werkzeug.utils import secure_filename
 
 from src.web.model_manager import get_default_model_manager
 from src.web.prediction_service import PredictionService
+from web.api.routes.segmentation import segment_image_payload
 from web.api.routes.history import add_to_history
 
 
@@ -67,6 +69,35 @@ def prediction_payload(result, original_filename: str, unique_filename: str) -> 
     return payload
 
 
+def enrich_prediction_payload(
+    payload: dict,
+    service: PredictionService,
+    result,
+    image_bgr,
+    features,
+) -> dict:
+    """Attach optional explanation, segmentation, and comparison data."""
+    try:
+        payload["explanation"] = service.explain_prediction(features, result)
+    except Exception as exc:
+        current_app.logger.exception("Prediction explanation failed")
+        payload["explanation"] = {"error": str(exc)}
+
+    try:
+        payload["model_comparison"] = service.compare_models(image_bgr, features)
+    except Exception as exc:
+        current_app.logger.exception("Model comparison failed")
+        payload["model_comparison"] = {"error": str(exc)}
+
+    try:
+        payload["segmentation"] = segment_image_payload(image_bgr)
+    except Exception as exc:
+        current_app.logger.exception("Segmentation enrichment failed")
+        payload["segmentation"] = {"error": str(exc)}
+
+    return payload
+
+
 @prediction_bp.route("/predict", methods=["POST"])
 def predict():
     """Predict fertility for one uploaded egg image."""
@@ -82,8 +113,13 @@ def predict():
 
     try:
         original_filename, unique_filename, filepath = save_upload(file)
-        result = get_prediction_service().predict_file(filepath)
+        image = cv2.imread(str(filepath))
+        if image is None:
+            return jsonify({"error": "Cannot decode uploaded image"}), 400
+        service = get_prediction_service()
+        result, _preprocessed, features = service.predict_image_with_context(image)
         payload = prediction_payload(result, original_filename, unique_filename)
+        payload = enrich_prediction_payload(payload, service, result, image, features)
         add_to_history(payload)
         return jsonify(payload), 200
     except Exception as exc:

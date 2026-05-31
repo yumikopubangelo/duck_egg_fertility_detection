@@ -10,6 +10,8 @@ import cv2
 import numpy as np
 from flask import Blueprint, current_app, jsonify, request
 
+from src.segmentation.postprocessing import postprocess_multiclass_mask, vascular_morphology_metrics
+
 segmentation_bp = Blueprint("segmentation", __name__)
 
 _unet_model = None        # lazy-loaded once
@@ -155,6 +157,44 @@ def _class_areas(mask: np.ndarray, n_classes: int = 1) -> dict:
     }
 
 
+def segment_image_payload(image_bgr: np.ndarray) -> dict:
+    """Run U-Net segmentation and return an enriched visualization payload."""
+    model, load_err = _get_unet()
+    if model is None:
+        raise RuntimeError(load_err or "U-Net model tidak tersedia")
+
+    n_cls = getattr(model, "_n_classes", 1)
+    raw_mask = _infer(image_bgr, model)
+    mask = postprocess_multiclass_mask(raw_mask) if n_cls > 1 else raw_mask
+    overlay = _make_overlay(image_bgr, mask, n_classes=n_cls)
+    resized = cv2.resize(image_bgr, (IMG_SIZE, IMG_SIZE))
+
+    if n_cls == 1:
+        class_colors = {
+            "background": "#1e293b",
+            "egg_region": "#16a34a",
+        }
+        vascular_metrics = {}
+    else:
+        class_colors = {
+            "background": "#1e293b",
+            "vascularization": "#dc2626",
+            "embryo": "#16a34a",
+        }
+        vascular_metrics = vascular_morphology_metrics(mask == 1)
+
+    return {
+        "overlay_b64": _to_b64(overlay),
+        "original_b64": _to_b64(resized),
+        "mask_b64": _to_b64(_make_overlay(np.zeros_like(resized), mask, n_classes=n_cls, alpha=1.0)),
+        "class_areas": _class_areas(mask, n_classes=n_cls),
+        "img_size": IMG_SIZE,
+        "n_classes": n_cls,
+        "class_colors": class_colors,
+        "vascular_metrics": {key: round(float(value), 4) for key, value in vascular_metrics.items()},
+    }
+
+
 @segmentation_bp.route("/segment", methods=["POST"])
 def segment():
     """Run U-Net on an uploaded image, return overlay as base64. Not saved to DB."""
@@ -168,35 +208,7 @@ def segment():
         if image is None:
             return jsonify({"error": "Cannot decode image"}), 400
 
-        model, load_err = _get_unet()
-        if model is None:
-            return jsonify({"error": load_err or "U-Net model tidak tersedia"}), 503
-
-        n_cls   = getattr(model, "_n_classes", 1)
-        mask    = _infer(image, model)
-        overlay = _make_overlay(image, mask, n_classes=n_cls)
-        resized = cv2.resize(image, (IMG_SIZE, IMG_SIZE))
-
-        if n_cls == 1:
-            class_colors = {
-                "background": "#1e293b",
-                "egg_region": "#16a34a",
-            }
-        else:
-            class_colors = {
-                "background":      "#1e293b",
-                "vascularization": "#dc2626",
-                "embryo":          "#16a34a",
-            }
-
-        return jsonify({
-            "overlay_b64":  _to_b64(overlay),
-            "original_b64": _to_b64(resized),
-            "class_areas":  _class_areas(mask, n_classes=n_cls),
-            "img_size":     IMG_SIZE,
-            "n_classes":    n_cls,
-            "class_colors": class_colors,
-        }), 200
+        return jsonify(segment_image_payload(image)), 200
 
     except Exception as exc:
         current_app.logger.exception("Segmentation failed")

@@ -14,7 +14,6 @@ Evaluation Metrics:
 """
 
 import argparse
-import yaml
 import torch
 import numpy as np
 import pandas as pd
@@ -40,8 +39,17 @@ from torchvision import transforms
 # Add src to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
 
-from src.segmentation.unet import UNet, create_unet_for_eggs, calculate_iou, calculate_dice_coefficient
+from src.segmentation.unet import UNet, create_unet_for_eggs
 from src.segmentation.data_loader import EggDataset
+from src.segmentation.evaluation import (
+    colorize_mask,
+    denormalize_image_tensor,
+    metrics_from_confusion_matrix,
+    overlay_mask,
+    per_sample_segmentation_metrics,
+    predict_class_map,
+    confusion_matrix_for_masks,
+)
 from src.clustering.awc import AdaptiveWeightedClustering, evaluate_clustering, visualize_clusters
 from src.utils.config import load_config
 from src.utils.logger import setup_logger
@@ -58,6 +66,9 @@ def _reduce_logits_for_classification(outputs: torch.Tensor) -> torch.Tensor:
     if outputs.ndim == 2 and outputs.shape[1] == 1:
         return outputs.squeeze(1)
     return outputs.view(-1)
+
+
+SEGMENTATION_CLASS_NAMES = ["background", "vascularization", "embryo"]
 
 
 class EvaluationMetrics:
@@ -120,91 +131,107 @@ def evaluate_unet_model(
     model: UNet,
     dataloader: torch.utils.data.DataLoader,
     device: torch.device,
-    metrics: EvaluationMetrics
-) -> None:
-    """Evaluate UNet model on test dataset"""
-    
+    metrics: EvaluationMetrics,
+    class_names: Optional[List[str]] = None,
+) -> Dict:
+    """Evaluate a multiclass U-Net model and return a detailed report."""
+
+    class_names = class_names or SEGMENTATION_CLASS_NAMES
     model.eval()
-    total_iou = 0.0
-    total_dice = 0.0
-    total_accuracy = 0.0
-    total_precision = 0.0
-    total_recall = 0.0
-    n_samples = 0
-    
+    num_classes = len(class_names)
+    total_cm = np.zeros((num_classes, num_classes), dtype=np.int64)
+    sample_rows = []
+    visualization_rows = []
+    sample_index = 0
+
     with torch.no_grad():
         for images, targets in dataloader:
             images = images.to(device)
             targets = targets.to(device)
-            
-            # Get predictions
             outputs = model(images)
+            preds = predict_class_map(outputs).cpu().numpy()
+            targets_np = targets.cpu().numpy()
+            images_cpu = images.cpu()
 
-            if _is_classification_target(targets):
-                logits = _reduce_logits_for_classification(outputs)
-                probs = torch.sigmoid(logits)
-                pred_labels = (probs > 0.5)
-                true_labels = (targets.float().view(-1) > 0.5)
+            for i in range(len(images_cpu)):
+                pred_mask = preds[i]
+                true_mask = targets_np[i]
+                total_cm += confusion_matrix_for_masks(pred_mask, true_mask, num_classes=num_classes)
 
-                tp = torch.logical_and(pred_labels, true_labels).sum().item()
-                fp = torch.logical_and(pred_labels, ~true_labels).sum().item()
-                fn = torch.logical_and(~pred_labels, true_labels).sum().item()
-                tn = torch.logical_and(~pred_labels, ~true_labels).sum().item()
+                sample_metrics = per_sample_segmentation_metrics(
+                    pred_mask,
+                    true_mask,
+                    class_names=class_names,
+                    background_index=0,
+                )
+                metrics.update_unet(
+                    sample_metrics["mean_iou"],
+                    sample_metrics["mean_dice"],
+                    sample_metrics["foreground_mean_dice"],
+                    sample_metrics["foreground_mean_iou"],
+                    sample_metrics["per_class"][2]["recall"] if len(sample_metrics["per_class"]) > 2 else 0.0,
+                )
 
-                accuracy = (tp + tn) / (tp + fp + fn + tn) if (tp + fp + fn + tn) > 0 else 0.0
-                precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-                recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-                iou = tp / (tp + fp + fn) if (tp + fp + fn) > 0 else 1.0
-                dice = (2 * tp) / (2 * tp + fp + fn) if (2 * tp + fp + fn) > 0 else 1.0
+                sample_rows.append(
+                    {
+                        "sample_index": sample_index,
+                        "mean_iou": sample_metrics["mean_iou"],
+                        "mean_dice": sample_metrics["mean_dice"],
+                        "foreground_mean_iou": sample_metrics["foreground_mean_iou"],
+                        "foreground_mean_dice": sample_metrics["foreground_mean_dice"],
+                        "per_class": sample_metrics["per_class"],
+                    }
+                )
+                visualization_rows.append(
+                    {
+                        "sample_index": sample_index,
+                        "image_rgb": denormalize_image_tensor(images_cpu[i]),
+                        "true_mask": true_mask.astype(np.uint8),
+                        "pred_mask": pred_mask.astype(np.uint8),
+                        "metrics": sample_metrics,
+                    }
+                )
+                sample_index += 1
 
-                metrics.update_unet(iou, dice, accuracy, precision, recall)
+    report = metrics_from_confusion_matrix(total_cm, class_names=class_names, background_index=0)
+    metrics.update_confusion_matrix(total_cm)
 
-                total_iou += iou
-                total_dice += dice
-                total_accuracy += accuracy
-                total_precision += precision
-                total_recall += recall
-                n_samples += 1
-            else:
-                pred_masks = (torch.sigmoid(outputs) > 0.5).float()
+    sample_rows_sorted = sorted(sample_rows, key=lambda row: row["foreground_mean_dice"])
+    visualization_rows_by_idx = {row["sample_index"]: row for row in visualization_rows}
 
-                # Calculate metrics for segmentation batches
-                for i in range(len(images)):
-                    iou = calculate_iou(outputs[i:i+1], targets[i:i+1])
-                    dice = calculate_dice_coefficient(outputs[i:i+1], targets[i:i+1])
+    def _pick_sample(position: str) -> Optional[Dict]:
+        if not sample_rows_sorted:
+            return None
+        if position == "best":
+            chosen = sample_rows_sorted[-1]
+        elif position == "worst":
+            chosen = sample_rows_sorted[0]
+        else:
+            chosen = sample_rows_sorted[len(sample_rows_sorted) // 2]
+        vis_row = visualization_rows_by_idx[chosen["sample_index"]]
+        return {
+            **chosen,
+            "image_rgb": vis_row["image_rgb"],
+            "true_mask": vis_row["true_mask"],
+            "pred_mask": vis_row["pred_mask"],
+        }
 
-                    pred_mask = pred_masks[i].byte()
-                    true_mask = targets[i].byte()
+    report["sample_count"] = len(sample_rows)
+    report["examples"] = {
+        "best": _pick_sample("best"),
+        "median": _pick_sample("median"),
+        "worst": _pick_sample("worst"),
+    }
 
-                    tp = (pred_mask & true_mask).sum().item()
-                    fp = (pred_mask & ~true_mask).sum().item()
-                    fn = (~pred_mask & true_mask).sum().item()
-                    tn = (~pred_mask & ~true_mask).sum().item()
+    print(
+        "UNet Multiclass Evaluation - "
+        f"Mean IoU: {report['mean_iou']:.3f}, Mean Dice: {report['mean_dice']:.3f}, "
+        f"Foreground IoU: {report['foreground_mean_iou']:.3f}, "
+        f"Foreground Dice: {report['foreground_mean_dice']:.3f}, "
+        f"Pixel Accuracy: {report['pixel_accuracy']:.3f}"
+    )
 
-                    accuracy = (tp + tn) / (tp + fp + fn + tn) if (tp + fp + fn + tn) > 0 else 0.0
-                    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-                    recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-
-                    metrics.update_unet(iou, dice, accuracy, precision, recall)
-
-                    total_iou += iou
-                    total_dice += dice
-                    total_accuracy += accuracy
-                    total_precision += precision
-                    total_recall += recall
-                    n_samples += 1
-    
-    if n_samples > 0:
-        avg_iou = total_iou / n_samples
-        avg_dice = total_dice / n_samples
-        avg_accuracy = total_accuracy / n_samples
-        avg_precision = total_precision / n_samples
-        avg_recall = total_recall / n_samples
-        
-        print(f"UNet Evaluation - IoU: {avg_iou:.3f}, Dice: {avg_dice:.3f}, "
-              f"Accuracy: {avg_accuracy:.3f}, Precision: {avg_precision:.3f}, Recall: {avg_recall:.3f}")
-    
-    return metrics
+    return report
 
 
 def evaluate_awc_model(
@@ -295,50 +322,99 @@ def generate_classification_report(
     return json.dumps(report, indent=4)
 
 
-def visualize_predictions(
-    images: torch.Tensor,
-    true_masks: torch.Tensor,
-    pred_masks: torch.Tensor,
-    output_dir: Path,
-    n_samples: int = 5
-) -> None:
-    """Visualize model predictions"""
-    
-    n_samples = min(n_samples, len(images))
-    
-    fig, axes = plt.subplots(n_samples, 3, figsize=(15, 5 * n_samples))
-    
-    if n_samples == 1:
-        axes = axes.reshape(1, -1)
-    
-    for i in range(n_samples):
-        # Original image
-        axes[i, 0].imshow(images[i].permute(1, 2, 0).numpy())
-        axes[i, 0].set_title('Original Image')
-        axes[i, 0].axis('off')
-        
-        # True mask
-        axes[i, 1].imshow(true_masks[i, 0].numpy(), cmap='gray')
-        axes[i, 1].set_title('True Mask')
-        axes[i, 1].axis('off')
-        
-        # Predicted mask
-        axes[i, 2].imshow(pred_masks[i, 0].numpy(), cmap='gray')
-        axes[i, 2].set_title('Predicted Mask')
-        axes[i, 2].axis('off')
-    
-    # Save visualization
-    vis_path = output_dir / 'predictions_visualization.png'
-    plt.savefig(vis_path)
+def visualize_predictions(report: Dict, output_dir: Path) -> None:
+    """Visualize best, median, and worst multiclass predictions."""
+
+    examples = [
+        ("Terbaik", report.get("examples", {}).get("best")),
+        ("Sedang", report.get("examples", {}).get("median")),
+        ("Terburuk", report.get("examples", {}).get("worst")),
+    ]
+    examples = [(title, ex) for title, ex in examples if ex is not None]
+    if not examples:
+        return
+
+    fig, axes = plt.subplots(len(examples), 3, figsize=(15, 4.8 * len(examples)))
+    if len(examples) == 1:
+        axes = np.expand_dims(axes, axis=0)
+
+    for row_idx, (title, example) in enumerate(examples):
+        image_rgb = example["image_rgb"]
+        true_rgb = colorize_mask(example["true_mask"])
+        pred_overlay = overlay_mask(image_rgb, example["pred_mask"])
+        dice = example["foreground_mean_dice"]
+        iou = example["foreground_mean_iou"]
+
+        axes[row_idx, 0].imshow(image_rgb)
+        axes[row_idx, 0].set_title(f"{title} - Citra Asli")
+        axes[row_idx, 0].axis("off")
+
+        axes[row_idx, 1].imshow(true_rgb)
+        axes[row_idx, 1].set_title("Mask Ground Truth")
+        axes[row_idx, 1].axis("off")
+
+        axes[row_idx, 2].imshow(pred_overlay)
+        axes[row_idx, 2].set_title(f"Prediksi | Dice FG {dice:.3f} | IoU FG {iou:.3f}")
+        axes[row_idx, 2].axis("off")
+
+    plt.tight_layout()
+    vis_path = output_dir / "predictions_visualization.png"
+    plt.savefig(vis_path, dpi=160, bbox_inches="tight")
     plt.close()
-    
     print(f"Predictions visualization saved to: {vis_path}")
+
+
+def save_segmentation_report(report: Dict, output_dir: Path) -> None:
+    """Save the multiclass segmentation report as JSON and CSV."""
+
+    examples = {}
+    for label, example in dict(report.get("examples", {})).items():
+        if example is None:
+            examples[label] = None
+            continue
+        examples[label] = {
+            key: value
+            for key, value in example.items()
+            if key not in {"image_rgb", "true_mask", "pred_mask"}
+        }
+
+    json_report = {
+        key: value
+        for key, value in report.items()
+        if key != "examples"
+    }
+    json_report["examples"] = examples
+
+    report_path = output_dir / "segmentation_report.json"
+    with open(report_path, "w") as f:
+        json.dump(json_report, f, indent=4, cls=NumpyEncoder)
+
+    per_class_df = pd.DataFrame(report["per_class"])
+    per_class_df.to_csv(output_dir / "segmentation_per_class_metrics.csv", index=False)
+
+    cm = np.asarray(report["confusion_matrix"], dtype=np.int64)
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(
+        cm,
+        annot=True,
+        fmt="d",
+        cmap="Blues",
+        xticklabels=report["class_names"],
+        yticklabels=report["class_names"],
+    )
+    plt.title("Pixel-Level Confusion Matrix (U-Net)")
+    plt.ylabel("Ground Truth")
+    plt.xlabel("Prediction")
+    plt.tight_layout()
+    plt.savefig(output_dir / "segmentation_confusion_matrix.png", dpi=160)
+    plt.close()
 
 
 def save_evaluation_results(
     metrics: EvaluationMetrics,
     config: Dict,
-    output_dir: Path
+    output_dir: Path,
+    segmentation_report: Optional[Dict] = None,
 ) -> None:
     """Save evaluation results to file"""
     
@@ -349,6 +425,12 @@ def save_evaluation_results(
         'averages': metrics.get_averages(),
         'config': config
     }
+    if segmentation_report is not None:
+        results['segmentation_report'] = {
+            key: value
+            for key, value in segmentation_report.items()
+            if key != 'examples'
+        }
     
     # Save as JSON
     results_path = output_dir / 'evaluation_results.json'
@@ -390,19 +472,27 @@ def main():
     
     # Load test datasets
     logger.info("Loading test datasets...")
-    
-    # UNet test dataset
+
+    seg_data_cfg = dict(config.get('segmentation_data', {}))
+    if not seg_data_cfg:
+        seg_data_cfg = {
+            'test_image_dir': config['data'].get('test_image_dir') or 'data/segmentation/test/images',
+            'test_mask_dir': config['data'].get('test_mask_dir') or 'data/segmentation/test/masks',
+            'image_size': config['data'].get('segmentation_image_size') or [256, 256],
+        }
+
+    seg_image_size = tuple(seg_data_cfg.get('image_size', [256, 256]))
     test_transform = transforms.Compose([
-        transforms.Resize(config['data']['image_size']),
+        transforms.Resize(seg_image_size),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
     
     test_dataset = EggDataset(
-        config['data']['test_fertile_dir'],
-        config['data']['test_infertile_dir'],
-        config['data']['image_size'],
-        test_transform
+        image_size=seg_image_size,
+        transform=test_transform,
+        image_dir=seg_data_cfg['test_image_dir'],
+        mask_dir=seg_data_cfg['test_mask_dir'],
     )
     
     test_loader = DataLoader(
@@ -422,15 +512,16 @@ def main():
     
     # Load UNet model
     unet_model = create_unet_for_eggs(
-        n_channels=3,
-        n_classes=1,
+        n_channels=config['model'].get('n_channels', 3),
+        n_classes=config['model'].get('n_classes', 3),
         bilinear=config['model']['bilinear'],
         dropout_rate=config['model']['dropout_rate'],
         lightweight=config['model']['lightweight']
     )
     
     unet_checkpoint = torch.load(config['model']['unet_checkpoint'], map_location=device)
-    unet_model.load_state_dict(unet_checkpoint['model_state_dict'])
+    unet_state = unet_checkpoint.get('model_state_dict', unet_checkpoint)
+    unet_model.load_state_dict(unet_state)
     unet_model = unet_model.to(device)
     
     logger.info(f"UNet model loaded from: {config['model']['unet_checkpoint']}")
@@ -444,7 +535,13 @@ def main():
     
     # Evaluate UNet model
     logger.info("\nEvaluating UNet model...")
-    evaluate_unet_model(unet_model, test_loader, device, metrics)
+    segmentation_report = evaluate_unet_model(
+        unet_model,
+        test_loader,
+        device,
+        metrics,
+        class_names=SEGMENTATION_CLASS_NAMES[: config['model'].get('n_classes', 3)],
+    )
     
     # Evaluate AWC model
     logger.info("\nEvaluating AWC model...")
@@ -452,20 +549,8 @@ def main():
     
     # Generate visualizations
     logger.info("\nGenerating visualizations...")
-    
-    # Get sample predictions
-    with torch.no_grad():
-        images, masks = next(iter(test_loader))
-        images = images.to(device)
-        masks = masks.to(device)
-        
-        unet_model.eval()
-        pred_masks = (torch.sigmoid(unet_model(images)) > 0.5).float()
-
-        if masks.ndim >= 3:
-            visualize_predictions(images, masks, pred_masks, output_dir)
-        else:
-            logger.info("Skipping segmentation visualization for classification labels.")
+    visualize_predictions(segmentation_report, output_dir)
+    save_segmentation_report(segmentation_report, output_dir)
     
     # Generate confusion matrix and classification report
     if awc_true_labels is not None:
@@ -493,12 +578,19 @@ def main():
     
     # Save evaluation results
     logger.info("\nSaving evaluation results...")
-    save_evaluation_results(metrics, config, output_dir)
+    save_evaluation_results(metrics, config, output_dir, segmentation_report=segmentation_report)
     
     # Print summary
     logger.info("\nEvaluation Summary:")
     averages = metrics.get_averages()
-    logger.info(f"UNet - IoU: {averages['unet']['iou']:.3f}, Dice: {averages['unet']['dice']:.3f}")
+    logger.info(
+        "UNet - Mean IoU: %.3f, Mean Dice: %.3f, Foreground IoU: %.3f, Foreground Dice: %.3f, Pixel Accuracy: %.3f",
+        segmentation_report['mean_iou'],
+        segmentation_report['mean_dice'],
+        segmentation_report['foreground_mean_iou'],
+        segmentation_report['foreground_mean_dice'],
+        segmentation_report['pixel_accuracy'],
+    )
     logger.info(f"AWC - Silhouette: {averages['awc']['silhouette']:.3f}")
     
     logger.info(f"\nEvaluation completed successfully!")
